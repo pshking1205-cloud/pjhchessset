@@ -1521,8 +1521,8 @@ const Online=(()=>{
  let admU=[],admO=""; // config/admins: 관리자 uid 목록 · 최고 관리자 uid
  const owner=()=>!!(me&&me.emailVerified&&ADMIN_EMAILS.some(x=>x.toLowerCase()===(me.email||"").toLowerCase()));
  const isAdmin=()=>owner()||!!(me&&admU.includes(me.uid));
- // 최고 관리자는 모두 관리, 일반 관리자는 다른 관리자·최고 관리자·자기 자신을 제외한 계정만 (규칙과 같은 기준)
- const canM=uid=>owner()||(isAdmin()&&uid!==me.uid&&uid!==admO&&!admU.includes(uid));
+ // 설정·계정 변경은 최고 관리자만. 일반 관리자는 관리자 화면을 보기만 해요 (규칙과 같은 기준)
+ const canM=()=>owner(),RO_MSG="보기 전용이에요. 최고 관리자만 바꿀 수 있어요";
  const onl=u=>u.online!==false&&Date.now()-ms(u.lastSeen)<60000,stale=g=>Date.now()-ms(g.at)>3e5;
  const ago=t=>{if(!t)return"-";const s=(Date.now()-t)/1000;return s<60?`${Math.max(0,s|0)}초 전`:s<3600?`${s/60|0}분 전`:s<86400?`${s/3600|0}시간 전`:`${s/86400|0}일 전`};
  const rec=x=>["w","l","d"].map(k=>Object.values(x||{}).reduce((a,m)=>a+((m||{})[k]||0),0)).join("-");
@@ -1539,7 +1539,8 @@ const Online=(()=>{
   const B=$("admB"),need=["dash","users","admins","games"].includes(adTab);
   if(need&&(ld||!adU))return B.innerHTML='<div class="empty">불러오는 중…</div>';
   const er=need&&adE?`<div class="er">일부 정보를 불러오지 못했어요: ${esc(errMsg(adE))}</div>`:"";
-  if(adTab==="dash")dashUI(B,er);else if(adTab==="users")usersUI(B,er);else if(adTab==="admins")adminsUI(B,er);else if(adTab==="games"){B.innerHTML=er+gamesP(0);wire(B)}else if(adTab==="aug")augUI(B);else ntcUI(B)}
+  if(adTab==="dash")dashUI(B,er);else if(adTab==="users")usersUI(B,er);else if(adTab==="admins")adminsUI(B,er);else if(adTab==="games"){B.innerHTML=er+gamesP(0);wire(B)}else if(adTab==="aug")augUI(B);else ntcUI(B);
+  if(!owner())B.insertAdjacentHTML("afterbegin",'<div class="panel" style="padding:10px 14px"><small>👀 일반 관리자는 보기만 할 수 있어요. 설정을 바꾸는 건 최고 관리자만 할 수 있어요.</small></div>')}
  function wire(B){B.querySelectorAll("[data-end]").forEach(b=>b.onclick=()=>admEnd(b.dataset.end));const a=B.querySelector("[data-gt]");if(a)a.onclick=e=>{e.preventDefault();adTab="games";admDraw()}}
  function dashUI(B,er){const M={},wk=Date.now()-7*864e5;adU.forEach(u=>["ai","online"].forEach(k=>Object.entries((u.st||{})[k]||{}).forEach(([m,x])=>{M[m]=(M[m]||0)+(x.w||0)+(x.l||0)+(x.d||0)})));
   const mx=Math.max(1,...MODES.map(m=>M[m.id]||0)),kp=(n,v,s)=>`<div class="kp"><i>${n}</i><b>${v}</b><small>${s}</small></div>`,sl=adG.filter(stale).length;
@@ -1547,24 +1548,24 @@ const Online=(()=>{
   <div class="adr"><div class="panel"><div class="ph"><span>모드별 기록된 대국 수</span></div><div style="padding:8px 0">${MODES.map(m=>{const v=M[m.id]||0;return`<div class="abar"><span>${esc(m.name)}</span><span><i style="width:${v/mx*100}%"></i></span><b>${v}</b></div>`}).join("")}<div style="padding:4px 16px 8px"><small>계정 전적의 합계예요. 온라인 대전은 두 사람에게 모두 기록돼서 2번 세요</small></div></div></div>
   <div class="panel"><div class="ph"><span>최근 접속한 사용자</span></div><div style="padding:4px 14px 10px">${adU.slice().sort((a,b)=>ms(b.lastSeen)-ms(a.lastSeen)).slice(0,6).map(u=>`<div class="li"><span><i class="dot${onl(u)?" on":""}"></i>${esc(u.name)}</span><small>${onl(u)?"접속 중":ago(ms(u.lastSeen))}</small></div>`).join("")||'<div class="empty">아직 없어요</div>'}</div></div></div>`+gamesP(5);wire(B)}
  function gamesP(lim){const L=lim?adG.slice(0,lim):adG,mv=g=>{try{return JSON.parse(g.state).log.length}catch(e){return"-"}};
-  return`<div class="panel ad"><div class="ph"><span>진행 중인 온라인 대전</span>${lim&&adG.length>lim?'<a href="#" data-gt>전체 보기</a>':""}</div>${L.length?`<div class="adx"><table class="tb"><tr><th>백</th><th>흑</th><th>모드</th><th>수</th><th>마지막 수</th><th></th></tr>${L.map(g=>`<tr><td>${esc(g.names[0])}</td><td>${esc(g.names[1])}</td><td>${esc(mname(g.mode))}</td><td>${mv(g)}</td><td class="${stale(g)?"stale":""}">${ago(ms(g.at))}${stale(g)?" · 멈춤 의심":""}</td><td style="text-align:right"><button style="background:var(--warn)" data-end="${esc(g.id)}">강제 종료</button></td></tr>`).join("")}</table></div>`:'<div class="empty">지금 진행 중인 대전이 없어요</div>'}</div>`}
+  return`<div class="panel ad"><div class="ph"><span>진행 중인 온라인 대전</span>${lim&&adG.length>lim?'<a href="#" data-gt>전체 보기</a>':""}</div>${L.length?`<div class="adx"><table class="tb"><tr><th>백</th><th>흑</th><th>모드</th><th>수</th><th>마지막 수</th><th></th></tr>${L.map(g=>`<tr><td>${esc(g.names[0])}</td><td>${esc(g.names[1])}</td><td>${esc(mname(g.mode))}</td><td>${mv(g)}</td><td class="${stale(g)?"stale":""}">${ago(ms(g.at))}${stale(g)?" · 멈춤 의심":""}</td><td style="text-align:right">${owner()?`<button style="background:var(--warn)" data-end="${esc(g.id)}">강제 종료</button>`:""}</td></tr>`).join("")}</table></div>`:'<div class="empty">지금 진행 중인 대전이 없어요</div>'}</div>`}
  // 강제 종료: 무승부로 끝내고 rev를 올려서 두 사람 화면에 바로 반영 (전적은 각자 접속할 때 기록됨)
- async function admEnd(id){if(!await ask("이 대전을 무승부로 끝낼까요?","강제 종료"))return;const ref=db.doc("games/"+id);
+ async function admEnd(id){if(!owner())return toast(RO_MSG);if(!await ask("이 대전을 무승부로 끝낼까요?","강제 종료"))return;const ref=db.doc("games/"+id);
   try{await db.runTransaction(async t=>{const d=await t.get(ref),g=d.data();if(!g||g.status!=="active")return;const s=JSON.parse(g.state);s.over={win:null,why:"관리자가 대전을 종료했어요"};s.msg=s.over.why;
    t.update(ref,{state:JSON.stringify(s),rev:g.rev+1,status:"done",at:FV.serverTimestamp(),pendW:true,pendB:true})});toast("대전을 종료했어요");admLoad()}catch(e){toast(errMsg(e))}}
  function usersUI(B,er){B.innerHTML=er+`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="admQ" placeholder="닉네임 검색" aria-label="닉네임 검색" value="${esc(adQ)}" style="flex:1 1 220px;font:inherit;padding:10px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--fg)"><small>전체 ${adU.length}명</small></div><div class="panel ad"><div class="adx" id="admL"></div></div>`;
   $("admQ").oninput=e=>{adQ=e.target.value;userRows()};userRows()}
  function userRows(){const q=adQ.trim().toLowerCase(),L=adU.filter(u=>!q||(u.nameLower||"").includes(q)).sort((a,b)=>(onl(b)-onl(a))||ms(b.lastSeen)-ms(a.lastSeen)),el=$("admL");
-  el.innerHTML=L.length?`<table class="tb"><tr><th>닉네임</th><th>상태</th><th>AI 전적</th><th>온라인 전적</th><th>가입</th><th></th></tr>${L.map(u=>`<tr><td>${esc(u.name)}${u.uid===admO?'<span class="bdg2">최고 관리자</span>':admU.includes(u.uid)?'<span class="bdg2">관리자</span>':""}${u.banned?'<span class="bdg2">정지</span>':""}${u.uid===me.uid?" <small>(나)</small>":""}</td><td style="white-space:nowrap"><i class="dot${onl(u)?" on":""}"></i>${onl(u)?"접속 중":ago(ms(u.lastSeen))}</td><td>${rec((u.st||{}).ai)}</td><td>${rec((u.st||{}).online)}</td><td>${ms(u.createdAt)?new Date(ms(u.createdAt)).toLocaleDateString():"-"}</td><td style="text-align:right;white-space:nowrap">${canM(u.uid)?`<button class="g" data-nm="${esc(u.uid)}">닉네임</button> <button class="g" data-rs="${esc(u.uid)}">전적 초기화</button> ${u.uid===me.uid?"":`<button ${u.banned?'class="g"':'style="background:var(--warn)"'} data-bn="${esc(u.uid)}">${u.banned?"정지 해제":"이용 정지"}</button>`}`:"<small>권한 없음</small>"}${owner()&&u.uid!==me.uid?` <button class="g" data-ad="${esc(u.uid)}">${admU.includes(u.uid)?"관리자 해제":"관리자 지정"}</button>`:""}</td></tr>`).join("")}</table>`:'<div class="empty">찾는 사용자가 없어요</div>';
+  el.innerHTML=L.length?`<table class="tb"><tr><th>닉네임</th><th>상태</th><th>AI 전적</th><th>온라인 전적</th><th>가입</th><th></th></tr>${L.map(u=>`<tr><td>${esc(u.name)}${u.uid===admO?'<span class="bdg2">최고 관리자</span>':admU.includes(u.uid)?'<span class="bdg2">관리자</span>':""}${u.banned?'<span class="bdg2">정지</span>':""}${u.uid===me.uid?" <small>(나)</small>":""}</td><td style="white-space:nowrap"><i class="dot${onl(u)?" on":""}"></i>${onl(u)?"접속 중":ago(ms(u.lastSeen))}</td><td>${rec((u.st||{}).ai)}</td><td>${rec((u.st||{}).online)}</td><td>${ms(u.createdAt)?new Date(ms(u.createdAt)).toLocaleDateString():"-"}</td><td style="text-align:right;white-space:nowrap">${canM(u.uid)?`<button class="g" data-nm="${esc(u.uid)}">닉네임</button> <button class="g" data-rs="${esc(u.uid)}">전적 초기화</button> ${u.uid===me.uid?"":`<button ${u.banned?'class="g"':'style="background:var(--warn)"'} data-bn="${esc(u.uid)}">${u.banned?"정지 해제":"이용 정지"}</button>`}`:"<small>보기 전용</small>"}${owner()&&u.uid!==me.uid?` <button class="g" data-ad="${esc(u.uid)}">${admU.includes(u.uid)?"관리자 해제":"관리자 지정"}</button>`:""}</td></tr>`).join("")}</table>`:'<div class="empty">찾는 사용자가 없어요</div>';
   el.querySelectorAll("[data-rs]").forEach(b=>b.onclick=()=>admUser(b.dataset.rs,"reset"));el.querySelectorAll("[data-bn]").forEach(b=>b.onclick=()=>admUser(b.dataset.bn,"ban"));
   el.querySelectorAll("[data-nm]").forEach(b=>b.onclick=()=>admRename(b.dataset.nm));el.querySelectorAll("[data-ad]").forEach(b=>b.onclick=()=>admToggle(b.dataset.ad))}
- async function admUser(uid,k){const u=adU.find(x=>x.uid===uid);if(!u)return;if(!canM(uid))return toast("이 계정은 최고 관리자만 바꿀 수 있어요");
+ async function admUser(uid,k){const u=adU.find(x=>x.uid===uid);if(!u)return;if(!canM(uid))return toast(RO_MSG);
   const msg=k==="reset"?`${u.name}님의 전적을 모두 0으로 초기화할까요? 되돌릴 수 없어요.`:u.banned?`${u.name}님의 이용 정지를 풀까요?`:`${u.name}님을 이용 정지할까요? 접속 중이면 바로 로그아웃돼요.`;
   if(!await ask(msg,k==="reset"?"초기화":u.banned?"해제":"정지"))return;
   const up=k==="reset"?{st:{ai:{},online:{}},stMig:true}:{banned:!u.banned};
   try{await db.doc("users/"+uid).update(up);Object.assign(u,up);toast(k==="reset"?"전적을 초기화했어요":u.banned?"이용을 정지했어요":"정지를 풀었어요");userRows()}catch(e){toast(errMsg(e))}}
  // 다른 사람 닉네임 변경: names/{소문자} 예약을 옮기고 프로필 이름을 바꿈
- async function admRename(uid){const u=adU.find(x=>x.uid===uid);if(!u)return;if(!canM(uid))return toast("이 계정은 최고 관리자만 바꿀 수 있어요");
+ async function admRename(uid){const u=adU.find(x=>x.uid===uid);if(!u)return;if(!canM(uid))return toast(RO_MSG);
   const n=(prompt(`${u.name}님의 새 닉네임 (2~12자 한글·영문·숫자·_)`,u.name)||"").trim();if(!n||n===u.name)return;
   if(!/^[가-힣A-Za-z0-9_]{2,12}$/.test(n))return toast("2~12자의 한글·영문·숫자·_ 만 쓸 수 있어요");const lo=n.toLowerCase(),ref=db.doc("names/"+lo);
   try{await db.runTransaction(async t=>{const d=await t.get(ref);if(d.exists&&d.data().uid!==uid)throw "이미 쓰는 닉네임이에요";
@@ -1587,21 +1588,23 @@ const Online=(()=>{
   B.innerHTML=`<div class="adr"><div class="panel"><div class="ph"><span>등급 가중치</span></div><div style="padding:8px 0">${TIERS.map(t=>`<div class="awt"><span class="ag2 rk-${t}"><i class="rkt">${RA[t]}</i>${t}</span><input type="range" min="0" max="5" step="0.01" value="${adC.w[t]}" data-w="${t}" aria-label="${t} 가중치"><input type="number" min="0" max="5" step="0.01" value="${adC.w[t]}" data-n="${t}" aria-label="${t} 가중치 값"></div>`).join("")}<div style="padding:6px 16px 10px"><small>가중치 × 그 등급에서 켜진 증강 수로 등급을 먼저 뽑아요</small></div></div></div>
   <div class="panel"><div class="ph"><span>중간 증강 선택 때 등급이 나올 확률</span></div><div id="admP" style="padding:14px 16px"></div></div></div>
   <div class="panel"><div class="ph"><span>증강 목록 · 끄면 뽑기에서 빠져요</span><span id="admC"></span></div><div class="agl">${ids.map(k=>{const a=AUGS[k],r=RA[a.r]?a.r:"COMMON";return`<label${adC.off.has(k)?' class="off"':""} title="${esc(a.d)}"><input type="checkbox" data-k="${k}"${adC.off.has(k)?"":" checked"}><i class="ag2 rk-${r}"><i class="rkt">${RA[r]}</i></i><span>${esc(a.n)}</span><small style="margin-left:auto">${a.o?"OPENING":a.p?"PASSIVE":"ACTIVE"}</small></label>`}).join("")}</div></div>
-  <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;flex-wrap:wrap"><small style="margin-right:auto">저장하면 새로 시작하는 판부터 모든 사람에게 적용돼요</small><button class="g" id="admDf">기본값으로</button><button id="admSv">저장</button></div>`;
+  <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;flex-wrap:wrap"><small style="margin-right:auto">저장하면 새로 시작하는 판부터 모든 사람에게 적용돼요</small><button class="g" id="admDf"${owner()?"":" hidden"}>기본값으로</button><button id="admSv"${owner()?"":" hidden"}>저장</button></div>`;
   const pv=()=>{const ws=TIERS.map(t=>adC.w[t]*cnt(t)),tot=ws.reduce((a,b)=>a+b,0)||1;
    $("admP").innerHTML=`<div style="display:flex;height:24px;border-radius:6px;overflow:hidden;background:var(--card2)">${TIERS.map((t,i)=>`<span style="flex:${ws[i]} 0 0;background:${CL[t]}"></span>`).join("")}</div><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px;margin-top:14px">${TIERS.map((t,i)=>`<span>${t} <b style="font-family:var(--f-mono);font-weight:500">${(ws[i]/tot*100).toFixed(1)}%</b> <small>(${cnt(t)}장)</small></span>`).join("")}</div>`;
    $("admC").textContent=`${ids.length-adC.off.size}/${ids.length}개 켜짐`};
   B.querySelectorAll("[data-w],[data-n]").forEach(e=>e.oninput=()=>{const t=e.dataset.w||e.dataset.n,v=Math.max(0,Math.min(5,+e.value||0));adC.w[t]=v;B.querySelector(`[data-${e.dataset.w?"n":"w"}="${t}"]`).value=v;pv()});
   B.querySelectorAll("[data-k]").forEach(e=>e.onchange=()=>{adC.off[e.checked?"delete":"add"](e.dataset.k);e.parentNode.classList.toggle("off",!e.checked);pv()});
   $("admDf").onclick=()=>{adC={w:{...AUGW0},off:new Set()};augUI(B)};
-  $("admSv").onclick=async()=>{const on=ids.filter(k=>!adC.off.has(k)),op=on.filter(k=>AUGS[k].o).length;
+  $("admSv").onclick=async()=>{if(!owner())return toast(RO_MSG);const on=ids.filter(k=>!adC.off.has(k)),op=on.filter(k=>AUGS[k].o).length;
    if(op<3||on.length-op<3)return toast("시작용·중간용 증강을 각각 3개 이상 켜 두어야 해요");
    if(!TIERS.some(t=>adC.w[t]>0&&cnt(t)))return toast("가중치가 0보다 큰 등급이 하나는 있어야 해요");
    const w={};TIERS.forEach(t=>w[t]=adC.w[t]);
    try{await db.doc("config/augment").set({w,off:[...adC.off],by:me.uid,at:FV.serverTimestamp()});applyAug({w,off:[...adC.off]});toast("증강 설정을 저장했어요")}catch(e){toast(errMsg(e))}};
+  if(!owner())B.querySelectorAll("input").forEach(e=>e.disabled=true);
   pv()}
- function ntcUI(B){B.innerHTML=`<div class="panel" style="padding:16px"><div class="lb" style="margin-top:0">로비 공지</div><textarea id="admN" maxlength="300" aria-label="로비 공지" placeholder="로비 맨 위에 보일 문구예요. 비우고 올리면 공지가 사라져요">${esc(ntcT)}</textarea><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button id="admNs">공지 올리기</button><button class="g" id="admNd">공지 내리기</button></div></div>`;
-  const put=t=>db.doc("config/notice").set({text:t,by:me.uid,at:FV.serverTimestamp()}).then(()=>toast(t?"공지를 올렸어요":"공지를 내렸어요")).catch(e=>toast(errMsg(e)));
+ function ntcUI(B){B.innerHTML=`<div class="panel" style="padding:16px"><div class="lb" style="margin-top:0">로비 공지</div><textarea id="admN" maxlength="300" aria-label="로비 공지" placeholder="로비 맨 위에 보일 문구예요. 비우고 올리면 공지가 사라져요">${esc(ntcT)}</textarea><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button id="admNs"${owner()?"":" hidden"}>공지 올리기</button><button class="g" id="admNd"${owner()?"":" hidden"}>공지 내리기</button></div></div>`;
+  if(!owner())$("admN").readOnly=true;
+  const put=t=>!owner()?toast(RO_MSG):db.doc("config/notice").set({text:t,by:me.uid,at:FV.serverTimestamp()}).then(()=>toast(t?"공지를 올렸어요":"공지를 내렸어요")).catch(e=>toast(errMsg(e)));
   $("admNs").onclick=()=>put($("admN").value.trim());$("admNd").onclick=()=>{$("admN").value="";put("")}}
  return{init,push,record,resign,leave,quit,dots,dot,invite,admOpen,admLoad,me:()=>me&&prof?me:null,friends:()=>friends};
 })();
