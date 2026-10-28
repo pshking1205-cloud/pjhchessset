@@ -92,6 +92,19 @@ small{color:var(--mut)}
 .empty{padding:14px;color:var(--mut);font-family:var(--f-body)}
 #inf{padding:12px 14px;font-size:13px;line-height:1.6}
 .ag2{cursor:pointer;display:inline-block;padding:2px 8px;margin:2px;border:1px solid var(--bd);border-radius:999px;background:var(--card2)}.ag2.u{opacity:.5}
+/* 증강 칩 등급 색: COMMON 회색 · RARE 파랑 · EPIC 자주 · LEGEND 금 · LUNACY 장미 */
+.ag2 .rkt{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.5px;padding:0 5px;margin-right:4px;border-radius:999px;color:#fff;vertical-align:1px}
+.ag2.rk-COMMON{border-color:#8a8f99}.ag2.rk-COMMON .rkt{background:#7d828c}
+.ag2.rk-RARE{border-color:#3b8ee6;background:color-mix(in srgb,#3b8ee6 16%,var(--card2))}.ag2.rk-RARE .rkt{background:#2f7fd8}
+.ag2.rk-EPIC{border-color:#a24fd6;background:color-mix(in srgb,#a24fd6 16%,var(--card2))}.ag2.rk-EPIC .rkt{background:#9440c8}
+.ag2.rk-LEGEND{border-color:#d9a520;background:color-mix(in srgb,#e8b13a 20%,var(--card2))}.ag2.rk-LEGEND .rkt{background:linear-gradient(90deg,#c88a0c,#f0c544);color:#3a2400}
+.ag2.rk-LUNACY{border-color:#e0457f;background:color-mix(in srgb,#e0457f 18%,var(--card2));box-shadow:0 0 8px rgba(255,90,140,.45)}.ag2.rk-LUNACY .rkt{background:linear-gradient(90deg,#9c0c3e,#f2558f);font-family:Cinzel,Georgia,serif}
+.ag2.rkl{cursor:default;font-size:10px;padding:0 6px 0 2px;letter-spacing:.5px}
+/* ACTIVE·PASSIVE도 등급 글자(영문 대문자)와 같은 모양으로 */
+.dct,.aty{text-transform:uppercase}
+/* 좁은 화면: 「등급 · PASSIVE · OPENING」이 길면 줄바꿈해서 카드가 화면 밖으로 밀리지 않게 */
+#drb .dc{min-width:0}
+@media(max-width:600px){#drb .dct,#cv .dct{white-space:normal!important;line-height:1.35;max-width:100%;text-align:center;border-radius:8px}}.aty{font-weight:700;letter-spacing:.8px;font-size:11px}
 .adc{margin-top:8px;padding:8px 10px;border-radius:8px;background:var(--card2)}
 #inf button{margin:6px 4px 0 0;padding:6px 10px;font-size:12px}
 .toolbar{display:flex;flex-wrap:wrap;gap:8px}
@@ -587,7 +600,7 @@ const AUGS={
  blackbox:{n:"검은 상자",d:"사용: 무작위 능동 증강 하나가 즉시 발동돼요."},
  advance:{n:"부정출발",o:1,p:1,r:"COMMON",d:"모든 아군 기물이 2칸 전진된 상태로 시작합니다."},
  london:{n:"런던 시스템",o:1,p:1,r:"COMMON",d:"런던 시스템의 첫 7수(d4·e3·c3·Bf4·Nf3·Nbd2·Bd3)가 진행된 상태로 내 진영을 배치합니다."},
- rocket:{n:"로켓",o:1,p:1,r:"COMMON",d:"아군 룩이 각각 첫 이동에 한해 아마존(퀸+나이트)처럼 행마할 수 있습니다."},
+ rocket:{n:"로켓",o:1,p:1,r:"RARE",d:"아군 룩이 각각 첫 이동에 한해 아마존(퀸+나이트)처럼 행마할 수 있습니다."},
  hill:{n:"언덕의 왕",o:1,p:1,r:"COMMON",d:"킹이 보드 중앙 4칸으로 들어올 경우 아마존(퀸+나이트)처럼 움직일 수 있습니다."},
  vanguard:{n:"선봉",o:1,p:1,r:"COMMON",d:"제일 선두에 있는 아군 폰이 하나라면, 해당 폰은 대각선으로도 이동할 수 있습니다. (확인 필요: 앞쪽 빈 대각선으로 해석)"},
  martyr:{n:"순교",o:1,p:1,r:"COMMON",d:"비숍을 전부 희생하여 모든 아군 폰에 가호를 부여합니다."},
@@ -943,10 +956,11 @@ const AUGC={...STD,id:"augment",name:"✦ 증강 체스",
   return n;
  },
  evalBonus:s=>{let w=0,b=0;s.b.forEach(p=>{if(p&&p.t==="K")p.c==="w"?w++:b++});return(w?0:-50000)+(b?0:50000)},
- info(s){const row=c=>s.aug[c].map(a=>{const d=AUGS[a.id];return`<span class="ag2${a.used?" u":""}" title="${d.n} [${d.r}] ${d.d}" onclick="showAug('${a.id}')">${d.p?"🔹":a.used?"▫️":"🔸"}${d.n}</span>`}).join(" ")||"-";
-  let o=`백: ${row("w")}<br>흑: ${row("b")}<br><small>🔹패시브 🔸사용 가능 ▫️사용함 · 이름을 누르거나 올려 보면 설명이 나와요</small>`;
+ // 얻은 증강 표시: 칩 색과 앞의 등급 글자로 등급을 바로 알 수 있게 (C·R·E·L·LU)
+ info(s){const RA={COMMON:"C",RARE:"R",EPIC:"E",LEGEND:"L",LUNACY:"LU"},row=c=>s.aug[c].map(a=>{const d=AUGS[a.id],r=RA[d.r]?d.r:"COMMON";return`<span class="ag2 rk-${r}${a.used?" u":""}" title="${d.n} [${r}] ${d.d}" onclick="showAug('${a.id}')"><i class="rkt">${RA[r]}</i>${d.p?"🔹":a.used?"▫️":"🔸"}${d.n}</span>`}).join(" ")||"-";
+  let o=`백: ${row("w")}<br>흑: ${row("b")}<br><small>🔹PASSIVE 🔸사용 가능 ▫️사용함 · 이름을 누르면 설명이 나와요</small>`;
   if(s.lastUse)o+=`<div class="adc" style="border-left:4px solid #8e44ad">✦ 최근 사용: <b>${s.lastUse}</b></div>`;
-  if(augSel&&AUGS[augSel])o+=`<div class="adc"><b>${AUGS[augSel].n}</b> <small>${AUGS[augSel].r}${AUGS[augSel].p?" · 패시브":" · 능동"}</small><br>${AUGS[augSel].d}</div>`;
+  if(augSel&&AUGS[augSel])o+=`<div class="adc"><b>${AUGS[augSel].n}</b> <small class="aty">${AUGS[augSel].r}${AUGS[augSel].p?" · PASSIVE":" · ACTIVE"}${AUGS[augSel].o?" · OPENING":""}</small><br>${AUGS[augSel].d}</div>`;
   const ef=s.eff.map(e=>`${(AUGS[e.k]||{n:e.k}).n}(${e.c==="w"?"백":"흑"} ${e.left})`).concat(s.fz.filter(f=>f.until>s.n).length?["❄ 얼음 "+s.fz.filter(f=>f.until>s.n).length+"개"]:[]);
   if(ef.length)o+="<br><small>효과: "+ef.join(", ")+"</small>";
   if(!s.over&&!lockTurn()&&!(s.draft&&s.draft.length)){const act=s.aug[s.turn].filter(a=>!a.used&&!AUGS[a.id].p);
@@ -994,7 +1008,7 @@ let net=null,gid=null;const recd=new Set(); // net: 진행 중인 온라인 대�
 let luShown=null,annSeen=null,augSel=null;function showAnn(a){const id=AUGS[a.id]?a.id:a.k,d=AUGS[id],v=$("cv"),r=["COMMON","RARE","EPIC","LEGEND","LUNACY"].includes(d.r)?d.r:"COMMON",ty=d.o?"o":d.p?"p":"a";
  const ICX={o:'<path d="M7 3h2v18H7zM10 4h10l-3 4 3 4H10z"/>',p:'<path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/>',a:'<path d="M13 2L4 14h6l-1 8 9-12h-6z"/>'};
  // 사용한 증강 카드를 그대로 보여 줌 (2인 한 기기에서 위쪽 좌석이 썼으면 카드를 뒤집어 보여 줌)
- v.innerHTML=`<div class="uaw"${!ai&&!net&&S.seat[a.c]===1?' style="transform:rotate(180deg)"':""}><div class="dc rc-${r} uac"><span class="dcf"><span class="dci"><svg viewBox="0 0 24 24">${ICX[ty]}</svg></span><b class="dcn">${d.n}</b><span class="dct">${r}${r==="LUNACY"?"":" · "+(ty==="o"?"시작":ty==="p"?"패시브":"능동")}</span><span class="dcd">${d.d}</span></span></div></div>`;
+ v.innerHTML=`<div class="uaw"${!ai&&!net&&S.seat[a.c]===1?' style="transform:rotate(180deg)"':""}><div class="dc rc-${r} uac"><span class="dcf"><span class="dci"><svg viewBox="0 0 24 24">${ICX[ty]}</svg></span><b class="dcn">${d.n}</b><span class="dct">${r}${r==="LUNACY"?"":" · "+(d.p?"PASSIVE":"ACTIVE")+(d.o?" · OPENING":"")}</span><span class="dcd">${d.d}</span></span></div></div>`;
  const c=v.querySelector(".uac");if(r==="LEGEND")lgSkin(c,"L");if(r==="LUNACY")luSkin(c);
  {const lv={COMMON:0,RARE:1,EPIC:2,LEGEND:3,LUNACY:4}[r],T={COMMON:"235,240,255",RARE:"150,200,255",EPIC:"215,150,255",LEGEND:"255,220,120",LUNACY:"255,140,185"}[r],R=Math.random;
   const rays=(n,wmin,wmax)=>{const st=[];Array.from({length:n},()=>R()*360).sort((x,y)=>x-y).forEach(a=>{const w=wmin+R()*(wmax-wmin),al=.6+R()*.4;st.push(`transparent ${(a-w).toFixed(1)}deg`,`rgba(255,255,255,${al.toFixed(2)}) ${(a-w*.35).toFixed(1)}deg`,`rgba(255,255,255,${al.toFixed(2)}) ${(a+w*.15).toFixed(1)}deg`,`rgba(${T},${(al*.7).toFixed(2)}) ${(a+w*.5).toFixed(1)}deg`,`transparent ${(a+w).toFixed(1)}deg`)});return`conic-gradient(from 0deg,${st.join(",")})`};
@@ -1116,10 +1130,10 @@ function render(){
  h.scrollTop=h.scrollHeight;
  const dq=S.draft&&S.draft[0],dm=$("dro");
  if(dq&&!(ai&&S.seat[dq.c]===1)&&!(net&&S.seat[dq.c]!==net.seat)){$("drt").textContent=`${pname(S.seat[dq.c])} (${dq.c==="w"?"백":"흑"}) · 증강을 고르세요`;const bx=$("drb");bx.innerHTML="";
-  // 아이콘: 시작 증강=깃발, 패시브=방패, 능동=번개
+  // 아이콘: OPENING=깃발, PASSIVE=방패, ACTIVE=번개
   const IC={o:'<path d="M7 3h2v18H7zM10 4h10l-3 4 3 4H10z"/>',p:'<path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/>',a:'<path d="M13 2L4 14h6l-1 8 9-12h-6z"/>'},RK={COMMON:1,RARE:1,EPIC:1,LEGEND:1,LUNACY:1};
   dq.opts.forEach((id,k)=>{const a=AUGS[id],r=RK[a.r]?a.r:"COMMON",ty=a.o?"o":a.p?"p":"a",b=document.createElement("button");b.className="dc rc-"+r;b.style.setProperty("--i",k);
-   b.innerHTML=`<span class="dcf"><span class="dci"><svg viewBox="0 0 24 24">${IC[ty]}</svg></span><b class="dcn">${a.n}</b><span class="dct">${r} · ${ty==="o"?"시작":ty==="p"?"패시브":"능동"}</span><span class="dcd">${a.d}</span></span>`;b.onclick=()=>pickFx(b,id,r);if(r==="LEGEND")lgSkin(b,"L");if(r==="LUNACY"){luSkin(b);b.style.setProperty("--i",0)}else if(dq.opts.some(x=>AUGS[x].r==="LUNACY"))b.style.setProperty("--i",k?2:1);bx.appendChild(b)});dm.classList.add("on");if(dq.opts.some(x=>AUGS[x].r==="LUNACY")&&luShown!==dq){luShown=dq;luReveal(bx)}else if(luShown===dq&&document.getElementById("lurv"))bx.classList.add("luwait")}else dm.classList.remove("on");
+   b.innerHTML=`<span class="dcf"><span class="dci"><svg viewBox="0 0 24 24">${IC[ty]}</svg></span><b class="dcn">${a.n}</b><span class="dct">${r} · ${a.p?"PASSIVE":"ACTIVE"}${a.o?" · OPENING":""}</span><span class="dcd">${a.d}</span></span>`;b.onclick=()=>pickFx(b,id,r);if(r==="LEGEND")lgSkin(b,"L");if(r==="LUNACY"){luSkin(b);b.style.setProperty("--i",0)}else if(dq.opts.some(x=>AUGS[x].r==="LUNACY"))b.style.setProperty("--i",k?2:1);bx.appendChild(b)});dm.classList.add("on");if(dq.opts.some(x=>AUGS[x].r==="LUNACY")&&luShown!==dq){luShown=dq;luReveal(bx)}else if(luShown===dq&&document.getElementById("lurv"))bx.classList.add("luwait")}else dm.classList.remove("on");
  $("wdo").classList.toggle("on",!!(net&&!S.over&&dq&&S.seat[dq.c]!==net.seat)); // 온라인: 상대가 증강 고르는 동안 살짝 어둡게
  if(S.over&&!dismissed){const w=S.over.win,lost=w&&(ai||net)&&S.seat[w]!==(net?net.seat:0);$("rt").textContent=!w?"🤝 무승부":lost?"😢 패배":"🏆 승리!";$("rw").textContent=$("st").firstChild.textContent;$("rso").classList.add("on")}else $("rso").classList.remove("on");
  renderBars();
