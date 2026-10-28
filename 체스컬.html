@@ -1,8 +1,4 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>체스 컬렉션</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -371,9 +367,23 @@ small{color:var(--mut)}
 @keyframes uaburst{0%{opacity:0;transform:scale(.15)}18%{opacity:1;transform:scale(.85)}100%{opacity:0;transform:scale(1.25)}}
 @keyframes uaspin{to{transform:rotate(14deg)}}
 @keyframes uaspin2{to{transform:rotate(-10deg)}}
+
+/* 증강 대상 표식: 칸 오른쪽 위, 어두운 원형 칩 + 등급처럼 색 테두리 + 흰 아이콘 (보드 크기에 맞춰 커짐) */
+.amk{position:absolute;right:3%;top:3%;display:flex;flex-direction:row-reverse;gap:1px;pointer-events:none;z-index:4}
+.amk .am{position:relative;display:grid;place-items:center;width:max(10px,2.7cqw);height:max(10px,2.7cqw);border-radius:50%;background:rgba(22,20,18,.86);box-shadow:0 0 0 1.5px var(--a),0 1px 3px rgba(0,0,0,.5);font-style:normal}
+.amk .am svg{width:68%;height:68%;fill:var(--a)}
+.amk .am b{position:absolute;right:-3px;bottom:-3px;min-width:max(8px,1.8cqw);height:max(8px,1.8cqw);padding:0 2px;border-radius:999px;background:var(--a);color:#1d1b19;font-size:max(7px,1.35cqw);line-height:max(8px,1.8cqw);text-align:center;font-weight:800}
+.amk .am.more{width:auto;padding:0 3px;border-radius:999px;font-size:max(7px,1.4cqw);font-weight:800;color:#fff;--a:#6c675f}
+.amk .am{animation:amin .35s cubic-bezier(.2,1.4,.4,1) both}
+/* 한 기기 2인: 맞은편(흑)이 보는 기물은 표식을 칸 오른쪽 아래에, 아이콘·숫자도 흑 쪽에서 바로 읽히게 뒤집음 */
+.amk.rot{top:auto;bottom:3%}
+.amk.rot .am{transform:rotate(180deg)}
+.amk.rot .am{animation:aminr .35s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes aminr{from{transform:rotate(180deg) scale(0)}}
+@keyframes amin{from{transform:scale(0)}}
+/* 한 기기 2인에서 흑이 증강을 고를 때: 창 전체를 흑 쪽으로 뒤집음 */
+#dro.flip2 .pop{transform:rotate(180deg)}
 </style>
-</head>
-<body>
 
 <header class="nav">
  <button class="logo" id="home" aria-label="체스 컬렉션 홈"><svg class="pc" viewBox="0 0 45 45"><g fill="var(--ac)" stroke="var(--acd)" stroke-width="1.5" stroke-linejoin="round"><path d="M31 36v-14c0-9-5-14-11-14l-2-3-2 4c-4 3-7 9-7 13l2 2c3-1 5-2 7-3-2 5-5 8-4 15z"/><path d="M10 39h25v-3q-12.5-4-25 0z"/></g></svg><span>체스 컬렉션</span></button>
@@ -495,6 +505,35 @@ function luReveal(box,done){const o=document.createElement("div");o.id="lurv",R=
  document.body.appendChild(o);box.classList.add("luwait");
  // 카드는 꽃잎·연기·글리터가 모두 사라진 뒤에 올라옴
  setTimeout(()=>{box.classList.remove("luwait");o.remove();done&&done()},4050)}
+
+
+// 증강 대상 표식: 기물에 걸린 증강 효과를 칸 오른쪽 위에 작은 아이콘으로 표시 (최대 3개, 넘치면 +n)
+const AMK={
+ bl:["가호","#e8b13a",'<path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/>'],
+ po:["독","#3fbf5a",'<path d="M12 2C9 7 6 10 6 14a6 6 0 0012 0c0-4-3-7-6-12z"/>'],
+ cm:["카멜레온","#22b8a8",'<path d="M5 11a7 7 0 0112-4l2-2v6h-6l2-2a4 4 0 00-7 2zM19 13a7 7 0 01-12 4l-2 2v-6h6l-2 2a4 4 0 007-2z"/>'],
+ nt:["예고장","#e5574a",'<path d="M3 6h18v12H3z"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5" fill="none" stroke="#1d1b19" stroke-width="2"/>'],
+ zb:["존버","#f0a020",'<path d="M6 2h12v3l-4 7 4 7v3H6v-3l4-7-4-7z"/>'],
+ da:["잡기 봉인","#8a8f99",'<path d="M14.5 3H21v6.5L11 19.5 7.5 16z"/><path d="M4 4l16 16" stroke="#fff" stroke-width="2.6"/>'],
+ cu:["절단 (한 칸씩만)","#ff8a3d",'<path d="M6 9a3 3 0 110-.1zM6 15a3 3 0 110 .1zM8.5 10.2L20 4v2.5l-9 6zM8.5 13.8L20 20v-2.5l-9-6z"/>'],
+ ia:["관성","#ff8a3d",'<path d="M4 12h12l-4-4 2-2 7 8-7 8-2-2 4-4H4z"/>'],
+ pw:["승진 체험","#ffd76a",'<path d="M12 3l8 9h-5v9H9v-9H4z"/>'],
+ pawnish:["기초 교습","#4aa3ff",'<circle cx="12" cy="7" r="3.6"/><path d="M8.5 12h7l2 8h-11z"/>'],
+ frz:["광란","#ff5a3d",'<path d="M12 2c1 4 6 6 6 11a6 6 0 01-12 0c0-3 2-5 2-7 1 2 2 3 3 3 0-3 0-5 1-7z"/>'],
+ lo:["충신","#a46cf0",'<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>'],
+ ch:["사슬·콤비","#c0c6d0",'<path d="M9 7a5 5 0 000 10h2v-2.4H9a2.6 2.6 0 010-5.2h2V7zM15 7h-2v2.4h2a2.6 2.6 0 010 5.2h-2V17h2a5 5 0 000-10zM8 11h8v2H8z"/>'],
+ hg:["빈 찬합","#c98a4a",'<path d="M3 11h18a9 7 0 01-18 0z"/><path d="M8 3c-1 2 1 3 0 5M12 2c-1 2 1 3 0 5M16 3c-1 2 1 3 0 5" fill="none" stroke="#fff" stroke-width="1.6"/>'],
+ st:["말뚝","#c79a6a",'<path d="M12 2l4 7H8zM10.5 9h3v13h-3z"/>'],
+ fz:["빙결","#6fc3ff",'<path d="M11 2h2v20h-2zM2 11h20v2H2zM4.2 5.6l1.4-1.4 14.2 14.2-1.4 1.4zM18.4 4.2l1.4 1.4L5.6 19.8l-1.4-1.4z"/>']};
+function augMarks(p,i){if(!S||!S.aug)return{html:"",tip:""};const n=S.n||0,L=[];
+ if(p.bl)L.push(["bl"]);if(p.po)L.push(["po"]);if(p.cm)L.push(["cm"]);if(p.nt)L.push(["nt"]);if(p.zb)L.push(["zb",p.zb]);
+ if(p.da>n)L.push(["da",p.da-n]);if(p.cu>n)L.push([p.cu>9999?"ia":"cu",p.cu>9999?0:p.cu-n]);if(p.ia)L.push(["ia"]);if(p.pw)L.push(["pw"]);if(p.pawnish)L.push(["pawnish"]);
+ if(p.frz)L.push(["frz"]);if(p.lo)L.push(["lo"]);if(p.ch)L.push(["ch"]);
+ (S.hgr||[]).forEach(x=>{if(x.sq===i&&x.until>n)L.push(["hg",x.until-n])});(S.st||[]).forEach(x=>{if(x.sq===i&&x.until>n)L.push(["st",x.until-n])});
+ (S.fz||[]).forEach(x=>{if(x.sq===i&&x.until>n)L.push(["fz",x.until-n])});
+ if(!L.length)return{html:"",tip:""};
+ const chip=([k,v])=>{const m=AMK[k];return`<i class="am" style="--a:${m[1]}"><svg viewBox="0 0 24 24">${m[2]}</svg>${k==="zb"&&v?`<b>${v}</b>`:""}</i>`};
+ return{html:(L.length>3?L.slice(0,2).map(chip).join("")+`<i class="am more">+${L.length-2}</i>`:L.map(chip).join("")),tip:L.map(([k,v])=>AMK[k][0]+(v?` (${k==="zb"?v+"수 뒤 승진":"남은 "+v})`:"")).join(" · ")}}
 
 /* ============ 1) CONFIG ============ */
 const CONFIG={
@@ -883,7 +922,7 @@ const AUGC={...STD,id:"augment",name:"✦ 증강 체스",
   else if(k==="loyal"){const l=shuf(idx(p=>p.c===me&&p.t!=="K"));if(!l.length)return{...s,msg:"대상이 없어요"};setP(l[0],{lo:true})}
   else if(k==="chain"||k==="combo"){const who=k==="chain"?you:me,l=shuf(idx(p=>p.c===who&&p.t!=="K"));if(l.length<2)return{...s,msg:"대상이 부족해요"};const id2=Math.random();setP(l[0],{ch:id2});setP(l[1],{ch:id2})}
   else if(k==="hunger"){const l=shuf(idx(p=>p.c===you&&p.t!=="K"));if(!l.length)return{...s,msg:"대상이 없어요"};n.hgr=[...(s.hgr||[]),{sq:l[0],until:s.n+6,c:you}]}
-  else if(k==="inertia"){const l=shuf(idx(p=>p.c===you&&(p.t==="R"||p.t==="B"||p.t==="Q")));if(!l.length)return{...s,msg:"대상이 없어요"};setP(l[0],{cu:99999})}
+  else if(k==="inertia"){const l=shuf(idx(p=>p.c===you&&(p.t==="R"||p.t==="B"||p.t==="Q")));if(!l.length)return{...s,msg:"대상이 없어요"};setP(l[0],{ia:true})} // 관성: 이제 한 칸 이동 금지(두 칸 이상만)
   else if(k==="greek"){const l=shuf(idx(p=>p.c===me&&p.t==="B"));if(!l.length)return{...s,msg:"비숍이 없어요"};n.b=n.b.slice();n.b[l[0]]=null;const ki=idx(p=>p.c===you&&p.t==="K")[0];
    for(let a=-1;a<=1;a++)for(let d=-1;d<=1;d++){const y=(ki>>3)+a,x=(ki&7)+d;if(Engine.inb(y,x)){const q=n.b[y*8+x];if(q&&q.t==="P"&&q.c===you)n.b[y*8+x]=null}}}
   else if(k==="miracle"){const bi=shuf(idx(p=>p.c===me&&p.t==="B"))[0];if(bi==null)return{...s,msg:"비숍이 없어요"};
@@ -1147,7 +1186,7 @@ function render(){
   const mv=sel&&sel.ms.find(m=>m.to===i);if(mv){d.classList.add("m2");if(p||mv.ep)d.classList.add("x")}
   if(p){if(ck&&p.t==="K"&&p.c===S.turn)d.classList.add("ck");
   if(atk.includes(i))d.classList.add("atk");
-   const sp=document.createElement("span");sp.className=(p.c==="w"?"pw":"pb")+(!ai&&!net&&S.seat[p.c]===1?" o2":"");sp.innerHTML=pcSvg(p.an?"A":p.t,p.c);if(p.an)sp.classList.add("ang");if(revFx&&revFx.sq===i&&revFx.until>Date.now()){d.classList.add("rvq");d.insertAdjacentHTML("beforeend",'<i class="halo bk"></i><i class="halo fr"></i>')};d.appendChild(sp);const bg=(p.bl?"🛡":"")+(p.po?"☠":"")+(p.cm?"🦎":"");if(bg){const e=document.createElement("i");e.className="bdg";e.textContent=bg;d.appendChild(e)}}
+   const sp=document.createElement("span");sp.className=(p.c==="w"?"pw":"pb")+(!ai&&!net&&S.seat[p.c]===1?" o2":"");sp.innerHTML=pcSvg(p.an?"A":p.t,p.c);if(p.an)sp.classList.add("ang");if(revFx&&revFx.sq===i&&revFx.until>Date.now()){d.classList.add("rvq");d.insertAdjacentHTML("beforeend",'<i class="halo bk"></i><i class="halo fr"></i>')};d.appendChild(sp);const mk=augMarks(p,i);if(mk.html){const e=document.createElement("span");e.className="amk"+(!ai&&!net&&S.seat[p.c]===1?" rot":"");e.innerHTML=mk.html;d.appendChild(e);d.title=mk.tip}}
   if(S.fz&&S.fz.some(f=>f.sq===i&&f.until>S.n))d.classList.add("fzn");
   if(mode.coords){if(k>>3===7){const e=document.createElement("i");e.className="co cf";e.textContent=FILE[c];d.appendChild(e)}
    if(!(k&7)){const e=document.createElement("i");e.className="co cr";e.textContent=8-r;d.appendChild(e)}}
@@ -1169,6 +1208,7 @@ function render(){
  else h.innerHTML=S.log.map(m=>`<div>${m}</div>`).join("");
  h.scrollTop=h.scrollHeight;
  const dq=S.draft&&S.draft[0],dm=$("dro");
+ $("dro").classList.toggle("flip2",!!(dq&&!ai&&!net&&S.seat[dq.c]===1)); // 한 기기 2인: 맞은편(흑) 플레이어가 고를 때는 증강 선택 창을 그쪽으로 180도 돌림
  if(dq&&!(ai&&S.seat[dq.c]===1)&&!(net&&S.seat[dq.c]!==net.seat)){$("drt").textContent=`${pname(S.seat[dq.c])} (${dq.c==="w"?"백":"흑"}) · 증강을 고르세요`;const bx=$("drb");bx.innerHTML="";
   // 아이콘: OPENING=깃발, PASSIVE=방패, ACTIVE=번개
   const IC={o:'<path d="M7 3h2v18H7zM10 4h10l-3 4 3 4H10z"/>',p:'<path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/>',a:'<path d="M13 2L4 14h6l-1 8 9-12h-6z"/>'},RK={COMMON:1,RARE:1,EPIC:1,LEGEND:1,LUNACY:1};
@@ -1237,7 +1277,7 @@ $("volSl").oninput=()=>{volume=+$("volSl").value;$("volVal").textContent=volume;
 /* ============ 6) 계정 · 전적 · 친구 · 온라인 대전 (Firebase) ============ */
 // Firebase 콘솔 > 프로젝트 설정 > 내 앱(웹)의 firebaseConfig 값을 붙여 넣으세요. 비어 있으면 로그인만 꺼지고 게임은 그대로 동작해요.
 const FIREBASE_CONFIG={apiKey:"AIzaSyB05fQXoi7NI3V-b64U9DZmQsxQHSXd2qY",authDomain:"chess-set-2dfc6.firebaseapp.com",projectId:"chess-set-2dfc6",storageBucket:"chess-set-2dfc6.firebasestorage.app",messagingSenderId:"941676906231",appId:"1:941676906231:web:93cc524efc4ac88144f5f2"};
-// 관리자 탭에 들어갈 수 있는 계정(로그인 이메일). 여러 명이면 쉼표로 추가. 화면만 막는 것이라 Firestore 규칙에도 같은 이메일을 넣어야 해요
+// 최고 관리자 계정(로그인 이메일). 다른 관리자는 관리자 화면 > 관리자 탭에서 추가·해제해요. 바꾸면 Firestore 규칙의 isOwner()도 같이 바꿔야 해요
 const ADMIN_EMAILS=["pshking1205@gmail.com"];
 function toast(m){const t=$("tst");t.textContent=m;t.className="show";clearTimeout(toast.t);toast.t=setTimeout(()=>t.className="",2600)}
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
@@ -1262,6 +1302,7 @@ const Online=(()=>{
    if(u){try{const d=await db.doc("users/"+u.uid).get();prof=d.exists?d.data():null}catch(e){toast(errMsg(e))}
     if(prof&&prof.banned){prof=null;toast("이용이 정지된 계정이에요");auth.signOut()}
     else if(prof)start();else nameUI(true)}
+   admU=[];admO="";if(u&&prof){try{const a=await db.doc("config/admins").get();if(a.exists){admU=a.data().uids||[];admO=a.data().owner||""}}catch(e){}}
    if(!isAdmin())ov("adm",false);
    bar()});
  }
@@ -1477,22 +1518,28 @@ const Online=(()=>{
  /* --- 관리자 탭: ADMIN_EMAILS에 있는 (이메일 인증된) 계정만 열림. 실제 데이터 보호는 Firestore 규칙이 해요 --- */
  const RA={COMMON:"C",RARE:"R",EPIC:"E",LEGEND:"L",LUNACY:"LU"},TIERS=Object.keys(RA),CL={COMMON:"#7d828c",RARE:"#2f7fd8",EPIC:"#9440c8",LEGEND:"#f0c544",LUNACY:"#e0457f"};
  let adTab="dash",adU=null,adG=[],adR=null,adE=null,adQ="",adC=null,ntcT="";
- const isAdmin=()=>!!(me&&me.emailVerified&&ADMIN_EMAILS.some(x=>x.toLowerCase()===(me.email||"").toLowerCase()));
+ let admU=[],admO=""; // config/admins: 관리자 uid 목록 · 최고 관리자 uid
+ const owner=()=>!!(me&&me.emailVerified&&ADMIN_EMAILS.some(x=>x.toLowerCase()===(me.email||"").toLowerCase()));
+ const isAdmin=()=>owner()||!!(me&&admU.includes(me.uid));
+ // 최고 관리자는 모두 관리, 일반 관리자는 다른 관리자·최고 관리자·자기 자신을 제외한 계정만 (규칙과 같은 기준)
+ const canM=uid=>owner()||(isAdmin()&&uid!==me.uid&&uid!==admO&&!admU.includes(uid));
  const onl=u=>u.online!==false&&Date.now()-ms(u.lastSeen)<60000,stale=g=>Date.now()-ms(g.at)>3e5;
  const ago=t=>{if(!t)return"-";const s=(Date.now()-t)/1000;return s<60?`${Math.max(0,s|0)}초 전`:s<3600?`${s/60|0}분 전`:s<86400?`${s/3600|0}시간 전`:`${s/86400|0}일 전`};
  const rec=x=>["w","l","d"].map(k=>Object.values(x||{}).reduce((a,m)=>a+((m||{})[k]||0),0)).join("-");
  function applyAug(c){TIERS.forEach(t=>{const v=(c.w||{})[t];if(typeof v==="number"&&v>=0)AUGW[t]=v});AUG_OFF.clear();(c.off||[]).forEach(k=>{if(AUGS[k])AUG_OFF.add(k)})}
  function admOpen(){if(!isAdmin())return toast("관리자가 아닙니다.");ov("adm",true);admLoad()}
  async function admLoad(){if(!isAdmin())return ov("adm",false);adE=null;admDraw(true);
+  try{const a=await db.doc("config/admins").get();admU=a.exists?a.data().uids||[]:[];admO=a.exists?a.data().owner||"":""}catch(e){}
+  if(owner()&&admO!==me.uid)try{await db.doc("config/admins").set({owner:me.uid,uids:admU,at:FV.serverTimestamp()});admO=me.uid}catch(e){adE=e}
   const T=p=>p.then(q=>q,e=>{adE=e;return null});
   const[u,g,r]=await Promise.all([T(db.collection("users").get()),T(db.collection("games").where("status","==","active").get()),db.collection("friendRequests").get().then(q=>q.size,()=>null)]);
   adU=u?u.docs.map(d=>({uid:d.id,...d.data()})):[];adG=g?g.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>ms(b.at)-ms(a.at)):[];adR=r;admDraw()}
  function admDraw(ld){const T=$("admT");T.innerHTML="";
-  [["dash","대시보드"],["users","사용자"],["games","대전 모니터"],["aug","증강 밸런스"],["ntc","공지"]].forEach(([k,n])=>{const b=document.createElement("button");b.textContent=n+(k==="games"&&adG.length?` (${adG.length})`:"");if(k===adTab)b.className="on";b.onclick=()=>{adTab=k;admDraw()};T.appendChild(b)});
-  const B=$("admB"),need=["dash","users","games"].includes(adTab);
+  [["dash","대시보드"],["users","사용자"],["admins","관리자"],["games","대전 모니터"],["aug","증강 밸런스"],["ntc","공지"]].forEach(([k,n])=>{const b=document.createElement("button");b.textContent=n+(k==="games"&&adG.length?` (${adG.length})`:"");if(k===adTab)b.className="on";b.onclick=()=>{adTab=k;admDraw()};T.appendChild(b)});
+  const B=$("admB"),need=["dash","users","admins","games"].includes(adTab);
   if(need&&(ld||!adU))return B.innerHTML='<div class="empty">불러오는 중…</div>';
   const er=need&&adE?`<div class="er">일부 정보를 불러오지 못했어요: ${esc(errMsg(adE))}</div>`:"";
-  if(adTab==="dash")dashUI(B,er);else if(adTab==="users")usersUI(B,er);else if(adTab==="games"){B.innerHTML=er+gamesP(0);wire(B)}else if(adTab==="aug")augUI(B);else ntcUI(B)}
+  if(adTab==="dash")dashUI(B,er);else if(adTab==="users")usersUI(B,er);else if(adTab==="admins")adminsUI(B,er);else if(adTab==="games"){B.innerHTML=er+gamesP(0);wire(B)}else if(adTab==="aug")augUI(B);else ntcUI(B)}
  function wire(B){B.querySelectorAll("[data-end]").forEach(b=>b.onclick=()=>admEnd(b.dataset.end));const a=B.querySelector("[data-gt]");if(a)a.onclick=e=>{e.preventDefault();adTab="games";admDraw()}}
  function dashUI(B,er){const M={},wk=Date.now()-7*864e5;adU.forEach(u=>["ai","online"].forEach(k=>Object.entries((u.st||{})[k]||{}).forEach(([m,x])=>{M[m]=(M[m]||0)+(x.w||0)+(x.l||0)+(x.d||0)})));
   const mx=Math.max(1,...MODES.map(m=>M[m.id]||0)),kp=(n,v,s)=>`<div class="kp"><i>${n}</i><b>${v}</b><small>${s}</small></div>`,sl=adG.filter(stale).length;
@@ -1508,13 +1555,34 @@ const Online=(()=>{
  function usersUI(B,er){B.innerHTML=er+`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="admQ" placeholder="닉네임 검색" aria-label="닉네임 검색" value="${esc(adQ)}" style="flex:1 1 220px;font:inherit;padding:10px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--fg)"><small>전체 ${adU.length}명</small></div><div class="panel ad"><div class="adx" id="admL"></div></div>`;
   $("admQ").oninput=e=>{adQ=e.target.value;userRows()};userRows()}
  function userRows(){const q=adQ.trim().toLowerCase(),L=adU.filter(u=>!q||(u.nameLower||"").includes(q)).sort((a,b)=>(onl(b)-onl(a))||ms(b.lastSeen)-ms(a.lastSeen)),el=$("admL");
-  el.innerHTML=L.length?`<table class="tb"><tr><th>닉네임</th><th>상태</th><th>AI 전적</th><th>온라인 전적</th><th>가입</th><th></th></tr>${L.map(u=>`<tr><td>${esc(u.name)}${u.banned?'<span class="bdg2">정지</span>':""}${u.uid===me.uid?" <small>(나)</small>":""}</td><td style="white-space:nowrap"><i class="dot${onl(u)?" on":""}"></i>${onl(u)?"접속 중":ago(ms(u.lastSeen))}</td><td>${rec((u.st||{}).ai)}</td><td>${rec((u.st||{}).online)}</td><td>${ms(u.createdAt)?new Date(ms(u.createdAt)).toLocaleDateString():"-"}</td><td style="text-align:right;white-space:nowrap"><button class="g" data-rs="${esc(u.uid)}">전적 초기화</button> ${u.uid===me.uid?"":`<button ${u.banned?'class="g"':'style="background:var(--warn)"'} data-bn="${esc(u.uid)}">${u.banned?"정지 해제":"이용 정지"}</button>`}</td></tr>`).join("")}</table>`:'<div class="empty">찾는 사용자가 없어요</div>';
-  el.querySelectorAll("[data-rs]").forEach(b=>b.onclick=()=>admUser(b.dataset.rs,"reset"));el.querySelectorAll("[data-bn]").forEach(b=>b.onclick=()=>admUser(b.dataset.bn,"ban"))}
- async function admUser(uid,k){const u=adU.find(x=>x.uid===uid);if(!u)return;
+  el.innerHTML=L.length?`<table class="tb"><tr><th>닉네임</th><th>상태</th><th>AI 전적</th><th>온라인 전적</th><th>가입</th><th></th></tr>${L.map(u=>`<tr><td>${esc(u.name)}${u.uid===admO?'<span class="bdg2">최고 관리자</span>':admU.includes(u.uid)?'<span class="bdg2">관리자</span>':""}${u.banned?'<span class="bdg2">정지</span>':""}${u.uid===me.uid?" <small>(나)</small>":""}</td><td style="white-space:nowrap"><i class="dot${onl(u)?" on":""}"></i>${onl(u)?"접속 중":ago(ms(u.lastSeen))}</td><td>${rec((u.st||{}).ai)}</td><td>${rec((u.st||{}).online)}</td><td>${ms(u.createdAt)?new Date(ms(u.createdAt)).toLocaleDateString():"-"}</td><td style="text-align:right;white-space:nowrap">${canM(u.uid)?`<button class="g" data-nm="${esc(u.uid)}">닉네임</button> <button class="g" data-rs="${esc(u.uid)}">전적 초기화</button> ${u.uid===me.uid?"":`<button ${u.banned?'class="g"':'style="background:var(--warn)"'} data-bn="${esc(u.uid)}">${u.banned?"정지 해제":"이용 정지"}</button>`}`:"<small>권한 없음</small>"}${owner()&&u.uid!==me.uid?` <button class="g" data-ad="${esc(u.uid)}">${admU.includes(u.uid)?"관리자 해제":"관리자 지정"}</button>`:""}</td></tr>`).join("")}</table>`:'<div class="empty">찾는 사용자가 없어요</div>';
+  el.querySelectorAll("[data-rs]").forEach(b=>b.onclick=()=>admUser(b.dataset.rs,"reset"));el.querySelectorAll("[data-bn]").forEach(b=>b.onclick=()=>admUser(b.dataset.bn,"ban"));
+  el.querySelectorAll("[data-nm]").forEach(b=>b.onclick=()=>admRename(b.dataset.nm));el.querySelectorAll("[data-ad]").forEach(b=>b.onclick=()=>admToggle(b.dataset.ad))}
+ async function admUser(uid,k){const u=adU.find(x=>x.uid===uid);if(!u)return;if(!canM(uid))return toast("이 계정은 최고 관리자만 바꿀 수 있어요");
   const msg=k==="reset"?`${u.name}님의 전적을 모두 0으로 초기화할까요? 되돌릴 수 없어요.`:u.banned?`${u.name}님의 이용 정지를 풀까요?`:`${u.name}님을 이용 정지할까요? 접속 중이면 바로 로그아웃돼요.`;
   if(!await ask(msg,k==="reset"?"초기화":u.banned?"해제":"정지"))return;
   const up=k==="reset"?{st:{ai:{},online:{}},stMig:true}:{banned:!u.banned};
   try{await db.doc("users/"+uid).update(up);Object.assign(u,up);toast(k==="reset"?"전적을 초기화했어요":u.banned?"이용을 정지했어요":"정지를 풀었어요");userRows()}catch(e){toast(errMsg(e))}}
+ // 다른 사람 닉네임 변경: names/{소문자} 예약을 옮기고 프로필 이름을 바꿈
+ async function admRename(uid){const u=adU.find(x=>x.uid===uid);if(!u)return;if(!canM(uid))return toast("이 계정은 최고 관리자만 바꿀 수 있어요");
+  const n=(prompt(`${u.name}님의 새 닉네임 (2~12자 한글·영문·숫자·_)`,u.name)||"").trim();if(!n||n===u.name)return;
+  if(!/^[가-힣A-Za-z0-9_]{2,12}$/.test(n))return toast("2~12자의 한글·영문·숫자·_ 만 쓸 수 있어요");const lo=n.toLowerCase(),ref=db.doc("names/"+lo);
+  try{await db.runTransaction(async t=>{const d=await t.get(ref);if(d.exists&&d.data().uid!==uid)throw "이미 쓰는 닉네임이에요";
+    if(!d.exists)t.set(ref,{uid});if(u.nameLower&&u.nameLower!==lo)t.delete(db.doc("names/"+u.nameLower));t.update(db.doc("users/"+uid),{name:n,nameLower:lo})});
+   Object.assign(u,{name:n,nameLower:lo});if(uid===me.uid){prof={...prof,name:n,nameLower:lo};bar()}toast("닉네임을 바꿨어요");userRows()}catch(e){toast(typeof e==="string"?e:errMsg(e))}}
+ // 관리자 지정·해제: 최고 관리자만 (config/admins 쓰기는 규칙에서도 최고 관리자만 허용)
+ async function admToggle(uid){if(!owner())return toast("관리자 지정은 최고 관리자만 할 수 있어요");const u=adU.find(x=>x.uid===uid),on=admU.includes(uid),nm=u?u.name:"이 사용자";
+  if(!await ask(on?`${nm}님의 관리자 권한을 뺄까요?`:`${nm}님을 관리자로 지정할까요? 대시보드·전적 초기화·이용 정지·대전 종료·증강 밸런스·공지를 쓸 수 있게 돼요.`,on?"해제":"지정"))return;
+  const L=on?admU.filter(x=>x!==uid):[...admU,uid];
+  try{await db.doc("config/admins").set({owner:me.uid,uids:L,at:FV.serverTimestamp()});admU=L;admO=me.uid;toast(on?"관리자에서 뺐어요":"관리자로 지정했어요. 그 사람이 사이트를 새로고침하면 적용돼요");admDraw()}catch(e){toast(errMsg(e))}}
+ function adminsUI(B,er){const nm=uid=>{const u=adU.find(x=>x.uid===uid);return u?esc(u.name):"(알 수 없는 계정)"};
+  B.innerHTML=er+`<div class="panel" style="padding:16px"><div class="lb" style="margin-top:0">최고 관리자</div><div class="li"><span>${admO?nm(admO):"아직 등록 전 (최고 관리자가 이 화면을 열면 등록돼요)"}</span><small>${esc(ADMIN_EMAILS.join(", "))}</small></div>
+  <div class="lb">관리자 ${admU.length}명</div>${admU.map(uid=>`<div class="li"><span>${nm(uid)}</span>${owner()?`<button class="g" data-ad="${esc(uid)}">관리자 해제</button>`:""}</div>`).join("")||'<div class="empty">추가한 관리자가 없어요</div>'}
+  ${owner()?`<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><input id="admA" placeholder="닉네임으로 관리자 추가" aria-label="관리자로 추가할 닉네임" maxlength="12" style="flex:1 1 200px;font:inherit;padding:10px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--fg)"><button id="admAb">추가</button></div><small>사용자 탭의 '관리자 지정' 버튼으로도 추가할 수 있어요. 관리자는 다른 관리자와 최고 관리자의 계정은 바꿀 수 없어요.</small>`:"<small>관리자 추가·해제는 최고 관리자만 할 수 있어요.</small>"}</div>`;
+  B.querySelectorAll("[data-ad]").forEach(b=>b.onclick=()=>admToggle(b.dataset.ad));
+  if($("admAb")){const go=()=>{const q=$("admA").value.trim().toLowerCase(),u=adU.find(x=>x.nameLower===q);if(!q)return;if(!u)return toast("그런 닉네임이 없어요");
+    if(u.uid===me.uid)return toast("최고 관리자는 이미 모든 권한이 있어요");if(admU.includes(u.uid))return toast("이미 관리자예요");admToggle(u.uid)};
+   $("admAb").onclick=go;$("admA").onkeydown=e=>{if(e.key==="Enter")go()}}}
  function augUI(B){if(!adC)adC={w:{...AUGW},off:new Set(AUG_OFF)};const ids=Object.keys(AUGS),cnt=t=>ids.filter(k=>AUGS[k].r===t&&!AUGS[k].o&&!adC.off.has(k)).length;
   B.innerHTML=`<div class="adr"><div class="panel"><div class="ph"><span>등급 가중치</span></div><div style="padding:8px 0">${TIERS.map(t=>`<div class="awt"><span class="ag2 rk-${t}"><i class="rkt">${RA[t]}</i>${t}</span><input type="range" min="0" max="5" step="0.01" value="${adC.w[t]}" data-w="${t}" aria-label="${t} 가중치"><input type="number" min="0" max="5" step="0.01" value="${adC.w[t]}" data-n="${t}" aria-label="${t} 가중치 값"></div>`).join("")}<div style="padding:6px 16px 10px"><small>가중치 × 그 등급에서 켜진 증강 수로 등급을 먼저 뽑아요</small></div></div></div>
   <div class="panel"><div class="ph"><span>중간 증강 선택 때 등급이 나올 확률</span></div><div id="admP" style="padding:14px 16px"></div></div></div>
@@ -1541,5 +1609,5 @@ $("acx").onclick=()=>$("acc").classList.remove("on");
 $("navAdm").onclick=()=>Online.admOpen();$("admR").onclick=()=>Online.admLoad();
 drawPreview();menu();mode=STD;S=STD.setup();render();Online.init();
 </script>
-</body>
-</html>
+
+</body></html>
