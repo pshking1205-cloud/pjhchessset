@@ -300,6 +300,42 @@ small{color:var(--mut)}
 @keyframes pkpuff{0%{opacity:0;transform:scale(.3)}18%{opacity:.95}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(2.3)}}
 .pkfx .pg{position:absolute;width:var(--s);height:var(--s);background:var(--c);clip-path:polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%);opacity:0;animation:pkglit var(--t) cubic-bezier(.15,.7,.3,1) both,lutwk .3s steps(2) infinite;animation-delay:var(--d),var(--d)}
 @keyframes pkglit{0%{opacity:0;transform:scale(.3)}15%{opacity:1}100%{opacity:0;transform:translate(var(--x),var(--y)) rotate(400deg)}}
+
+/* 능동 증강 사용: 카드가 떠올랐다가 등급 색 빛이 나는 동시에 빠르게 사라짐 */
+#cv.ua{transition:none}
+#cv .uaw{width:min(230px,58vw)}
+#cv .uac{width:100%;pointer-events:none;animation:uain .45s cubic-bezier(.2,.9,.3,1.25) both,uaout .7s ease-out 1.35s forwards!important}
+#cv .uac .dcf{min-height:0}
+#cv .uac::after{content:"";position:absolute;inset:-6px;border-radius:20px;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,var(--c1),var(--gl) 45%,transparent 72%);opacity:0;mix-blend-mode:screen;animation:uaglow .7s ease-out 1.35s forwards}
+.dc.uac{position:relative}
+@keyframes uain{from{opacity:0;transform:translateY(30px) scale(.7)}}
+@keyframes uaout{0%{opacity:1;transform:scale(1);filter:brightness(1.3);box-shadow:0 0 40px var(--gl),0 0 100px var(--gl),0 0 160px var(--gl)}100%{opacity:0;transform:scale(1.1);filter:brightness(2.4);box-shadow:0 0 60px var(--gl),0 0 140px var(--gl),0 0 220px var(--gl)}}
+@keyframes uaglow{0%{opacity:.95}100%{opacity:0;transform:scale(1.5)}}
+/* 루나시 능동 증강: 등장 때 장미빛 고리와 꽃잎이 터지고, 사라질 때 장미빛 연기·꽃잎·글리터가 화면으로 퍼짐 */
+#cv.lu .uac{animation:uain .5s cubic-bezier(.2,.9,.3,1.25) both,luuaout .8s ease-out 1.3s forwards!important}
+@keyframes luuaout{0%{opacity:1;transform:scale(1);filter:brightness(1.4);box-shadow:0 0 50px rgba(255,90,140,.9),0 0 120px rgba(220,30,80,.7),0 0 200px rgba(255,150,190,.5)}100%{opacity:0;transform:scale(1.16) rotate(-2deg);filter:brightness(2.6);box-shadow:0 0 80px rgba(255,90,140,.9),0 0 180px rgba(220,30,80,.7),0 0 300px rgba(255,150,190,.5)}}
+#cv .luua{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#cv .luring{position:absolute;left:50%;top:50%;width:260px;height:260px;margin:-130px 0 0 -130px;border-radius:50%;border:3px solid #ffd0e2;box-shadow:0 0 20px #ff6fa3,inset 0 0 20px #ff6fa3;opacity:0;animation:luring .9s ease-out both}
+@keyframes luring{0%{opacity:0;transform:scale(.3)}25%{opacity:1}100%{opacity:0;transform:scale(1.8)}}
+#cv .lup{position:absolute;left:50%;top:50%;width:var(--s);height:calc(var(--s)*1.25);margin:calc(var(--s)*-.62) 0 0 calc(var(--s)*-.5);border-radius:70% 0 70% 0;background:linear-gradient(135deg,#ffd3e4,#f2558f 55%,#9c0c3e);box-shadow:inset 0 0 0 1px rgba(255,240,246,.8);opacity:0;animation:lupet var(--t) cubic-bezier(.2,.7,.3,1) var(--dl) both}
+@keyframes lupet{0%{opacity:0;transform:rotate(var(--a)) translateY(0) scale(.4)}15%{opacity:1}100%{opacity:0;transform:rotate(var(--a)) translateY(calc(var(--d)*-1)) rotate(var(--r)) scale(1)}}
+#cv .lus2{position:absolute;left:50%;top:50%;width:var(--s);height:var(--s);margin:calc(var(--s)/-2) 0 0 calc(var(--s)/-2);border-radius:50%;background:radial-gradient(circle,var(--c) 0,transparent 66%);opacity:0;animation:lusm2 var(--t) cubic-bezier(.15,.7,.3,1) 1.3s both}
+@keyframes lusm2{0%{opacity:0;transform:scale(.3)}20%{opacity:.95}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(2.3)}}
+#cv .lug2{position:absolute;left:50%;top:50%;width:var(--s);height:var(--s);background:var(--c);clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);opacity:0;animation:lugl2 var(--t) cubic-bezier(.15,.7,.3,1) var(--dl) both,lutwk .3s steps(2) infinite}
+@keyframes lugl2{0%{opacity:0;transform:scale(.3)}15%{opacity:1}100%{opacity:0;transform:translate(var(--x),var(--y)) rotate(300deg) scale(1.2)}}
+
+
+/* 섬광(카드 뒤에서 뻗어 나옴): 가운데 둥근 빛 없이 굵은 빛줄기 두 겹 (등급 색으로 살짝 물듦) */
+#cv .uaw{position:relative;isolation:isolate}
+#cv .uac{z-index:1}
+#cv .uac::after{display:none}
+#cv .uab{position:absolute;left:50%;top:50%;width:var(--z);height:var(--z);margin:calc(var(--z)/-2) 0 0 calc(var(--z)/-2);pointer-events:none;z-index:0;opacity:0;mix-blend-mode:screen;animation:uaburst .75s cubic-bezier(.2,.8,.3,1) 1.3s both}
+#cv .uab i{position:absolute;inset:0;border-radius:50%}
+#cv .uab .rl{-webkit-mask:radial-gradient(circle,transparent 0,transparent 3%,#000 9%,rgba(0,0,0,.75) 40%,transparent 80%);mask:radial-gradient(circle,transparent 0,transparent 3%,#000 9%,rgba(0,0,0,.75) 40%,transparent 80%);animation:uaspin .75s linear 1.3s both}
+#cv .uab .rs{-webkit-mask:radial-gradient(circle,transparent 0,transparent 3%,#000 8%,transparent 48%);mask:radial-gradient(circle,transparent 0,transparent 3%,#000 8%,transparent 48%);animation:uaspin2 .75s linear 1.3s both}
+@keyframes uaburst{0%{opacity:0;transform:scale(.15)}18%{opacity:1;transform:scale(.85)}100%{opacity:0;transform:scale(1.25)}}
+@keyframes uaspin{to{transform:rotate(14deg)}}
+@keyframes uaspin2{to{transform:rotate(-10deg)}}
 </style>
 </head>
 <body>
@@ -955,7 +991,23 @@ const $=i=>document.getElementById(i);
 let mode=STD,S=null,hist=[],sel=null,flip=false,ai=true,level="보통",theme="wood",aiT,seen=null,dismissed=false,ctm,soundOn=true,volume=20;
 try{const sd0=localStorage.getItem("chessSound");if(sd0!=null)soundOn=sd0==="1";const v0=localStorage.getItem("chessVolume");if(v0!=null)volume=+v0}catch(e){}
 let net=null,gid=null;const recd=new Set(); // net: 진행 중인 온라인 대전 {gid,seat,names,rev,unsub} · gid: 전적 기록용 게임 id
-let luShown=null,annSeen=null,augSel=null;function showAnn(a){const d=AUGS[a.k],v=$("cv");v.innerHTML=`<div class="cc" style="background:#8e44ad;width:240px;height:auto;min-height:150px;padding:18px;${!ai&&!net&&S.seat[a.c]===1?"transform:rotate(180deg);":""}"><b style="font-size:40px">✦</b><span style="font-size:18px">${a.c==="w"?"백":"흑"} 「${d.n}」 사용!</span><span style="font-size:13px;font-weight:400">${d.d}</span></div>`;v.className="show";clearTimeout(ctm);ctm=setTimeout(()=>v.className="",2600)}
+let luShown=null,annSeen=null,augSel=null;function showAnn(a){const id=AUGS[a.id]?a.id:a.k,d=AUGS[id],v=$("cv"),r=["COMMON","RARE","EPIC","LEGEND","LUNACY"].includes(d.r)?d.r:"COMMON",ty=d.o?"o":d.p?"p":"a";
+ const ICX={o:'<path d="M7 3h2v18H7zM10 4h10l-3 4 3 4H10z"/>',p:'<path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/>',a:'<path d="M13 2L4 14h6l-1 8 9-12h-6z"/>'};
+ // 사용한 증강 카드를 그대로 보여 줌 (2인 한 기기에서 위쪽 좌석이 썼으면 카드를 뒤집어 보여 줌)
+ v.innerHTML=`<div class="uaw"${!ai&&!net&&S.seat[a.c]===1?' style="transform:rotate(180deg)"':""}><div class="dc rc-${r} uac"><span class="dcf"><span class="dci"><svg viewBox="0 0 24 24">${ICX[ty]}</svg></span><b class="dcn">${d.n}</b><span class="dct">${r}${r==="LUNACY"?"":" · "+(ty==="o"?"시작":ty==="p"?"패시브":"능동")}</span><span class="dcd">${d.d}</span></span></div></div>`;
+ const c=v.querySelector(".uac");if(r==="LEGEND")lgSkin(c,"L");if(r==="LUNACY")luSkin(c);
+ {const lv={COMMON:0,RARE:1,EPIC:2,LEGEND:3,LUNACY:4}[r],T={COMMON:"235,240,255",RARE:"150,200,255",EPIC:"215,150,255",LEGEND:"255,220,120",LUNACY:"255,140,185"}[r],R=Math.random;
+  const rays=(n,wmin,wmax)=>{const st=[];Array.from({length:n},()=>R()*360).sort((x,y)=>x-y).forEach(a=>{const w=wmin+R()*(wmax-wmin),al=.6+R()*.4;st.push(`transparent ${(a-w).toFixed(1)}deg`,`rgba(255,255,255,${al.toFixed(2)}) ${(a-w*.35).toFixed(1)}deg`,`rgba(255,255,255,${al.toFixed(2)}) ${(a+w*.15).toFixed(1)}deg`,`rgba(${T},${(al*.7).toFixed(2)}) ${(a+w*.5).toFixed(1)}deg`,`transparent ${(a+w).toFixed(1)}deg`)});return`conic-gradient(from 0deg,${st.join(",")})`};
+  const sz=Math.min(470+lv*120,Math.max(innerWidth,innerHeight)*(1+lv*.12));
+  v.querySelector(".uaw").insertAdjacentHTML("afterbegin",`<div class="uab" style="--z:${sz|0}px;--T:${T}"><i class="rl" style="background:${rays(10+lv*4,3.2,6)}"></i><i class="rs" style="background:${rays(14+lv*5,2.4,4.6)}"></i></div>`)}
+ if(r==="LUNACY"){const R=Math.random,F=Math.max(innerWidth,innerHeight),C=["rgba(235,45,110,.9)","rgba(255,125,175,.85)","rgba(170,15,65,.9)","rgba(255,175,210,.8)"],G=["#ffd76a","#ffffff","#ff9cc4","#ff5c95"];
+  const pet=(n,t0,far,dur)=>Array.from({length:n},(_,i)=>{const a=i/n*360+R()*20,d=far*(.6+R()*.5);return`<i class="lup" style="--a:${a|0}deg;--d:${d|0}px;--t:${dur+R()*.4}s;--dl:${t0+R()*.15}s;--r:${(R()-.5)*720|0}deg;--s:${10+R()*12|0}px"></i>`}).join("");
+  const sm=Array.from({length:18},(_,i)=>{const a=i/18*Math.PI*2+R()*.3,d=F*(.25+R()*.35);return`<i class="lus2" style="--x:${Math.cos(a)*d|0}px;--y:${(Math.sin(a)*d-30)|0}px;--s:${150+R()*160|0}px;--c:${C[i%4]};--t:${.8+R()*.3}s"></i>`}).join("");
+  const gl=Array.from({length:46},(_,i)=>{const a=R()*Math.PI*2,d=F*(.12+R()*.45);return`<i class="lug2" style="--x:${Math.cos(a)*d|0}px;--y:${(Math.sin(a)*d-20)|0}px;--s:${3+R()*5|0}px;--c:${G[i%4]};--t:${.7+R()*.5}s;--dl:${1.25+R()*.2}s"></i>`}).join("")
+   +Array.from({length:22},(_,i)=>{const a=i/22*Math.PI*2,d=150+R()*60;return`<i class="lug2" style="--x:${Math.cos(a)*d|0}px;--y:${Math.sin(a)*d|0}px;--s:${3+R()*4|0}px;--c:${G[i%4]};--t:${.6+R()*.3}s;--dl:${R()*.12}s"></i>`}).join("");
+  v.insertAdjacentHTML("afterbegin",`<div class="luua"><i class="luring"></i>${pet(14,0,170,.9)}${sm}${pet(22,1.25,F*.45,1.1)}${gl}</div>`);
+  v.className="show ua lu";clearTimeout(ctm);ctm=setTimeout(()=>v.className="ua lu",2700)}
+ else{v.className="show ua";clearTimeout(ctm);ctm=setTimeout(()=>v.className="ua",2100)}}
 let revSeen=null,revFx=null;const PNM={P:"폰",N:"나이트",B:"비숍",R:"룩",Q:"퀸",A:"천사"};
 // 부활 알림: 상태(S.rev)로 전달되어 두 사람 모두에게 똑같이 보임
 function showRevive(rv){revFx={sq:rv.to,until:Date.now()+2000};setTimeout(()=>{if(S)render()},2100)}
