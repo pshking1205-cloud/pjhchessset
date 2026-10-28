@@ -703,7 +703,9 @@ function augXM(s,i,p,out,h){
  const at=(y,x)=>Engine.inb(y,x)?b[y*8+x]:undefined,mk=(y,x)=>out.push({from:i,to:y*8+x});
  if(s.only!=null&&s.only!==i)return[];
  if((s.fz||[]).concat(s.st||[]).some(f=>f.sq===i&&f.until>s.n))return[];
- if(E.includes("flip")&&p.t==="P"){const s2={...s,eff:[],b:b.slice(),ep:null};s2.b[i]={...p,f:-p.f};return Engine.pseudo(s2,i)}
+ // 폰 방향 반전: 뒤로 움직이기만 바뀌고 프로모션 칸은 원래 그대로(뒤쪽 끝 줄에서 승급하지 않음). 두 칸 전진도 막음
+ if(E.includes("flip")&&p.t==="P"){const s2={...s,eff:[],b:b.slice(),ep:null};s2.b[i]={...p,f:-p.f,m:true};const seen=new Set();
+  return Engine.pseudo(s2,i).map(m=>{const{promo,...x}=m;return x}).filter(m=>{const k=m.to+(m.epx!=null?"e":"");if(seen.has(k))return false;seen.add(k);return true})}
  if(E.includes("invert")&&(p.t==="R"||p.t==="B")){const s2={...s,eff:s.eff.filter(e=>e.k!=="invert"),b:b.slice()};s2.b[i]={...p,t:p.t==="R"?"B":"R"};return Engine.pseudo(s2,i)}
 
  if(E.includes("zug")&&p.t!=="K")return[];
@@ -798,10 +800,18 @@ const AUGC={...STD,id:"augment",name:"✦ 증강 체스",
   s.draft=[mkDraft(s,"w"),mkDraft(s,"b")];s.msg="게임 시작! 먼저 증강을 고르세요";return s},
  pick(s,id){const q=s.draft[0],n={...s,aug:{...s.aug,[q.c]:[...s.aug[q.c],{id,used:false}]},draft:s.draft.slice(1)};
   if(OPEN[id])OPEN[id](n,q.c);
-  if(id==="prayer")n.b=n.b.map(p=>p&&p.c===q.c&&p.t==="N"?{...p,t:"B"}:p);
-  if(id==="salvation")n.b=n.b.map(p=>p&&p.c===q.c&&p.t==="Q"?{...p,an:true,ak:0}:p);
+  // 획득 즉시 효과 (하얀 상자로 얻은 증강도 같은 효과를 받음)
+  const acq=k=>{
+   if(k==="prayer")n.b=n.b.map(p=>p&&p.c===q.c&&p.t==="N"?{...p,t:"B"}:p);
+   if(k==="salvation")n.b=n.b.map(p=>p&&p.c===q.c&&p.t==="Q"?{...p,an:true,ak:0}:p);
+   if(k==="jeans")n.b=n.b.map(p=>p&&(p.t==="Q"||p.t==="R")?null:p)}; // 청바지: 양쪽 퀸·룩(천사 포함) 추방
+  let got=id;
+  if(id==="whitebox"){ // 하얀 상자: 아직 없는 무작위 패시브 증강(시작 전용·루나시 제외)을 대신 얻고 효과까지 적용
+   const own=n.aug[q.c].map(a=>a.id),pool=Object.keys(AUGS).filter(k=>AUGS[k].p&&!AUGS[k].o&&k!=="whitebox"&&AUGS[k].r!=="LUNACY"&&!own.includes(k));
+   if(pool.length){got=pool[Math.random()*pool.length|0];n.aug={...n.aug,[q.c]:n.aug[q.c].map(a=>a.id==="whitebox"&&!a.wb?{id:got,used:false,wb:true}:a)}}}
+  acq(got);
   if(!n.draft.length){n.draft=null;if(!Engine.all(n).length){const ck=Engine.inCheck(n.b,n.turn);n.over={win:ck?opp(n.turn):null,why:ck?"체크메이트":"스테일메이트 (당한 쪽 패배)"}}}
- n.msg=n.over?n.over.why:`${q.c==="w"?"백":"흑"}: 「${AUGS[id].n}」 선택`+(n.draft?"":" · "+(n.turn==="w"?"백":"흑")+" 차례");return n},
+ n.msg=n.over?n.over.why:`${q.c==="w"?"백":"흑"}: 「${got!==id?"하얀 상자."+AUGS[got].n:AUGS[id].n}」 선택`+(n.draft?"":" · "+(n.turn==="w"?"백":"흑")+" 차례");return n},
  aiPick:s=>{const o=s.draft[0].opts;return o.find(id=>AUGS[id].p&&id!=="prayer")||o[0]},
  aiUse(s){const act=s.aug[s.turn].filter(a=>!a.used&&!AUGS[a.id].p);return act.length&&Math.random()<.35?act[Math.random()*act.length|0].id:null},
  use(s,id){const me=s.turn,you=opp(me),a=s.aug[me].find(x=>x.id===id&&!x.used);if(!a||AUGS[id].p)return s;
@@ -811,7 +821,7 @@ const AUGC={...STD,id:"augment",name:"✦ 증강 체스",
   const rnd=a=>a[Math.random()*a.length|0];
   const E={horse:[me,1],taunt:[you,1],ice:[you,3],relo:[me,2],split:[me,1],wang:[me,3],truce:["*",2],brk:[me,1],enpass:[me,1],social:[you,1],oops:[you,1],othello:[me,1],ghillie:[me,3],sniper:[me,1],overtake:[me,1],swapk:[me,1],rotate:[me,1],kinship:[me,1],swapx:[me,1],mirror:[me,1],e4:[me,1]};
   if(E[k])n.eff.push({k,c:E[k][0],left:E[k][1]});
-  else if(k==="storm"){const b=n.b.slice();for(let i=0;i<64;i++){const p=b[i];if(p&&p.t==="P"&&p.c===me){const y=i+p.f*8;if(y>=0&&y<64&&!b[y]){b[y]={...p,m:true,t:(y>>3)===(p.f<0?0:7)?"Q":"P"};b[i]=null}}}n.b=b}
+  else if(k==="storm"){const b0=n.b,b=b0.slice();for(let i=0;i<64;i++){const p=b0[i];if(p&&p.t==="P"&&p.c===me){const y=i+p.f*8;if(y>=0&&y<64&&!b0[y]&&!b[y]){b[y]={...p,m:true,t:(y>>3)===(p.f<0?0:7)?"Q":"P"};b[i]=null}}}n.b=b} // 원래 판(b0) 기준으로 한 칸씩만: 앞 칸으로 옮긴 폰을 다시 옮기지 않음
   else if(k==="bless"){const l=shuf(idx(p=>p.c===me&&!p.bl));if(l.length)setP(l[0],{bl:true})}
   else if(k==="poison")shuf(idx(p=>p.c===me&&p.t==="P")).slice(0,3).forEach(i=>setP(i,{po:true}));
   else if(k==="cham")shuf(idx(p=>p.c===me&&p.t!=="K")).slice(0,3).forEach(i=>setP(i,{cm:true}));
@@ -957,7 +967,7 @@ const AUGC={...STD,id:"augment",name:"✦ 증강 체스",
  },
  evalBonus:s=>{let w=0,b=0;s.b.forEach(p=>{if(p&&p.t==="K")p.c==="w"?w++:b++});return(w?0:-50000)+(b?0:50000)},
  // 얻은 증강 표시: 칩 색과 앞의 등급 글자로 등급을 바로 알 수 있게 (C·R·E·L·LU)
- info(s){const RA={COMMON:"C",RARE:"R",EPIC:"E",LEGEND:"L",LUNACY:"LU"},row=c=>s.aug[c].map(a=>{const d=AUGS[a.id],r=RA[d.r]?d.r:"COMMON";return`<span class="ag2 rk-${r}${a.used?" u":""}" title="${d.n} [${r}] ${d.d}" onclick="showAug('${a.id}')"><i class="rkt">${RA[r]}</i>${d.p?"🔹":a.used?"▫️":"🔸"}${d.n}</span>`}).join(" ")||"-";
+ info(s){const RA={COMMON:"C",RARE:"R",EPIC:"E",LEGEND:"L",LUNACY:"LU"},row=c=>s.aug[c].map(a=>{const d=AUGS[a.id],r=RA[d.r]?d.r:"COMMON";return`<span class="ag2 rk-${r}${a.used?" u":""}" title="${a.wb?"하얀 상자.":""}${d.n} [${r}] ${d.d}" onclick="showAug('${a.id}')"><i class="rkt">${RA[r]}</i>${d.p?"🔹":a.used?"▫️":"🔸"}${a.wb?"하얀 상자.":""}${d.n}</span>`}).join(" ")||"-";
   let o=`백: ${row("w")}<br>흑: ${row("b")}<br><small>🔹PASSIVE 🔸사용 가능 ▫️사용함 · 이름을 누르면 설명이 나와요</small>`;
   if(s.lastUse)o+=`<div class="adc" style="border-left:4px solid #8e44ad">✦ 최근 사용: <b>${s.lastUse}</b></div>`;
   if(augSel&&AUGS[augSel])o+=`<div class="adc"><b>${AUGS[augSel].n}</b> <small class="aty">${AUGS[augSel].r}${AUGS[augSel].p?" · PASSIVE":" · ACTIVE"}${AUGS[augSel].o?" · OPENING":""}</small><br>${AUGS[augSel].d}</div>`;
