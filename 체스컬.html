@@ -183,7 +183,7 @@ small{color:var(--mut)}
 .hero p{margin:0;color:var(--mut);font-size:15px;line-height:1.6;max-width:44ch}
 #pv{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));width:min(100%,460px);aspect-ratio:1/1;border-radius:6px;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.4);container-type:inline-size}
 #pv>div{display:grid;place-items:center;font-size:9cqw;min-width:0;min-height:0;overflow:hidden}
-@media(max-width:899px){#pv{display:none}.hero h1{font-size:34px}}
+@media(max-width:899px){#pv{display:none}.hero h1{font-size:34px}.hero{display:contents}}
 .play{background:var(--card);border-radius:14px;padding:20px;min-width:0}
 .play h2{font-family:var(--f-disp);font-weight:400;font-size:24px;margin:0 0 4px}
 .opts{display:grid;gap:8px}
@@ -510,7 +510,7 @@ html[data-ag="wood"] .ag2{background:url("data:image/svg+xml,%3Csvg xmlns='http:
 <!-- 나무 스킨 기물 무늬 (pcSvg에서 url(#wpw)/url(#wpb)로 사용) -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><pattern id="wpw" patternUnits="userSpaceOnUse" width="14" height="45"><rect width="14" height="45" fill="#efd3a0"/><path d="M2.8 0.0L2.7 3.0L2.9 6.0L3.2 9.0L3.7 12.0L4.3 15.0L4.8 18.0L5.1 21.0L5.3 24.0L5.3 27.0L5.0 30.0L4.6 33.0L4.1 36.0L3.5 39.0L3.1 42.0L2.8 45.0" fill="none" stroke="#c9995a" stroke-opacity="0.75" stroke-width="0.78"/><path d="M4.2 0.0L4.7 3.0L5.8 6.0L6.6 9.0L6.7 12.0L5.9 15.0L4.9 18.0L4.2 21.0L4.3 24.0L5.2 27.0L6.2 30.0L6.7 33.0L6.4 36.0L5.4 39.0L4.5 42.0L4.2 45.0" fill="none" stroke="#c9995a" stroke-opacity="0.75" stroke-width="1.15"/><path d="M12.2 0.0L11.9 3.0L11.0 6.0L10.0 9.0L9.6 12.0L10.0 15.0L11.1 18.0L12.0 21.0L12.1 24.0L11.5 27.0L10.4 30.0L9.7 33.0L9.7 36.0L10.5 39.0L11.6 42.0L12.2 45.0" fill="none" stroke="#c9995a" stroke-opacity="0.75" stroke-width="1.34"/></pattern><pattern id="wpb" patternUnits="userSpaceOnUse" width="14" height="45"><rect width="14" height="45" fill="#5a3925"/><path d="M2.8 0.0L3.5 3.0L4.5 6.0L5.2 9.0L5.1 12.0L4.2 15.0L3.2 18.0L2.7 21.0L3.0 24.0L4.0 27.0L5.0 30.0L5.3 33.0L4.7 36.0L3.7 39.0L2.8 42.0L2.8 45.0" fill="none" stroke="#3a2416" stroke-opacity="0.75" stroke-width="1.24"/><path d="M5.6 0.0L5.1 3.0L4.7 6.0L4.5 9.0L4.5 12.0L4.7 15.0L5.1 18.0L5.6 21.0L6.1 24.0L6.6 27.0L6.9 30.0L7.0 33.0L6.9 36.0L6.6 39.0L6.1 42.0L5.6 45.0" fill="none" stroke="#3a2416" stroke-opacity="0.75" stroke-width="0.53"/><path d="M10.7 0.0L10.5 3.0L10.1 6.0L9.6 9.0L9.1 12.0L8.6 15.0L8.3 18.0L8.2 21.0L8.3 24.0L8.6 27.0L9.0 30.0L9.6 33.0L10.1 36.0L10.5 39.0L10.7 42.0L10.7 45.0" fill="none" stroke="#3a2416" stroke-opacity="0.75" stroke-width="1.19"/></pattern></defs></svg>
 <header class="nav">
- <button class="logo" id="home" aria-label="체스 컬렉션 홈"><svg class="pc" viewBox="0 0 45 45"><g fill="var(--ac)" stroke="var(--acd)" stroke-width="1.5" stroke-linejoin="round"><path d="M31 36v-14c0-9-5-14-11-14l-2-3-2 4c-4 3-7 9-7 13l2 2c3-1 5-2 7-3-2 5-5 8-4 15z"/><path d="M10 39h25v-3q-12.5-4-25 0z"/></g></svg><span>체스 컬렉션</span></button>
+ <button class="logo" id="home" aria-label="체스 컬렉션 홈"><svg class="pc" viewBox="0 0 45 45"><g fill="var(--ac)" stroke="var(--acd)" stroke-width="1.5" stroke-linejoin="round"><path d="M31 36v-14c0-9-5-14-11-14l-2-3-2 4c-4 3-7 9-7 13l2 2c3-1 5-2 7-3-2 5-5 8-4 15z"/><path d="M10 39h25v-3q-12.5-4-25 0z"/></g></svg></button>
  <button class="shpl" id="navShop" aria-label="상점" title="상점"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h3.4l.5 2H22l-3 10H7.6L5 4.6H2zM8.5 17.5a2 2 0 110 4 2 2 0 010-4zM17 17.5a2 2 0 110 4 2 2 0 010-4z" fill="currentColor"/></svg></button>
  <button class="shpl" id="navInv" aria-label="스킨 장착" title="스킨 장착"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a2.6 2.6 0 00-2.6 2.6h1.8a.8.8 0 111.2.7c-.7.4-1.3 1-1.3 1.9v.7L2.6 15c-1 .6-.6 2 .5 2h17.8c1.1 0 1.5-1.4.5-2l-7.5-5.6v-.5c0-.2.1-.3.3-.4A2.6 2.6 0 0012 3zm0 7.6L18 15H6z" fill="currentColor"/><path d="M5 18.5h14V21H5z" fill="currentColor"/></svg></button>
  <button class="shpl" id="navAdm" aria-label="관리자" title="관리자"><svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/></svg></button>
@@ -525,8 +525,6 @@ html[data-ag="wood"] .ag2{background:url("data:image/svg+xml,%3Csvg xmlns='http:
  <div class="lobby">
   <section class="hero">
    <div id="ntc" class="ntc" style="display:none"></div>
-   <h1>오늘은 어떤 <em>체스</em>를<br>둘까요?</h1>
-   <p>국제 규칙 그대로의 표준 체스부터 매번 판이 달라지는 증강 체스까지. AI와 연습하거나, 한 화면에서 마주 보고 두거나, 친구에게 대전을 신청해 보세요.</p>
    <div id="pv" aria-hidden="true"></div>
   </section>
   <section class="play">
@@ -1609,14 +1607,18 @@ const Online=(()=>{
  // 접속 확인: 10초마다 내 hbW/hbB를 갱신. 상대 값이 45초 넘게 안 바뀌거나 나감 표시(leftW/leftB)가 있으면 상대 패배로 끝냄
  // 시계 차이를 피하려고 상대 값이 "바뀐 시점"을 내 시계로 잼. 내 탭이 잠들어 있었으면(타이머 20초 이상 밀림) 다시 셈
  function openGame(id){leave();clearTimeout(aiT);
-  net={gid:id,seat:-1,names:[],rev:-1,unsub:null,seen:Date.now(),tk:Date.now(),ob:0};const my=net,ref=db.doc("games/"+id);
+  net={gid:id,seat:-1,names:[],rev:-1,unsub:null,seen:Date.now(),tk:Date.now(),ob:0,lb:0,oon:true,warn:0,ous:null};const my=net,ref=db.doc("games/"+id);
   const beat=()=>{if(my.seat>=0)ref.update({["hb"+(my.seat?"B":"W")]:FV.serverTimestamp()}).catch(()=>{})};
+  // 상대가 나갔는지 판정 (나간 쪽 패배): ① 나가기 표시(left) → 바로 ② 상대가 앱·창을 닫음(online:false)인데 대전 신호가 20초 없음 ③ 켜져 있는데 신호가 45초 없음
   const chk=g=>{if(net!==my||my.seat<0||gid!==my.gid||!S||S.over)return;const o=my.seat?"W":"B";
-   if(g){const t=ms(g["hb"+o]);if(t&&t!==my.ob){my.ob=t;my.seen=Date.now()}if(g["left"+o])return forfeit(1-my.seat)}
-   if(Date.now()-my.seen>45000)forfeit(1-my.seat)};
-  my.hbT=setInterval(()=>{const n=Date.now();if(n-my.tk>20000)my.seen=n;my.tk=n;beat();chk()},10000);
+   if(g){const t=ms(g["hb"+o]);if(t&&t!==my.ob){my.ob=t;my.seen=Date.now()}if(g["left"+o])return forfeit(1-my.seat,true)}
+   const n=Date.now(),rem=(my.oon?45000:20000)-(n-my.seen);
+   if(rem<=0)return forfeit(1-my.seat,true);
+   if(n-my.seen>18000&&n-my.warn>4000){my.warn=n;toast(`상대 연결이 끊겼어요 · ${Math.ceil(rem/1000)}초 안에 안 돌아오면 승리로 처리돼요`)}};
+  my.hbT=setInterval(()=>{const n=Date.now();if(n-my.tk>20000)my.seen=n;my.tk=n;if(n-my.lb>=10000){my.lb=n;beat()}chk()},2000);
   my.unsub=ref.onSnapshot(d=>{if(net!==my)return;const g=d.data();if(!g)return;
-   if(g.rev>my.rev){const first=my.rev<0;my.rev=g.rev;my.seat=g.w===me.uid?0:1;my.names=g.names;load1(g,first);if(first)beat()}chk(g)},e=>toast(errMsg(e)));
+   if(g.rev>my.rev){const first=my.rev<0;my.rev=g.rev;my.seat=g.w===me.uid?0:1;my.names=g.names;load1(g,first);
+    if(first){my.lb=Date.now();beat();my.ous=db.doc("users/"+(my.seat?g.w:g.b)).onSnapshot(u=>{if(net===my)my.oon=(u.data()||{}).online!==false},()=>{})}}chk(g)},e=>toast(errMsg(e)));
  }
  function load1(g,first){
   const m0=MODES.find(m=>m.id===g.mode);if(!m0){leave();return toast("더 이상 제공하지 않는 모드의 대전이에요")}
@@ -1630,17 +1632,23 @@ const Online=(()=>{
  function push(s){const my=net,ref=db.doc("games/"+my.gid),r=my.rev;my.rev=r+1;
   db.runTransaction(async t=>{const d=await t.get(ref);if(d.data().rev!==r)throw{code:"stale"};
    t.update(ref,{state:JSON.stringify(s),rev:r+1,status:s.over?"done":"active",at:FV.serverTimestamp(),...(s.over?{pendW:true,pendB:true}:{})})})
-  .catch(e=>{if(net!==my)return;toast(e.code==="stale"?"상대 수가 먼저 반영됐어요":"전송 실패: "+errMsg(e));
+  .catch(e=>{if(net!==my)return;
+   if(s.over&&e.code!=="stale"){console.warn("push",e);return} // 끝난 판(나감·기권)은 저장이 막혀도 서버 상태로 되돌리지 않음 → 판이 다시 살아나지 않게
+   toast(e.code==="stale"?"상대 수가 먼저 반영됐어요":"전송 실패: "+errMsg(e));
    ref.get().then(d=>{if(net!==my)return;const g=d.data();my.rev=g.rev;load1(g,false)})});
  }
  async function resign(){if(!net||S.over||!await ask("기권할까요? 패배로 기록돼요.","기권"))return;if(!net||S.over)return;
   const mc=S.seat.w===net.seat?"w":"b";S={...S,over:{win:opp(mc),why:`${net.names[net.seat]} 기권`},msg:"기권"};sel=null;after()}
  // 나가기 = 나간 쪽 패배. 결과는 평소처럼 push(rev 확인) → 실패해도 상대 쪽 접속 확인이 대신 끝냄
  const live=()=>net&&net.seat>=0&&gid===net.gid&&S&&!S.over;
- function forfeit(seat){const c=S.seat.w===seat?"w":"b";S={...S,over:{win:opp(c),why:`${c==="w"?"백":"흑"}(${net.names[seat]})이 나갔어요`},msg:"나감"};sel=null;after()}
- function leave(){$("wdo").classList.remove("on");if(!net)return;if(live())forfeit(net.seat);if(net.unsub)net.unsub();clearInterval(net.hbT);net=null;gid=null}
+ function forfeit(seat,remote){if(remote)toast("상대가 나가서 승리했어요");const c=S.seat.w===seat?"w":"b";S={...S,over:{win:opp(c),why:`${c==="w"?"백":"흑"}(${net.names[seat]})이 나갔어요`},msg:"나감"};sel=null;after()}
+ // 나가기 표시(leftW/leftB)는 상대가 바로 알아채도록 대전 상태 저장과 따로 한 번 더 씀
+ const mark=()=>db.doc("games/"+net.gid).update({["left"+(net.seat?"B":"W")]:true}).catch(()=>{});
+ function leave(){$("wdo").classList.remove("on");if(!net)return;if(live()){forfeit(net.seat);mark()}if(net.unsub)net.unsub();if(net.ous)net.ous();clearInterval(net.hbT);net=null;gid=null}
  async function quit(){if(live()){if(!await ask("지금 나가면 패배로 처리돼요. 나갈까요?","나가기"))return false;leave();toast("패배로 처리됐어요")}else leave();return true}
- addEventListener("pagehide",()=>{if(live())db.doc("games/"+net.gid).update({["left"+(net.seat?"B":"W")]:true}).catch(()=>{})});
+ // 창·앱을 닫을 때: SDK 쓰기는 끝나기 전에 끊길 수 있어서 REST keepalive 요청도 함께 보냄 (규칙은 똑같이 적용)
+ addEventListener("pagehide",()=>{if(!live())return;mark();const f="left"+(net.seat?"B":"W");
+  if(tok)try{fetch(`https://firestore.googleapis.com/v1/projects/${FIREBASE_CONFIG.projectId}/databases/(default)/documents/games/${net.gid}?updateMask.fieldPaths=${f}`,{method:"PATCH",keepalive:true,headers:{Authorization:"Bearer "+tok,"Content-Type":"application/json"},body:`{"fields":{"${f}":{"booleanValue":true}}}`}).catch(()=>{})}catch(e){}});
  // 결과 1회 기록: users/{uid}/games/{게임id}가 이미 있으면 건너뜀
  function record(id,g,seat){if(!me||!prof)return;const uref=db.doc("users/"+me.uid),gref=db.doc(`users/${me.uid}/games/${id}`);
   db.runTransaction(async t=>{const d=await t.get(gref);if(d.exists)return;t.set(gref,{...g,at:FV.serverTimestamp()});t.update(uref,{[`st.${g.online?"online":"ai"}.${g.mode}.${g.res}`]:FV.increment(1)})})
