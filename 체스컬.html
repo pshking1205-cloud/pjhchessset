@@ -215,7 +215,7 @@ small{color:var(--mut)}
 .ad .tb td,.ad .tb th{padding:9px 12px}.adx{overflow-x:auto}.adx .tb{min-width:640px}
 .ad .tb button{margin:0;padding:6px 10px;font-size:12px;box-shadow:none}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#6c675f;margin-right:6px;flex:0 0 auto}.dot.on{background:var(--ac)}
-.bdg2{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--warn);color:#fff;font-size:10px;font-weight:700}
+.bdg2.adb{background:var(--gold);color:#2b2926}.bdg2{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--warn);color:#fff;font-size:10px;font-weight:700}
 .stale{color:var(--gold)}
 .awt{display:grid;grid-template-columns:96px 1fr 70px;align-items:center;gap:12px;padding:6px 16px}.awt input[type=range]{width:100%;accent-color:var(--ac)}.awt input[type=number]{font:inherit;width:70px;padding:6px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);color:var(--fg)}.awt .ag2{margin:0;cursor:default;text-align:center;font-size:11px}
 .agl{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}.agl label{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--bd);cursor:pointer;min-width:0}.agl input{width:18px;height:18px;accent-color:var(--ac);flex:0 0 auto}.agl label>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.agl label.off>span{text-decoration:line-through;color:var(--mut)}.agl .ag2{margin:0;padding:0 2px;cursor:inherit}.agl .rkt{margin:0}
@@ -1652,6 +1652,7 @@ const Online=(()=>{
   auth.getRedirectResult().catch(e=>toast(errMsg(e)));
   // 관리자가 저장한 증강 밸런스와 로비 공지 (누구나 읽기)
   db.doc("config/augment").get().then(d=>{if(d.exists)applyAug(d.data())}).catch(()=>{});
+  db.doc("config/admins").onSnapshot(d=>{admUids=d.exists&&Array.isArray(d.data().uids)?d.data().uids:[];if(!isAdmin())ov("adm",false);else if($("adm").classList.contains("on")&&["admins","users"].includes(adTab))admDraw();giftSync();skinAuth()},()=>{});
   db.doc("config/notice").onSnapshot(d=>{ntcT=d.exists&&d.data().text||"";const n=$("ntc");n.textContent=ntcT;n.style.display=ntcT?"":"none"},()=>{});
   auth.onAuthStateChanged(async u=>{stop();me=u;prof=null;
    if(u){try{const d=await db.doc("users/"+u.uid).get();prof=d.exists?d.data():null}catch(e){toast(errMsg(e))}
@@ -1662,7 +1663,7 @@ const Online=(()=>{
  }
  // 로그인 후 실시간 구독: 내 프로필 · 친구 · 친구 신청 · 대전 초대
  function start(){const u=me.uid,L=(q,f)=>subs.push(q.onSnapshot(f,e=>console.warn(e))),D=q=>q.docs.map(d=>({id:d.id,...d.data()}));
-  L(db.doc("users/"+u),d=>{if(d.exists){prof=d.data();skinGift(prof.skins);if(prof.banned){toast("이용이 정지된 계정이에요");return logout()}bar();if(tab==="stats"&&!view)refresh()}});
+  L(db.doc("users/"+u),d=>{if(d.exists){prof=d.data();giftSync();if(prof.banned){toast("이용이 정지된 계정이에요");return logout()}bar();if(tab==="stats"&&!view)refresh()}});
   L(db.collection(`users/${u}/friends`),q=>{friends=D(q).map(f=>({uid:f.id,name:f.name})).sort((a,b)=>a.name.localeCompare(b.name));bar();refresh();if($("acc").classList.contains("on")&&tab==="friends")loadFi();fwatch()});
   L(db.collection("friendRequests").where("to","==",u),q=>{reqs=D(q);bar();refresh()});
   L(db.collection("games").where("inviteTo","==",u),q=>{invs=D(q).filter(g=>g.status==="invited");invUI()});
@@ -1671,6 +1672,7 @@ const Online=(()=>{
   if(!prof.stMig)games(u).then(q=>db.doc("users/"+u).update({st:tally(q.docs),stMig:true})).catch(e=>console.warn("stMig",e));
   beat();hb=setInterval(beat,25000);
  }
+ const giftSync=()=>skinGift(me&&prof&&admUids.includes(me.uid)?prof.skins:[]);
  function stop(){subs.forEach(f=>f());subs=[];SKIN_GIFT=[];clearInterval(hb);Object.values(fsub).forEach(f=>f());fsub={};friends=[];reqs=[];invs=[];fi={};invUI()}
  const refresh=()=>{if($("acc").classList.contains("on"))panel()};
 
@@ -1881,8 +1883,10 @@ const Online=(()=>{
 
  /* --- 관리자 탭: ADMIN_EMAILS에 있는 (이메일 인증된) 계정만 열림. 실제 데이터 보호는 Firestore 규칙이 해요 --- */
  const RA={COMMON:"C",RARE:"R",EPIC:"E",LEGEND:"L",LUNACY:"LU"},TIERS=Object.keys(RA),CL={COMMON:"#7d828c",RARE:"#2f7fd8",EPIC:"#9440c8",LEGEND:"#f0c544",LUNACY:"#e0457f"};
- let adTab="dash",adU=null,adG=[],adR=null,adE=null,adQ="",adC=null,ntcT="";
- const isAdmin=()=>!!(me&&me.emailVerified&&ADMIN_EMAILS.some(x=>x.toLowerCase()===(me.email||"").toLowerCase()));
+ let admUids=[],adTab="dash",adU=null,adG=[],adR=null,adE=null,adQ="",adC=null,ntcT="";
+ const isOwner=()=>!!(me&&me.emailVerified&&ADMIN_EMAILS.some(x=>x.toLowerCase()===(me.email||"").toLowerCase()));
+ // 최고 관리자(ADMIN_EMAILS) + 최고 관리자가 지정한 관리자(config/admins.uids)
+ const isAdmin=()=>isOwner()||!!(me&&admUids.includes(me.uid));
  const onl=u=>u.online!==false&&Date.now()-ms(u.lastSeen)<60000,stale=g=>Date.now()-ms(g.at)>3e5;
  const ago=t=>{if(!t)return"-";const s=(Date.now()-t)/1000;return s<60?`${Math.max(0,s|0)}초 전`:s<3600?`${s/60|0}분 전`:s<86400?`${s/3600|0}시간 전`:`${s/86400|0}일 전`};
  const rec=x=>["w","l","d"].map(k=>Object.values(x||{}).reduce((a,m)=>a+((m||{})[k]||0),0)).join("-");
@@ -1893,11 +1897,12 @@ const Online=(()=>{
   const[u,g,r]=await Promise.all([T(db.collection("users").get()),T(db.collection("games").where("status","==","active").get()),db.collection("friendRequests").get().then(q=>q.size,()=>null)]);
   adU=u?u.docs.map(d=>({uid:d.id,...d.data()})):[];adG=g?g.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>ms(b.at)-ms(a.at)):[];adR=r;admDraw()}
  function admDraw(ld){const T=$("admT");T.innerHTML="";
-  [["dash","대시보드"],["users","사용자"],["games","대전 모니터"],["aug","증강 밸런스"],["ntc","공지"]].forEach(([k,n])=>{const b=document.createElement("button");b.textContent=n+(k==="games"&&adG.length?` (${adG.length})`:"");if(k===adTab)b.className="on";b.onclick=()=>{adTab=k;admDraw()};T.appendChild(b)});
-  const B=$("admB"),need=["dash","users","games"].includes(adTab);
+  [["dash","대시보드"],["users","사용자"],["admins","관리자 목록"],["games","대전 모니터"],["aug","증강 밸런스"],["ntc","공지"]].forEach(([k,n])=>{const b=document.createElement("button");b.textContent=n+(k==="games"&&adG.length?` (${adG.length})`:"");if(k===adTab)b.className="on";b.onclick=()=>{adTab=k;admDraw()};T.appendChild(b)});
+  const B=$("admB"),need=["dash","users","games","admins"].includes(adTab);
   if(need&&(ld||!adU))return B.innerHTML='<div class="empty">불러오는 중…</div>';
   const er=need&&adE?`<div class="er">일부 정보를 불러오지 못했어요: ${esc(errMsg(adE))}</div>`:"";
-  if(adTab==="dash")dashUI(B,er);else if(adTab==="users")usersUI(B,er);else if(adTab==="games"){B.innerHTML=er+gamesP(0);wire(B)}else if(adTab==="aug")augUI(B);else ntcUI(B)}
+  if(adTab==="dash")dashUI(B,er);else if(adTab==="users")usersUI(B,er);else if(adTab==="games"){B.innerHTML=er+gamesP(0);wire(B)}else if(adTab==="aug")augUI(B);else if(adTab==="admins")adminsUI(B,er);else ntcUI(B);
+  if(!isOwner()){B.insertAdjacentHTML("afterbegin",`<div class="ntc">👀 ${RO_MSG}</div>`);roLock(B)}}
  function wire(B){B.querySelectorAll("[data-end]").forEach(b=>b.onclick=()=>admEnd(b.dataset.end));const a=B.querySelector("[data-gt]");if(a)a.onclick=e=>{e.preventDefault();adTab="games";admDraw()}}
  function dashUI(B,er){const M={},wk=Date.now()-7*864e5;adU.forEach(u=>["ai","online"].forEach(k=>Object.entries((u.st||{})[k]||{}).forEach(([m,x])=>{M[m]=(M[m]||0)+(x.w||0)+(x.l||0)+(x.d||0)})));
   const mx=Math.max(1,...MODES.map(m=>M[m.id]||0)),kp=(n,v,s)=>`<div class="kp"><i>${n}</i><b>${v}</b><small>${s}</small></div>`,sl=adG.filter(stale).length;
@@ -1907,23 +1912,37 @@ const Online=(()=>{
  function gamesP(lim){const L=lim?adG.slice(0,lim):adG,mv=g=>{try{return JSON.parse(g.state).log.length}catch(e){return"-"}};
   return`<div class="panel ad"><div class="ph"><span>진행 중인 온라인 대전</span>${lim&&adG.length>lim?'<a href="#" data-gt>전체 보기</a>':""}</div>${L.length?`<div class="adx"><table class="tb"><tr><th>백</th><th>흑</th><th>모드</th><th>수</th><th>마지막 수</th><th></th></tr>${L.map(g=>`<tr><td>${esc(g.names[0])}</td><td>${esc(g.names[1])}</td><td>${esc(mname(g.mode))}</td><td>${mv(g)}</td><td class="${stale(g)?"stale":""}">${ago(ms(g.at))}${stale(g)?" · 멈춤 의심":""}</td><td style="text-align:right"><button style="background:var(--warn)" data-end="${esc(g.id)}">강제 종료</button></td></tr>`).join("")}</table></div>`:'<div class="empty">지금 진행 중인 대전이 없어요</div>'}</div>`}
  // 강제 종료: 무승부로 끝내고 rev를 올려서 두 사람 화면에 바로 반영 (전적은 각자 접속할 때 기록됨)
- async function admEnd(id){if(!await ask("이 대전을 무승부로 끝낼까요?","강제 종료"))return;const ref=db.doc("games/"+id);
+ async function admEnd(id){if(!roOK())return;if(!await ask("이 대전을 무승부로 끝낼까요?","강제 종료"))return;const ref=db.doc("games/"+id);
   try{await db.runTransaction(async t=>{const d=await t.get(ref),g=d.data();if(!g||g.status!=="active")return;const s=JSON.parse(g.state);s.over={win:null,why:"관리자가 대전을 종료했어요"};s.msg=s.over.why;
    t.update(ref,{state:JSON.stringify(s),rev:g.rev+1,status:"done",at:FV.serverTimestamp(),pendW:true,pendB:true})});toast("대전을 종료했어요");admLoad()}catch(e){toast(errMsg(e))}}
  function usersUI(B,er){B.innerHTML=er+`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="admQ" placeholder="닉네임 검색" aria-label="닉네임 검색" value="${esc(adQ)}" style="flex:1 1 220px;font:inherit;padding:10px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--fg)"><small>전체 ${adU.length}명</small></div><div class="panel ad"><div class="adx" id="admL"></div></div>`;
   $("admQ").oninput=e=>{adQ=e.target.value;userRows()};userRows()}
  function userRows(){const q=adQ.trim().toLowerCase(),L=adU.filter(u=>!q||(u.nameLower||"").includes(q)).sort((a,b)=>(onl(b)-onl(a))||ms(b.lastSeen)-ms(a.lastSeen)),el=$("admL");
-  el.innerHTML=L.length?`<table class="tb"><tr><th>닉네임</th><th>상태</th><th>AI 전적</th><th>온라인 전적</th><th>가입</th><th></th></tr>${L.map(u=>`<tr><td>${esc(u.name)}${u.banned?'<span class="bdg2">정지</span>':""}${u.uid===me.uid?" <small>(나)</small>":""}</td><td style="white-space:nowrap"><i class="dot${onl(u)?" on":""}"></i>${onl(u)?"접속 중":ago(ms(u.lastSeen))}</td><td>${rec((u.st||{}).ai)}</td><td>${rec((u.st||{}).online)}</td><td>${ms(u.createdAt)?new Date(ms(u.createdAt)).toLocaleDateString():"-"}</td><td style="text-align:right;white-space:nowrap"><button class="g" data-sk="${esc(u.uid)}">스킨 주기${(u.skins||[]).length?` (${u.skins.length})`:""}</button> <button class="g" data-rs="${esc(u.uid)}">전적 초기화</button> ${u.uid===me.uid?"":`<button ${u.banned?'class="g"':'style="background:var(--warn)"'} data-bn="${esc(u.uid)}">${u.banned?"정지 해제":"이용 정지"}</button>`}</td></tr>`).join("")}</table>`:'<div class="empty">찾는 사용자가 없어요</div>';
-  el.querySelectorAll("[data-sk]").forEach(b=>b.onclick=()=>admSkin(b.dataset.sk));el.querySelectorAll("[data-rs]").forEach(b=>b.onclick=()=>admUser(b.dataset.rs,"reset"));el.querySelectorAll("[data-bn]").forEach(b=>b.onclick=()=>admUser(b.dataset.bn,"ban"))}
- async function admUser(uid,k){const u=adU.find(x=>x.uid===uid);if(!u)return;
+  el.innerHTML=L.length?`<table class="tb"><tr><th>닉네임</th><th>상태</th><th>AI 전적</th><th>온라인 전적</th><th>가입</th><th></th></tr>${L.map(u=>`<tr><td>${esc(u.name)}${admUids.includes(u.uid)?'<span class="bdg2 adb">관리자</span>':""}${u.banned?'<span class="bdg2">정지</span>':""}${u.uid===me.uid?" <small>(나)</small>":""}</td><td style="white-space:nowrap"><i class="dot${onl(u)?" on":""}"></i>${onl(u)?"접속 중":ago(ms(u.lastSeen))}</td><td>${rec((u.st||{}).ai)}</td><td>${rec((u.st||{}).online)}</td><td>${ms(u.createdAt)?new Date(ms(u.createdAt)).toLocaleDateString():"-"}</td><td style="text-align:right;white-space:nowrap">${isOwner()&&u.uid!==me.uid?`<button class="g" data-ad="${esc(u.uid)}">${admUids.includes(u.uid)?"관리자 해제":"관리자 지정"}</button> `:""}${admUids.includes(u.uid)?`<button class="g" data-sk="${esc(u.uid)}">스킨 주기${(u.skins||[]).length?` (${u.skins.length})`:""}</button> `:""}<button class="g" data-rs="${esc(u.uid)}">전적 초기화</button> ${u.uid===me.uid?"":`<button ${u.banned?'class="g"':'style="background:var(--warn)"'} data-bn="${esc(u.uid)}">${u.banned?"정지 해제":"이용 정지"}</button>`}</td></tr>`).join("")}</table>`:'<div class="empty">찾는 사용자가 없어요</div>';
+  roLock(el);el.querySelectorAll("[data-ad]").forEach(b=>b.onclick=()=>admSet(b.dataset.ad));el.querySelectorAll("[data-sk]").forEach(b=>b.onclick=()=>admSkin(b.dataset.sk));el.querySelectorAll("[data-rs]").forEach(b=>b.onclick=()=>admUser(b.dataset.rs,"reset"));el.querySelectorAll("[data-bn]").forEach(b=>b.onclick=()=>admUser(b.dataset.bn,"ban"))}
+ async function admUser(uid,k){if(!roOK())return;const u=adU.find(x=>x.uid===uid);if(!u)return;
   const msg=k==="reset"?`${u.name}님의 전적을 모두 0으로 초기화할까요? 되돌릴 수 없어요.`:u.banned?`${u.name}님의 이용 정지를 풀까요?`:`${u.name}님을 이용 정지할까요? 접속 중이면 바로 로그아웃돼요.`;
   if(!await ask(msg,k==="reset"?"초기화":u.banned?"해제":"정지"))return;
   const up=k==="reset"?{st:{ai:{},online:{}},stMig:true}:{banned:!u.banned};
   try{await db.doc("users/"+uid).update(up);Object.assign(u,up);toast(k==="reset"?"전적을 초기화했어요":u.banned?"이용을 정지했어요":"정지를 풀었어요");userRows()}catch(e){toast(errMsg(e))}}
  // 스킨 주기: 체크한 스킨이 users/{uid}.skins에 저장됨. 체크를 풀고 저장하면 회수 (상점에서 산 스킨은 그 사람 기기에 있어서 회수 안 됨)
- function admSkin(uid){const u=adU.find(x=>x.uid===uid);if(!u)return;const B=$("admB"),sel=new Set(u.skins||[]),SC={pc:"말",bd:"보드",ag:"증강"};
+ // 관리자 지정/해제: 최고 관리자만. 지정된 관리자는 관리자 탭 전체를 쓸 수 있지만 다른 사람을 관리자로 만들 수는 없음
+ async function admSet(uid){if(!isOwner())return toast("최고 관리자만 관리자를 지정할 수 있어요");const u=(adU||[]).find(x=>x.uid===uid),nm=u?u.name:"이 사용자",on=admUids.includes(uid);
+  if(!await ask(on?`${nm}님을 관리자에서 해제할까요? 준 스킨도 함께 회수돼요.`:`${nm}님을 관리자로 지정할까요? 관리자 탭을 볼 수는 있지만 설정을 바꾸지는 못해요.`,on?"해제":"지정"))return;
+  const uids=on?admUids.filter(x=>x!==uid):[...admUids,uid];
+  try{const k=db.batch();k.set(db.doc("config/admins"),{uids,by:me.uid,at:FV.serverTimestamp()});if(on&&u&&(u.skins||[]).length)k.update(db.doc("users/"+uid),{skins:[]});await k.commit();if(on&&u)u.skins=[];admUids=uids;toast(on?"관리자에서 해제했어요":"관리자로 지정했어요");admDraw()}catch(e){toast(errMsg(e))}}
+ // 보기 전용: 검색창만 남기고 관리자 탭 안의 버튼·입력을 모두 막음
+ const RO_MSG="보기 전용이에요. 설정 변경은 최고 관리자만 할 수 있어요.";
+ const roOK=()=>isOwner()||(toast(RO_MSG),false);
+ function roLock(el){if(isOwner()||!el)return;el.querySelectorAll("button,input,textarea,select").forEach(x=>{if(x.id!=="admQ"){x.disabled=true;x.title=RO_MSG}})}
+ function adminsUI(B,er){const L=admUids.map(id=>(adU||[]).find(u=>u.uid===id)||{uid:id,name:"(알 수 없는 계정)"}),own=isOwner();
+  B.innerHTML=er+`<div class="panel ad"><div class="ph"><span>최고 관리자</span><span>${ADMIN_EMAILS.length}명</span></div><div style="padding:4px 14px 10px">${ADMIN_EMAILS.map(e=>`<div class="li"><span>${esc(e)}${me&&(me.email||"").toLowerCase()===e.toLowerCase()?" <small>(나)</small>":""}</span><small>코드에서 지정</small></div>`).join("")}</div></div>
+  <div class="panel ad"><div class="ph"><span>지정한 관리자</span><span>${L.length}명</span></div><div style="padding:4px 14px 10px">${L.length?L.map(u=>`<div class="li"><span><i class="dot${u.lastSeen&&onl(u)?" on":""}"></i>${esc(u.name)}${u.uid===(me&&me.uid)?" <small>(나)</small>":""}</span>${own?`<span style="display:flex;gap:6px"><button class="g" data-sk="${esc(u.uid)}">스킨 주기${(u.skins||[]).length?` (${u.skins.length})`:""}</button><button class="g" data-ad="${esc(u.uid)}">해제</button></span>`:""}</div>`).join(""):'<div class="empty">아직 없어요</div>'}</div>
+  <div style="padding:0 14px 12px"><small>${own?"사용자 탭에서 원하는 사람 옆의 「관리자 지정」을 누르면 여기에 추가돼요. 스킨은 지정 관리자에게만 줄 수 있고, 해제하면 준 스킨도 회수돼요. 최고 관리자는 코드의 ADMIN_EMAILS에서만 바꿀 수 있어요.":"지정된 관리자는 관리자 탭을 볼 수만 있어요. 관리자 지정과 설정 변경은 최고 관리자만 할 수 있어요."}</small></div></div>`;
+  B.querySelectorAll("[data-ad]").forEach(b=>b.onclick=()=>admSet(b.dataset.ad));B.querySelectorAll("[data-sk]").forEach(b=>b.onclick=()=>admSkin(b.dataset.sk))}
+ function admSkin(uid){if(!roOK())return;if(!admUids.includes(uid))return toast("스킨은 지정한 관리자에게만 줄 수 있어요");const u=adU.find(x=>x.uid===uid);if(!u)return;const B=$("admB"),sel=new Set(u.skins||[]),SC={pc:"말",bd:"보드",ag:"증강"};
   const rows=k=>SHOP[k].filter(it=>it.r).map(it=>{const v=k+":"+it.id;return`<label><input type="checkbox" data-g="${v}"${sel.has(v)?" checked":""}><i class="ag2 rk-${it.r}"><i class="rkt">${RA[it.r]}</i></i><span>${esc(it.n)}</span><small style="margin-left:auto">${it.reward?"세트 보상":(it.p||0).toLocaleString()+" 토큰"}</small></label>`}).join("");
-  B.innerHTML=`<div class="panel"><div class="ph"><span>${esc(u.name)}님에게 스킨 주기</span><span id="admGc"></span></div>
+  B.innerHTML=`<div class="panel"><div class="ph"><span>${esc(u.name)}님(관리자)에게 스킨 주기</span><span id="admGc"></span></div>
   ${Object.keys(SC).map(k=>`<div class="lb" style="padding:10px 14px 0;margin:0">${SC[k]}</div><div class="agl">${rows(k)}</div>`).join("")}
   <div style="padding:10px 14px"><small>말과 보드를 같은 테마로 모두 주면 그 테마의 증강 스킨도 따라와요. 체크를 풀고 저장하면 준 스킨을 회수해요 (그 사람이 상점에서 산 스킨은 그대로).</small></div></div>
   <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button class="g" id="admGa">전부 선택</button><button class="g" id="admGx">취소</button><button id="admGs">저장</button></div>`;
@@ -1931,7 +1950,7 @@ const Online=(()=>{
   B.querySelectorAll("[data-g]").forEach(e=>e.onchange=()=>{sel[e.checked?"add":"delete"](e.dataset.g);cnt()});
   $("admGa").onclick=()=>B.querySelectorAll("[data-g]").forEach(e=>{e.checked=true;sel.add(e.dataset.g);cnt()});
   $("admGx").onclick=()=>admDraw();
-  $("admGs").onclick=async()=>{const sk=[...sel];try{await db.doc("users/"+uid).update({skins:sk});u.skins=sk;toast(`${u.name}님의 스킨을 저장했어요`);admDraw()}catch(e){toast(errMsg(e))}}}
+  $("admGs").onclick=async()=>{const sk=[...sel];if(!roOK())return;try{await db.doc("users/"+uid).update({skins:sk});u.skins=sk;toast(`${u.name}님의 스킨을 저장했어요`);admDraw()}catch(e){toast(errMsg(e))}}}
  function augUI(B){if(!adC)adC={w:{...AUGW},off:new Set(AUG_OFF)};const ids=Object.keys(AUGS),cnt=t=>ids.filter(k=>AUGS[k].r===t&&!AUGS[k].o&&!adC.off.has(k)).length;
   B.innerHTML=`<div class="adr"><div class="panel"><div class="ph"><span>등급 가중치</span></div><div style="padding:8px 0">${TIERS.map(t=>`<div class="awt"><span class="ag2 rk-${t}"><i class="rkt">${RA[t]}</i>${t}</span><input type="range" min="0" max="5" step="0.01" value="${adC.w[t]}" data-w="${t}" aria-label="${t} 가중치"><input type="number" min="0" max="5" step="0.01" value="${adC.w[t]}" data-n="${t}" aria-label="${t} 가중치 값"></div>`).join("")}<div style="padding:6px 16px 10px"><small>가중치 × 그 등급에서 켜진 증강 수로 등급을 먼저 뽑아요</small></div></div></div>
   <div class="panel"><div class="ph"><span>중간 증강 선택 때 등급이 나올 확률</span></div><div id="admP" style="padding:14px 16px"></div></div></div>
@@ -1943,16 +1962,16 @@ const Online=(()=>{
   B.querySelectorAll("[data-w],[data-n]").forEach(e=>e.oninput=()=>{const t=e.dataset.w||e.dataset.n,v=Math.max(0,Math.min(5,+e.value||0));adC.w[t]=v;B.querySelector(`[data-${e.dataset.w?"n":"w"}="${t}"]`).value=v;pv()});
   B.querySelectorAll("[data-k]").forEach(e=>e.onchange=()=>{adC.off[e.checked?"delete":"add"](e.dataset.k);e.parentNode.classList.toggle("off",!e.checked);pv()});
   $("admDf").onclick=()=>{adC={w:{...AUGW0},off:new Set()};augUI(B)};
-  $("admSv").onclick=async()=>{const on=ids.filter(k=>!adC.off.has(k)),op=on.filter(k=>AUGS[k].o).length;
+  $("admSv").onclick=async()=>{if(!roOK())return;const on=ids.filter(k=>!adC.off.has(k)),op=on.filter(k=>AUGS[k].o).length;
    if(op<3||on.length-op<3)return toast("시작용·중간용 증강을 각각 3개 이상 켜 두어야 해요");
    if(!TIERS.some(t=>adC.w[t]>0&&cnt(t)))return toast("가중치가 0보다 큰 등급이 하나는 있어야 해요");
    const w={};TIERS.forEach(t=>w[t]=adC.w[t]);
    try{await db.doc("config/augment").set({w,off:[...adC.off],by:me.uid,at:FV.serverTimestamp()});applyAug({w,off:[...adC.off]});toast("증강 설정을 저장했어요")}catch(e){toast(errMsg(e))}};
   pv()}
  function ntcUI(B){B.innerHTML=`<div class="panel" style="padding:16px"><div class="lb" style="margin-top:0">로비 공지</div><textarea id="admN" maxlength="300" aria-label="로비 공지" placeholder="로비 맨 위에 보일 문구예요. 비우고 올리면 공지가 사라져요">${esc(ntcT)}</textarea><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button id="admNs">공지 올리기</button><button class="g" id="admNd">공지 내리기</button></div></div>`;
-  const put=t=>db.doc("config/notice").set({text:t,by:me.uid,at:FV.serverTimestamp()}).then(()=>toast(t?"공지를 올렸어요":"공지를 내렸어요")).catch(e=>toast(errMsg(e)));
+  const put=t=>!roOK()?0:db.doc("config/notice").set({text:t,by:me.uid,at:FV.serverTimestamp()}).then(()=>toast(t?"공지를 올렸어요":"공지를 내렸어요")).catch(e=>toast(errMsg(e)));
   $("admNs").onclick=()=>put($("admN").value.trim());$("admNd").onclick=()=>{$("admN").value="";put("")}}
- return{init,push,record,resign,leave,quit,dots,dot,invite,admOpen,admLoad,admin:()=>isAdmin(),me:()=>me&&prof?me:null,friends:()=>friends};
+ return{init,push,record,resign,leave,quit,dots,dot,invite,admOpen,admLoad,admin:()=>isAdmin(),owner:()=>isOwner(),me:()=>me&&prof?me:null,friends:()=>friends};
 })();
 $("acx").onclick=()=>$("acc").classList.remove("on");
 
@@ -2020,10 +2039,10 @@ const SHOP_C=[["pc","말",["기물 디자인을 사요.","가진 말 스킨을 �
  ["bd","보드",["체스판 디자인을 사요.","가진 보드 스킨을 골라 장착해요."],'<path d="M3 3h18v18H3z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 3h6v6H3zM15 3h6v6h-6zM9 9h6v6H9zM3 15h6v6H3zM15 15h6v6h-6z" fill="currentColor"/>'],
  ["ag","증강",["같은 테마의 말과 보드를 모두 사면 세트 보상으로 받아요.","가진 증강 스킨을 골라 장착해요. 등급은 그대로 구분돼요."],'<path d="M6 3h12a1 1 0 011 1v16a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7l3.5 1.3v2.6c0 2.2-1.5 3.9-3.5 4.8-2-.9-3.5-2.6-3.5-4.8V8.3z" fill="currentColor"/>']];
 const SKN={P:"폰",N:"나이트",B:"비숍",R:"룩",Q:"퀸",K:"킹"};let shCat="pc",shCoins=0,shMode="shop"; // shMode: "shop"(구매) / "inv"(스킨 장착)
-// 관리자 계정은 지금 있는 스킨과 앞으로 추가하는 모든 스킨을 보유한 것으로 침 (구매·세트 없이 장착 가능)
-// SKIN_GIFT: 관리자가 내 계정에 준 스킨 (users/{uid}.skins). 말·보드를 선물로 모두 갖추면 세트 증강도 함께 생김
+// 최고 관리자 계정은 지금 있는 스킨과 앞으로 추가하는 모든 스킨을 보유한 것으로 침 (구매·세트 없이 장착 가능)
+// SKIN_GIFT: 최고 관리자가 지정 관리자 계정에 준 스킨 (users/{uid}.skins, 관리자일 때만 적용). 말·보드를 선물로 모두 갖추면 세트 증강도 함께 생김
 let SKIN_GIFT=[];
-const skOwn=(k,id)=>SKIN_OWN.includes(k+":"+id)||SKIN_GIFT.includes(k+":"+id)||(typeof Online!=="undefined"&&Online.admin());
+const skOwn=(k,id)=>SKIN_OWN.includes(k+":"+id)||SKIN_GIFT.includes(k+":"+id)||(typeof Online!=="undefined"&&Online.owner());
 function skinGift(a){const g=Array.isArray(a)?a.filter(x=>typeof x==="string"):[],all=new Set([...SKIN_OWN,...g]);
  Object.values(SKIN_SET).forEach(st=>{if(!all.has(st.give)&&st.need.every(x=>all.has(x))){g.push(st.give);all.add(st.give)}});
  const nw=g.filter(x=>!SKIN_GIFT.includes(x)&&!SKIN_OWN.includes(x)),ch=g.join()!==SKIN_GIFT.join();SKIN_GIFT=g;
