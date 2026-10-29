@@ -1437,8 +1437,9 @@ const Online=(()=>{
   auth.onAuthStateChanged(async u=>{stop();me=u;prof=null;
    if(u){try{const d=await db.doc("users/"+u.uid).get();prof=d.exists?d.data():null}catch(e){toast(errMsg(e))}
     if(prof&&prof.banned){prof=null;toast("이용이 정지된 계정이에요");auth.signOut()}
-    else if(prof){const up={};if(!prof.pid)up.pid=newPid();if(mail()&&prof.email!==mail())up.email=mail();
-     if(Object.keys(up).length)try{await db.doc("users/"+u.uid).update(up);Object.assign(prof,up)}catch(e){console.warn("profile",e)}
+    else if(prof){const up={};if(!prof.pid)up.pid=newPid();
+     try{if("email" in prof)up.email=FV.delete();if(Object.keys(up).length){await db.doc("users/"+u.uid).update(up);delete prof.email;if(up.pid)prof.pid=up.pid}
+      if(mail()){const pc=db.doc(`users/${u.uid}/private/contact`),c=await pc.get();if(!c.exists||c.data().email!==mail())await pc.set({email:mail()})}}catch(e){console.warn("profile",e)}
      start()}else nameUI(true)}else skinGuest();
    admU=[];admO="";if(u&&prof){try{const a=await db.doc("config/admins").get();if(a.exists){admU=a.data().uids||[];admO=a.data().owner||""}}catch(e){}}
    if(!isAdmin())ov("adm",false);
@@ -1521,8 +1522,8 @@ const Online=(()=>{
   const lo=n.toLowerCase(),u=me.uid,old=prof&&prof.nameLower,ref=db.doc("names/"+lo),uref=db.doc("users/"+u),np=prof?null:newPid(),em=mail();
   await db.runTransaction(async t=>{const d=await t.get(ref);if(d.exists&&d.data().uid!==u)throw "이미 쓰는 닉네임이에요";
    if(!d.exists)t.set(ref,{uid:u});if(old&&old!==lo)t.delete(db.doc("names/"+old));
-   if(prof)t.update(uref,{name:n,nameLower:lo});else t.set(uref,{name:n,nameLower:lo,pid:np,...(em?{email:em}:{}),stats:{},createdAt:FV.serverTimestamp(),lastSeen:FV.serverTimestamp()})});
-  prof={...(prof||{stats:{},pid:np,...(em?{email:em}:{})}),name:n,nameLower:lo};
+   if(prof)t.update(uref,{name:n,nameLower:lo});else t.set(uref,{name:n,nameLower:lo,pid:np,stats:{},createdAt:FV.serverTimestamp(),lastSeen:FV.serverTimestamp()});if(!prof&&em)t.set(db.doc(`users/${u}/private/contact`),{email:em})});
+  prof={...(prof||{stats:{},pid:np}),name:n,nameLower:lo};
  }
  // 접속 상태: users/{uid}.online + lastSeen(25초마다). 사이트를 닫거나 숨기면 online:false (로그인은 유지)
  // 닫는 순간엔 SDK 쓰기가 안 끝날 수 있어서, 미리 받아 둔 ID 토큰으로 REST keepalive 요청도 함께 보냄 (규칙은 똑같이 적용)
@@ -1695,7 +1696,7 @@ const Online=(()=>{
   if(owner()&&admO!==me.uid)try{await db.doc("config/admins").set({owner:me.uid,uids:admU,at:FV.serverTimestamp()});admO=me.uid}catch(e){adE=e}
   const T=p=>p.then(q=>q,e=>{adE=e;return null});
   const[u,g,r]=await Promise.all([T(db.collection("users").get()),T(db.collection("games").where("status","==","active").get()),db.collection("friendRequests").get().then(q=>q.size,()=>null)]);
-  adU=u?u.docs.map(d=>({uid:d.id,...d.data()})):[];adG=g?g.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>ms(b.at)-ms(a.at)):[];adR=r;admDraw()}
+  adU=u?u.docs.map(d=>({uid:d.id,...d.data()})):[];adG=g?g.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>ms(b.at)-ms(a.at)):[];adR=r;admDraw();if(owner())admMig(adU)}
  function admDraw(ld){const T=$("admT");T.innerHTML="";
   [["dash","대시보드"],["users","사용자"],["admins","관리자"],["games","대전 모니터"],["aug","증강 밸런스"],["ntc","공지"]].forEach(([k,n])=>{const b=document.createElement("button");b.textContent=n+(k==="games"&&adG.length?` (${adG.length})`:"");if(k===adTab)b.className="on";b.onclick=()=>{adTab=k;admDraw()};T.appendChild(b)});
   const B=$("admB"),need=["dash","users","admins","games"].includes(adTab);
@@ -1727,11 +1728,15 @@ const Online=(()=>{
   if(!await ask(msg,k==="reset"?"초기화":u.banned?"해제":"정지"))return;
   const up=k==="reset"?{st:{ai:{},online:{}},stMig:true}:{banned:!u.banned};
   try{await db.doc("users/"+uid).update(up);Object.assign(u,up);toast(k==="reset"?"전적을 초기화했어요":u.banned?"이용을 정지했어요":"정지를 풀었어요");userRows()}catch(e){toast(errMsg(e))}}
+ // 예전에 공개 프로필(users/{uid})에 들어간 이메일을 비공개 문서로 옮기고 공개 쪽에서는 지움 (여러 번 해도 안전)
+ async function admMig(L){const x=L.filter(u=>u.email);if(!x.length)return;
+  try{for(let i=0;i<x.length;i+=200){const b=db.batch();x.slice(i,i+200).forEach(u=>{b.set(db.doc(`users/${u.uid}/private/contact`),{email:u.email});b.update(db.doc("users/"+u.uid),{email:FV.delete()})});await b.commit()}
+   x.forEach(u=>delete u.email);toast(`${x.length}명의 이메일을 비공개로 옮겼어요`)}catch(e){console.warn("migrate",e)}}
  // 전체 백업: 계정·전적·친구·대국 기록·대전·설정을 JSON 파일 하나로 내려받음 (이메일이 들어 있으니 비공개로 보관). 로그인 시스템을 옮길 때도 이 파일이 기준이 돼요
  function backupP(B){B.insertAdjacentHTML("beforeend",`<div class="panel" style="padding:16px"><div class="lb" style="margin-top:0">데이터 백업</div><small>계정·전적·친구·대국 기록·대전·설정을 파일 하나로 내려받아요. 이메일이 들어 있으니 다른 사람에게 보이지 않게 보관하세요.</small><div style="margin-top:10px"><button id="admBk">백업 파일 내려받기</button> <small id="admBs"></small></div></div>`);$("admBk").onclick=backup}
  async function backup(){if(!owner())return toast(RO_MSG);const st=$("admBs"),b=$("admBk");b.disabled=true;
   try{const D=q=>q.docs.map(d=>({id:d.id,...d.data()})),out={version:1,exportedAt:new Date().toISOString(),users:[]},us=await db.collection("users").get();let n=0;
-   for(const d of us.docs){st.textContent=`사용자 ${++n}/${us.size}`;const[f,g]=await Promise.all([db.collection(`users/${d.id}/friends`).get(),db.collection(`users/${d.id}/games`).get()]);out.users.push({uid:d.id,...d.data(),friends:D(f),games:D(g)})}
+   for(const d of us.docs){st.textContent=`사용자 ${++n}/${us.size}`;const[f,g,c]=await Promise.all([db.collection(`users/${d.id}/friends`).get(),db.collection(`users/${d.id}/games`).get(),db.doc(`users/${d.id}/private/contact`).get()]);out.users.push({uid:d.id,...d.data(),...(c.exists?{email:c.data().email}:{}),friends:D(f),games:D(g)})}
    const[nm,fr,gm,cf]=await Promise.all([db.collection("names").get(),db.collection("friendRequests").get(),db.collection("games").get(),db.collection("config").get()]);
    out.names=D(nm);out.friendRequests=D(fr);out.games=D(gm);out.config=D(cf);
    const blob=new Blob([JSON.stringify(out,function(k,v){const r=this[k];return r&&typeof r.toMillis==="function"?{__ts:r.toMillis()}:v},1)],{type:"application/json"}),a=document.createElement("a");
