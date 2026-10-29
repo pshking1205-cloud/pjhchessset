@@ -1439,14 +1439,28 @@ const Online=(()=>{
     if(prof&&prof.banned){prof=null;toast("이용이 정지된 계정이에요");auth.signOut()}
     else if(prof){const up={};if(!prof.pid)up.pid=newPid();if(mail()&&prof.email!==mail())up.email=mail();
      if(Object.keys(up).length)try{await db.doc("users/"+u.uid).update(up);Object.assign(prof,up)}catch(e){console.warn("profile",e)}
-     start()}else nameUI(true)}
+     start()}else nameUI(true)}else skinGuest();
    admU=[];admO="";if(u&&prof){try{const a=await db.doc("config/admins").get();if(a.exists){admU=a.data().uids||[];admO=a.data().owner||""}}catch(e){}}
    if(!isAdmin())ov("adm",false);
    bar()});
  }
+ // 스킨: 로그인하면 계정(users/{uid}.skins)에 저장돼서 어느 기기에서 로그인해도 같은 스킨을 써요. 로그아웃 상태에선 이 기기에만 저장
+ // 이 기기의 저장본에 by(계정 번호)가 있으면 그 계정의 것이라 다른 계정·로그아웃 상태에는 보여 주지 않아요
+ const SK0=["pc:classic","bd:green","ag:classic"],SKD={pc:"classic",bd:"green",ag:"classic"};
+ function skinNorm(sk){const own=[...new Set([...SK0,...((sk&&sk.own)||[]).filter(x=>typeof x==="string")])].sort(),eq={...SKD,...((sk&&sk.eq)||{})};["pc","bd","ag"].forEach(k=>{if(!own.includes(k+":"+eq[k]))eq[k]=SKD[k]});return{eq:{pc:eq.pc,bd:eq.bd,ag:eq.ag},own}}
+ function skinFrom(sk){const n=skinNorm(sk);Object.assign(SKIN,n.eq);SKIN_OWN.length=0;SKIN_OWN.push(...n.own);skinApply()}
+ const skinSame=sk=>JSON.stringify(skinNorm(sk))===JSON.stringify(skinNorm({eq:SKIN,own:SKIN_OWN})),skinLocal=()=>{try{return JSON.parse(localStorage.getItem("chessSkin")||"null")}catch(e){return null}};
+ function saveSkins(d){if(me&&prof)db.doc("users/"+me.uid).update({skins:d}).then(()=>{prof.skins=d}).catch(e=>toast(errMsg(e)))}
+ function skinLogin(){const L=skinLocal();
+  if(prof.skins)skinFrom(prof.skins);
+  else if(L&&!L.by&&Array.isArray(L.own)&&L.own.some(x=>!SK0.includes(x))){skinFrom(L);saveSkins({eq:{...SKIN},own:[...SKIN_OWN]})} // 계정에 저장된 스킨이 없으면, 로그인 전에 이 기기에서 모은 스킨을 처음 한 번만 가져와요
+  else skinFrom(null);
+  try{localStorage.setItem("chessSkin",JSON.stringify({eq:{...SKIN},own:[...SKIN_OWN],by:me.uid}))}catch(e){}}
+ function skinGuest(){const L=skinLocal();if(L&&L.by){skinFrom(null);try{localStorage.removeItem("chessSkin")}catch(e){}}}
  // 로그인 후 실시간 구독: 내 프로필 · 친구 · 친구 신청 · 대전 초대
  function start(){const u=me.uid,L=(q,f)=>subs.push(q.onSnapshot(f,e=>console.warn(e))),D=q=>q.docs.map(d=>({id:d.id,...d.data()}));
-  L(db.doc("users/"+u),d=>{if(d.exists){prof=d.data();if(prof.banned){toast("이용이 정지된 계정이에요");return logout()}bar();if(tab==="stats"&&!view)refresh()}});
+  skinLogin();
+  L(db.doc("users/"+u),d=>{if(d.exists){prof=d.data();if(prof.skins&&!skinSame(prof.skins))skinFrom(prof.skins);if(prof.banned){toast("이용이 정지된 계정이에요");return logout()}bar();if(tab==="stats"&&!view)refresh()}});
   L(db.collection(`users/${u}/friends`),q=>{friends=D(q).map(f=>({uid:f.id,name:f.name})).sort((a,b)=>a.name.localeCompare(b.name));bar();refresh();if($("acc").classList.contains("on")&&tab==="friends")loadFi();fwatch()});
   L(db.collection("friendRequests").where("to","==",u),q=>{reqs=D(q);bar();refresh()});
   L(db.collection("games").where("inviteTo","==",u),q=>{invs=D(q).filter(g=>g.status==="invited");invUI()});
@@ -1765,7 +1779,7 @@ const Online=(()=>{
   if(!owner())$("admN").readOnly=true;
   const put=t=>!owner()?toast(RO_MSG):db.doc("config/notice").set({text:t,by:me.uid,at:FV.serverTimestamp()}).then(()=>toast(t?"공지를 올렸어요":"공지를 내렸어요")).catch(e=>toast(errMsg(e)));
   $("admNs").onclick=()=>put($("admN").value.trim());$("admNd").onclick=()=>{$("admN").value="";put("")}}
- return{init,push,record,resign,leave,quit,dots,dot,invite,admOpen,admLoad,me:()=>me&&prof?me:null,friends:()=>friends};
+ return{init,push,record,resign,leave,quit,dots,dot,invite,admOpen,admLoad,uid:()=>me?me.uid:"",saveSkins,me:()=>me&&prof?me:null,friends:()=>friends};
 })();
 $("acx").onclick=()=>$("acc").classList.remove("on");
 
@@ -1834,7 +1848,7 @@ const SHOP_C=[["pc","말",["기물 디자인을 사요.","가진 말 스킨을 �
  ["ag","증강",["같은 테마의 말과 보드를 모두 사면 세트 보상으로 받아요.","가진 증강 스킨을 골라 장착해요. 등급은 그대로 구분돼요."],'<path d="M6 3h12a1 1 0 011 1v16a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7l3.5 1.3v2.6c0 2.2-1.5 3.9-3.5 4.8-2-.9-3.5-2.6-3.5-4.8V8.3z" fill="currentColor"/>']];
 const SKN={P:"폰",N:"나이트",B:"비숍",R:"룩",Q:"퀸",K:"킹"};let shCat="pc",shCoins=0,shMode="shop"; // shMode: "shop"(구매) / "inv"(스킨 장착)
 const skOwn=(k,id)=>SKIN_OWN.includes(k+":"+id);
-function skinSave(){try{localStorage.setItem("chessSkin",JSON.stringify({eq:SKIN,own:SKIN_OWN}))}catch(e){}}
+function skinSave(){const d={eq:{...SKIN},own:[...SKIN_OWN]};try{localStorage.setItem("chessSkin",JSON.stringify({...d,by:Online.uid()}))}catch(e){}Online.saveSkins(d)}
 function skinApply(){const W=SKIN.bd==="wood";$("bd").classList.toggle("wood",W);const pv=$("pv");if(pv)pv.classList.toggle("wood",W);document.documentElement.dataset.ag=SKIN.ag;drawPreview();if(S)render()}
 function skinGet(k,id){if(skOwn(k,id))return;SKIN_OWN.push(k+":"+id);
  Object.values(SKIN_SET).forEach(st=>{if(!SKIN_OWN.includes(st.give)&&st.need.every(x=>SKIN_OWN.includes(x))){SKIN_OWN.push(st.give);setTimeout(()=>toast(`세트 완성! ${st.n} 증강 스킨을 얻었어요`),250)}});skinSave()}
