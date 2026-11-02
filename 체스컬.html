@@ -172,7 +172,7 @@ small{color:var(--mut)}
 #tst{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;z-index:80;font-size:14px;font-weight:500;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw;text-align:center}#tst.show{opacity:1}
 #ask .rb{display:flex;gap:8px;margin-top:16px}#ask .rb button{flex:1}
 /* 상대 고르기 작은 창 (오프라인: 2인·AI / 온라인: 친구·일반·랭크) */
-#opo{z-index:50}#opo .pop{max-width:340px;text-align:left}#opo h3{margin:0 0 12px;padding-right:44px}#opo .xb{border-radius:50%;width:34px;height:34px;padding:0}
+#opo{z-index:50}#opo .pop{max-width:380px;max-height:88vh;overflow:auto;text-align:left}#opo h3{margin:0 0 12px;padding-right:44px}#opo .xb{border-radius:50%;width:34px;height:34px;padding:0}
 #opo .opt.soon{opacity:.5;cursor:default}#opo .opt.soon:hover{filter:none}
 
 /* 로비 */
@@ -200,7 +200,8 @@ small{color:var(--mut)}
 .seg button.on{background:var(--ac);color:var(--acf);box-shadow:0 2px 0 var(--acd)}
 .seg button.on::before{content:"✓ "}
 .seg.sl{overflow-x:auto;scrollbar-width:none}.seg.sl::-webkit-scrollbar{display:none}.seg.sl button{flex:0 0 auto;min-width:110px;white-space:nowrap}
-#go{width:100%;margin-top:20px;padding:15px;font-size:18px;box-shadow:0 5px 0 var(--acd)}
+#mnb>.lb:first-child{margin-top:0}
+#opGo{width:100%;margin-top:16px;padding:14px;font-size:17px;box-shadow:0 5px 0 var(--acd)}#opo .seg{margin-top:2px}#opo .md{margin-top:0}
 .ntc{background:color-mix(in srgb,var(--gold) 16%,var(--card));border:1px solid var(--gold);border-radius:10px;padding:10px 14px;font-weight:500;line-height:1.5;white-space:pre-line;overflow-wrap:anywhere}
 
 /* 관리자 탭 (지정한 계정만) */
@@ -1192,6 +1193,7 @@ html[data-ag="crys"] #cv :is(.uab,.luua){display:none!important}
 .agm{width:100%;height:100%;display:flex;align-items:center;justify-content:center;gap:5%;background:radial-gradient(ellipse at 50% 30%,#3a3632,#1d1b19)}
 .agm .dc,.agv .dc{animation:none;pointer-events:none}
 .agm .dc{width:29%;padding:2px!important;border-radius:7px}
+/* 루나시 카드 한 장만 보여 주므로 크게 */.agm .dc{width:42%}.agm .dcn{font-size:13px!important}.agm .dct{font-size:9px!important}
 .agm .dcf{min-height:0;aspect-ratio:3/4.3;padding:10% 4%;gap:5%;border-radius:5px}
 .agm .dci{width:52%;height:auto;aspect-ratio:1;margin:0}.agm .dci svg{width:55%;height:55%}
 .agm .dcn{font-size:9px;line-height:1.2}.agm .dct{font-size:7px;padding:1px 4px;letter-spacing:0}.agm .dcd{display:none}.agm[data-ag="crys"]{gap:9%}.agm[data-ag="crys"] .dc{width:200px!important;flex:none;zoom:.26}.agm[data-ag="crys"] .dc .dcf{padding:40px 14px!important;min-height:300px!important;justify-content:center}.agm[data-ag="crys"] .dc .dcn{font-size:44px!important;line-height:1.2!important}.agm[data-ag="crys"] .dc .dct{font-size:26px!important;padding:5px 24px!important}.agm[data-ag="crys"] .dc .dci{width:120px!important;height:120px!important;margin-bottom:14px!important}.agm[data-ag="crys"] .dc .dci>svg:not(.creye){width:58px!important;height:58px!important}@media(max-width:600px){.agm[data-ag="crys"] .dc{zoom:.2}}
@@ -1221,9 +1223,7 @@ html[data-ag="crys"] #cv :is(.uab,.luua){display:none!important}
    <div id="pv" aria-hidden="true"></div>
   </section>
   <section class="play">
-   <h2>새 게임</h2>
    <div id="mnb"></div>
-   <button id="go">게임 시작</button>
   </section>
  </div>
 </div>
@@ -1247,7 +1247,7 @@ html[data-ag="crys"] #cv :is(.uab,.luua){display:none!important}
 <div class="ov" id="ivo"><div class="pop" id="ivb"></div></div>
 <div class="ov" id="wto"><div class="pop" id="wtb"></div></div>
 <div class="ov" id="wdo" style="background:rgba(0,0,0,.35);z-index:25;pointer-events:none"><div class="pop" style="max-width:280px;font-weight:700">상대가 증강을 고르는 중이에요</div></div>
-<div class="ov" id="opo"><div class="pop" role="dialog" aria-labelledby="opT"><button class="g xb" id="opX" aria-label="닫기">✕</button><h3 id="opT"></h3><div class="opts" id="opb"></div></div></div>
+<div class="ov" id="opo"><div class="pop" role="dialog" aria-labelledby="opT"><button class="g xb" id="opX" aria-label="닫기">✕</button><h3 id="opT"></h3><div class="opts" id="opb"></div><div id="opx"></div><button id="opGo">게임 시작</button></div></div>
 <div class="ov" id="ask"><div class="pop"><div id="askT" style="font-weight:700;line-height:1.5"></div><div class="rb"><button class="g" id="askN">취소</button><button id="askY">확인</button></div></div></div>
 <div id="tst"></div>
 <div class="ov" id="shp"><div class="shw">
@@ -2423,21 +2423,31 @@ function menu(){
  const fr=Online.friends();if(sO===2&&!Online.me())sO=1;
  // 상대: 오프라인/온라인 두 개만. 누르면 작은 창에서 세부 방식을 고름 (oppPick)
  cards("상대",[["off","🏠","오프라인",sO===1?`AI 대결 · ${sL}`:sO===0?"2인 (한 기기)":"2인 (한 기기) · AI 대결"],["on","🌐","온라인",sO===2?"친구 대전":"친구 대전 · 일반 게임 · 랭크 게임"]],sO===2?"on":"off",v=>oppPick(v));
- if(sO===1)seg("AI 난이도",Object.keys(CONFIG.aiDepth).map(k=>[k,k]),sL,v=>sL=v);
- if(sO===2){if(!fr.some(f=>f.uid===sF))sF=fr.length?fr[0].uid:null;
-  if(fr.length)seg("친구",fr.map(f=>[f.uid,(Online.dot(f.uid)+" "+f.name).trim()]),sF,v=>sF=v,true);
-  else{const e=document.createElement("div");e.className="md";e.textContent="아직 친구가 없어요. 위쪽의 친구 버튼에서 닉네임으로 친구를 추가하세요.";box.appendChild(e)}}
- $("go").textContent=sO===2?"대전 신청 보내기":sO===1?`게임 시작 · AI ${sL}`:"게임 시작";
+ if($("opo").classList.contains("on"))oppDraw(); // 열린 선택 창도 최신 상태로 (친구 목록·접속 표시)
  const nw=box.querySelector(".sl");if(nw)nw.scrollLeft=sc;
 }
-// 상대 고르기 창. 일반 게임·랭크 게임은 아직 없어서 눌러도 아무 일도 없음
-function oppPick(k){const L=k==="off"?[[1,"🤖","AI 대결","쉬움·보통·어려움 중에서 골라요"],[0,"👥","2인 (한 기기)","한 화면에서 마주 보고 둬요"]]
+// 상대 고르기 창: 세부 방식 + (오프라인) AI 난이도 / (온라인) 친구 고르기 + 게임 시작·대전 신청까지 이 창에서. 일반·랭크 게임은 아직 없어서 눌러도 아무 일도 없음
+let opK="off";
+function oppPick(k){opK=k;if(k==="off"&&sO===2)sO=1;oppDraw();$("opo").classList.add("on")}
+function oppDraw(){const k=opK,L=k==="off"?[[1,"🤖","AI 대결","쉬움·보통·어려움 중에서 골라요"],[0,"👥","2인 (한 기기)","한 화면에서 마주 보고 둬요"]]
   :[[2,"⚔","친구 대전","친구에게 대전을 신청해요"],["n","🎮","일반 게임","준비 중이에요"],["r","🏆","랭크 게임","준비 중이에요"]];
  $("opT").textContent=k==="off"?"오프라인":"온라인";const bx=$("opb");bx.innerHTML="";
  L.forEach(([v,ic,n,sub])=>{const b=document.createElement("button"),soon=typeof v!=="number";b.className="opt"+(v===sO?" on":"")+(soon?" soon":"");if(soon)b.setAttribute("aria-disabled","true");
   b.innerHTML=`<span class="oi">${ic}</span><span class="ot"><b>${n}</b><small>${sub}</small></span>`;
-  b.onclick=()=>{if(soon)return;if(v===2&&!Online.me())return toast("로그인하면 친구 대전을 할 수 있어요");sO=v;$("opo").classList.remove("on");menu()};bx.appendChild(b)});
- $("opo").classList.add("on")}
+  b.onclick=()=>{if(soon)return;if(v===2&&!Online.me())return toast("로그인하면 친구 대전을 할 수 있어요");sO=v;menu();oppDraw()};bx.appendChild(b)});
+ const x=$("opx");x.innerHTML="";
+ const lab=t=>{const l=document.createElement("div");l.className="lb";l.textContent=t;x.appendChild(l)};
+ const seg=(items,cur,fn,sl)=>{const t=document.createElement("div");t.className="seg"+(sl?" sl":"");
+  if(sl)t.addEventListener("wheel",e=>{if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){t.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
+  items.forEach(([v,n])=>{const b=document.createElement("button");b.textContent=n;if(v===cur)b.className="on";b.onclick=()=>{fn(v);menu();oppDraw()};t.appendChild(b)});x.appendChild(t)};
+ const go=$("opGo");go.disabled=false;
+ if(k==="off"){if(sO===1){lab("AI 난이도");seg(Object.keys(CONFIG.aiDepth).map(z=>[z,z]),sL,v=>sL=v)}
+  go.textContent=sO===1?`게임 시작 · AI ${sL}`:"게임 시작"}
+ else{if(sO===2){const fr=Online.friends();if(!fr.some(f=>f.uid===sF))sF=fr.length?fr[0].uid:null;lab("친구");
+   if(fr.length)seg(fr.map(f=>[f.uid,(Online.dot(f.uid)+" "+f.name).trim()]),sF,v=>sF=v,true);
+   else{const e=document.createElement("div");e.className="md";e.textContent="아직 친구가 없어요. 위쪽의 친구 버튼에서 닉네임으로 친구를 추가하세요.";x.appendChild(e)}
+   go.textContent="대전 신청 보내기";go.disabled=!sF}
+  else{go.textContent="게임 시작";go.disabled=true}}}
 $("opX").onclick=()=>$("opo").classList.remove("on");$("opo").onclick=e=>{if(e.target.id==="opo")$("opo").classList.remove("on")};
 // 플레이어 바: 이름 · 잡은 기물 · 기물 점수 차이 · 차례 표시
 function renderBars(){if(!S)return;
@@ -2458,8 +2468,10 @@ function ask(msg,yes){return new Promise(ok=>{$("askT").textContent=msg;$("askY"
 // 나이트 로고: 상점·스킨·관리자·대국 어디서든 바로 메인(로비)으로. 진행 중인 온라인 대전만 나가기 확인을 거침
 $("home").onclick=async()=>{if(!$("mn").classList.contains("on")&&!await Online.quit())return;shopShow(false);["adm","skm","rso"].forEach(i=>$(i).classList.remove("on"));if(!$("mn").classList.contains("on"))$("bmn").onclick()};
 setInterval(()=>Online.dots(),15000); // 친구 접속 상태: 시간이 지나 오프라인이 된 친구 반영
-$("go").onclick=()=>{if(sO===2)return sF?Online.invite(sF,sM):toast("함께할 친구를 고르세요");
- mode=MODES.find(m=>m.id===sM);ai=sO===1;level=sL;$("mn").classList.remove("on");newGame()};
+// 게임 시작 / 친구 대전 신청 (선택 창의 버튼)
+function startGame(){if(sO===2){if(!sF)return toast("함께할 친구를 고르세요");$("opo").classList.remove("on");return Online.invite(sF,sM)}
+ $("opo").classList.remove("on");mode=MODES.find(m=>m.id===sM);ai=sO===1;level=sL;$("mn").classList.remove("on");newGame()}
+$("opGo").onclick=startGame;
 function updateSndBtn(){$("sndTgl").textContent=soundOn?"🔊 소리 켜짐 (끄기)":"🔇 소리 꺼짐 (켜기)";$("ckTgl").textContent=checkPop?"⚠ 체크 알림 켜짐 (끄기)":"체크 알림 꺼짐 (켜기)"}
 $("gear").onclick=()=>{updateSndBtn();$("volSl").value=volume;$("volVal").textContent=volume;$("stg").classList.add("on")};
 $("stgClose").onclick=()=>$("stg").classList.remove("on");
@@ -2899,12 +2911,12 @@ const price=it=>`<span class="shp">${it.p?coin("bg",false)+it.p.toLocaleString()
 // 작은 판: cols×rows 칸, L=[색+기물] 배열 (빈칸은 ""), 판 색은 지금 테마의 --lt/--dk (cls에 wood면 나무 판), sk=기물 스킨
 const miniBd=(c,r,L,cls,sk)=>`<div class="mbd ${cls||""}" style="grid-template-columns:repeat(${c},1fr)">${Array.from({length:c*r},(_,i)=>`<i style="background:var(--${((i/c|0)+i%c)%2?"dk":"lt"})">${L[i]?pcSvg(L[i][1],L[i][0],sk):""}</i>`).join("")}</div>`;
 const fullBd=()=>{const B="RNBQKBNR".split("");return[...B.map(t=>"b"+t),...Array(8).fill("bP"),...Array(32).fill(""),...Array(8).fill("wP"),...B.map(t=>"w"+t)]};
-// 증강 스킨 미리보기용 카드 (등급마다 실제 증강 하나를 예로 보여 줌)
+// 증강 스킨 미리보기용 카드: 루나시 카드 하나만, 이름은 모두 「증강」
 const AGR=["COMMON","RARE","EPIC","LEGEND","LUNACY"],AGI='<path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/>';
-const agCard=r=>{const e=Object.values(AUGS).find(a=>(a.r||"COMMON")===r)||{n:r,d:""};return`<div class="dc rc-${r}"><span class="dcf"><span class="dci"><svg viewBox="0 0 24 24">${AGI}</svg></span><b class="dcn">${e.n}</b><span class="dct">${r}</span><span class="dcd">${e.d}</span></span></div>`};
+const agCard=r=>{const e=Object.values(AUGS).find(a=>(a.r||"COMMON")===r)||{n:r,d:""};return`<div class="dc rc-${r}"><span class="dcf"><span class="dci"><svg viewBox="0 0 24 24">${AGI}</svg></span><b class="dcn">증강</b><span class="dct">${r}</span><span class="dcd">${e.d}</span></span></div>`};
 const agDeco=el=>{el.querySelectorAll(".dc.rc-LEGEND").forEach(c=>lgSkin(c,"L"));el.querySelectorAll(".dc.rc-LUNACY").forEach(c=>luSkin(c))};
 const skTile=(k,it)=>k==="pc"?miniBd(4,4,["bR","bN","bB","bQ","bP","bP","","bP","","","wP","","wK","wQ","wN","wB"],"",it.id)
- :k==="bd"?miniBd(8,8,[],BDS.includes(it.id)?it.id:""):`<div class="agm" data-ag="${it.id}">${["COMMON","EPIC","LEGEND"].map(agCard).join("")}</div>`;
+ :k==="bd"?miniBd(8,8,[],BDS.includes(it.id)?it.id:""):`<div class="agm" data-ag="${it.id}">${agCard("LUNACY")}</div>`;
 function shopDraw(){const inv=shMode==="inv";$("shp").classList.toggle("inv",inv);$("shS").querySelector("h1").textContent=inv?"스킨 장착":"상점";$("shS").setAttribute("aria-label",inv?"스킨 장착 분류":"상점 분류");
  $("shW").innerHTML=coin("bg",false)+"<span>"+shCoins.toLocaleString()+"</span>";
  const list=k=>inv?SHOP[k].filter(it=>skOwn(k,it.id)||it.adm||it.p!=null||it.reward).sort((a,b)=>skOwn(k,b.id)-skOwn(k,a.id)):SHOP[k].filter(it=>!it.adm&&(it.p!=null||it.reward)); // 상점엔 파는 것+세트 보상, 장착 탭엔 가진 것 먼저 + 못 가진 것(관리자 전용 제외)
@@ -2929,13 +2941,13 @@ function crPvFx(kind,t){const M=document.querySelector("#skB .mbd");if(!M)return
  if(kind==="promo"){lay.insertAdjacentHTML("beforeend",`<i class="crpil" style="left:${b.left+b.width/2}px;--b:${innerHeight-b.bottom}px;--w:${b.width*1.5|0}px"></i><i class="crhit" style="left:${b.left+b.width/2}px;top:${b.top+b.height/2}px;--s:${b.width*4|0}px"></i>`);
   crShards(lay,{left:b.left,top:b.top,width:b.width,height:b.height},CR_PAL.LUNACY,30,b.width*3.5,150,-80);crRings(lay,b.left+b.width/2,b.top+b.height/2,CR_PAL.LUNACY,4,7,0);crPromoSnd()}
  setTimeout(()=>lay.remove(),2200)}
-function skinOpen(it,t){const k=shCat,inv=shMode==="inv",B=$("skB"),own=skOwn(k,it.id),eq=SHOP_EQ[k]===it.id;t=t||(k==="ag"?"COMMON":"P");
+function skinOpen(it,t){const k=shCat,inv=shMode==="inv",B=$("skB"),own=skOwn(k,it.id),eq=SHOP_EQ[k]===it.id;t=k==="ag"?"LUNACY":(t||"P");
  const st=it.set&&SKIN_SET[it.set],nm={pc:"말",bd:"보드",ag:"증강"}[k];
  const view=k==="pc"?`<div class="skv"><span class="pnm">${SKN[t]}</span>${miniBd(2,2,["","b"+t,"w"+t,""],"",it.id)}</div>`
   :k==="bd"?`<div class="skv">${miniBd(8,8,fullBd(),"b8"+(BDS.includes(it.id)?" "+it.id:""))}</div>`
   :`<div class="skv ag"><div class="agv" data-ag="${it.id}">${agCard(t)}</div></div>`;
  const pick=k==="pc"?`<div class="skp">${"PNBRQK".split("").map(x=>`<button data-t="${x}" class="${x===t?"on":""}" aria-label="${SKN[x]}">${pcSvg(x,"w",it.id)}</button>`).join("")}</div>`
-  :k==="ag"?`<div class="skp">${AGR.map(x=>`<button data-t="${x}" class="gr${x===t?" on":""}">${x}</button>`).join("")}</div>`:"";
+  :"";
  const sets=st&&!inv?`<div class="sks">${it.reward?`세트 보상이에요. <b>${st.n} 말</b>과 <b>${st.n} 보드</b>를 모두 사면 받아요. (${setCnt(it.set)}/${st.need.length})`:`<b>${st.n} 말</b> + <b>${st.n} 보드</b>를 모두 사면 <b>${st.n} 증강 스킨</b>을 받아요. (${setCnt(it.set)}/${st.need.length})`}</div>`:"";
  // 상점: 구매만 / 스킨 장착: 장착만
  const snd=it.snd?`<div class="sks snd"><span>이동·잡기 소리가 <b>${it.n}</b> 소리로 바뀌어요.</span><button class="g" id="skS">소리 듣기</button></div>`:"";
