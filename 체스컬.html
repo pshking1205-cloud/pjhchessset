@@ -171,6 +171,9 @@ small{color:var(--mut)}
 #volSl{width:100%;accent-color:var(--ac)}
 #tst{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;z-index:80;font-size:14px;font-weight:500;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw;text-align:center}#tst.show{opacity:1}
 #ask .rb{display:flex;gap:8px;margin-top:16px}#ask .rb button{flex:1}
+/* 상대 고르기 작은 창 (오프라인: 2인·AI / 온라인: 친구·일반·랭크) */
+#opo{z-index:50}#opo .pop{max-width:340px;text-align:left}#opo h3{margin:0 0 12px;padding-right:44px}#opo .xb{border-radius:50%;width:34px;height:34px;padding:0}
+#opo .opt.soon{opacity:.5;cursor:default}#opo .opt.soon:hover{filter:none}
 
 /* 로비 */
 #mn{z-index:40;top:calc(var(--navh) + env(safe-area-inset-top,0px));background:var(--bg);overflow:auto;padding:0}
@@ -181,7 +184,7 @@ small{color:var(--mut)}
 .hero h1{font-family:var(--f-disp);font-weight:400;font-size:clamp(34px,6vw,56px);line-height:1.05;margin:0;text-wrap:balance}
 .hero h1 em{font-style:normal;color:var(--ac)}
 .hero p{margin:0;color:var(--mut);font-size:15px;line-height:1.6;max-width:44ch}
-#pv{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));width:min(100%,460px);aspect-ratio:1/1;border-radius:6px;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.4);container-type:inline-size}
+#pv{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));width:min(100%,640px,calc(100dvh - var(--navh) - 80px));aspect-ratio:1/1;border-radius:6px;overflow:hidden;container-type:inline-size}
 #pv>div{display:grid;place-items:center;font-size:9cqw;min-width:0;min-height:0;overflow:hidden}
 @media(max-width:899px){#pv{display:none}.hero h1{font-size:34px}.hero{display:contents}}
 .play{background:var(--card);border-radius:14px;padding:20px;min-width:0}
@@ -1244,6 +1247,7 @@ html[data-ag="crys"] #cv :is(.uab,.luua){display:none!important}
 <div class="ov" id="ivo"><div class="pop" id="ivb"></div></div>
 <div class="ov" id="wto"><div class="pop" id="wtb"></div></div>
 <div class="ov" id="wdo" style="background:rgba(0,0,0,.35);z-index:25;pointer-events:none"><div class="pop" style="max-width:280px;font-weight:700">상대가 증강을 고르는 중이에요</div></div>
+<div class="ov" id="opo"><div class="pop" role="dialog" aria-labelledby="opT"><button class="g xb" id="opX" aria-label="닫기">✕</button><h3 id="opT"></h3><div class="opts" id="opb"></div></div></div>
 <div class="ov" id="ask"><div class="pop"><div id="askT" style="font-weight:700;line-height:1.5"></div><div class="rb"><button class="g" id="askN">취소</button><button id="askY">확인</button></div></div></div>
 <div id="tst"></div>
 <div class="ov" id="shp"><div class="shw">
@@ -2417,7 +2421,8 @@ function menu(){
   items.forEach(([v,n])=>{const b=document.createElement("button");b.textContent=n;if(v===cur)b.className="on";b.onclick=()=>{fn(v);menu()};t.appendChild(b)});box.appendChild(t)};
  cards("모드",MODES.map(m=>{const ic=m.name.split(" ")[0],nm=m.name.slice(ic.length+1);return[m.id,ic,nm,m.desc||MSUB[m.id]||""]}),sM,v=>sM=v);
  const fr=Online.friends();if(sO===2&&!Online.me())sO=1;
- cards("상대",[[1,"🤖","AI 대결","쉬움·보통·어려움 중에서 골라요"],[0,"👥","2인 (한 기기)","한 화면에서 마주 보고 둬요"],...(Online.me()?[[2,"🌐","친구와 온라인","친구에게 대전을 신청해요"]]:[])],sO,v=>sO=v);
+ // 상대: 오프라인/온라인 두 개만. 누르면 작은 창에서 세부 방식을 고름 (oppPick)
+ cards("상대",[["off","🏠","오프라인",sO===1?`AI 대결 · ${sL}`:sO===0?"2인 (한 기기)":"2인 (한 기기) · AI 대결"],["on","🌐","온라인",sO===2?"친구 대전":"친구 대전 · 일반 게임 · 랭크 게임"]],sO===2?"on":"off",v=>oppPick(v));
  if(sO===1)seg("AI 난이도",Object.keys(CONFIG.aiDepth).map(k=>[k,k]),sL,v=>sL=v);
  if(sO===2){if(!fr.some(f=>f.uid===sF))sF=fr.length?fr[0].uid:null;
   if(fr.length)seg("친구",fr.map(f=>[f.uid,(Online.dot(f.uid)+" "+f.name).trim()]),sF,v=>sF=v,true);
@@ -2425,6 +2430,15 @@ function menu(){
  $("go").textContent=sO===2?"대전 신청 보내기":sO===1?`게임 시작 · AI ${sL}`:"게임 시작";
  const nw=box.querySelector(".sl");if(nw)nw.scrollLeft=sc;
 }
+// 상대 고르기 창. 일반 게임·랭크 게임은 아직 없어서 눌러도 아무 일도 없음
+function oppPick(k){const L=k==="off"?[[1,"🤖","AI 대결","쉬움·보통·어려움 중에서 골라요"],[0,"👥","2인 (한 기기)","한 화면에서 마주 보고 둬요"]]
+  :[[2,"⚔","친구 대전","친구에게 대전을 신청해요"],["n","🎮","일반 게임","준비 중이에요"],["r","🏆","랭크 게임","준비 중이에요"]];
+ $("opT").textContent=k==="off"?"오프라인":"온라인";const bx=$("opb");bx.innerHTML="";
+ L.forEach(([v,ic,n,sub])=>{const b=document.createElement("button"),soon=typeof v!=="number";b.className="opt"+(v===sO?" on":"")+(soon?" soon":"");if(soon)b.setAttribute("aria-disabled","true");
+  b.innerHTML=`<span class="oi">${ic}</span><span class="ot"><b>${n}</b><small>${sub}</small></span>`;
+  b.onclick=()=>{if(soon)return;if(v===2&&!Online.me())return toast("로그인하면 친구 대전을 할 수 있어요");sO=v;$("opo").classList.remove("on");menu()};bx.appendChild(b)});
+ $("opo").classList.add("on")}
+$("opX").onclick=()=>$("opo").classList.remove("on");$("opo").onclick=e=>{if(e.target.id==="opo")$("opo").classList.remove("on")};
 // 플레이어 바: 이름 · 잡은 기물 · 기물 점수 차이 · 차례 표시
 function renderBars(){if(!S)return;
  const bot=flip?"b":"w",top=bot==="w"?"b":"w",N={P:8,N:2,B:2,R:2,Q:1},V={P:1,N:3,B:3,R:5,Q:9};
