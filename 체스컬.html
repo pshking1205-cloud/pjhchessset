@@ -2491,6 +2491,8 @@ const Online=(()=>{
  let auth,db,FV,me=null,prof=null,stK="ai",friends=[],reqs=[],invs=[],subs=[],fsub={},tok=null,hb,tab="stats",fi={},view=null,waitUn=null,shownInv=null;
  const load=src=>new Promise((ok,no)=>{const s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s)});
  const ov=(id,on)=>$(id).classList.toggle("on",on);
+ // pid: 로그인 방식(uid)과 상관없는 영구 번호. 나중에 로그인 시스템을 바꿔도 이 번호와 이메일로 계정을 이어 줘요. 이메일은 공개 프로필이 아니라 users/{uid}/private/contact에만 저장
+ const newPid=()=>"p_"+(window.crypto&&crypto.randomUUID?crypto.randomUUID().replace(/-/g,"").slice(0,20):Math.random().toString(36).slice(2,12)+Date.now().toString(36)),mail=()=>((me&&me.email)||"").toLowerCase();
  function errMsg(e){const c=e&&e.code||"";return({"auth/invalid-email":"이메일 형식이 올바르지 않아요","auth/user-not-found":"이메일 또는 비밀번호가 틀렸어요","auth/wrong-password":"이메일 또는 비밀번호가 틀렸어요","auth/invalid-credential":"이메일 또는 비밀번호가 틀렸어요","auth/email-already-in-use":"이미 가입된 이메일이에요","auth/weak-password":"비밀번호는 6자 이상이어야 해요","auth/missing-password":"비밀번호를 입력하세요","auth/too-many-requests":"시도가 너무 많아요. 잠시 후 다시 해 주세요","auth/unauthorized-domain":"이 주소가 Firebase 승인 도메인에 없어요","auth/popup-closed-by-user":"","auth/cancelled-popup-request":"","auth/popup-blocked":"팝업이 차단됐어요. 주소창의 팝업 차단 아이콘에서 이 사이트를 허용한 뒤 다시 눌러 주세요","auth/operation-not-allowed":"Firebase에서 이 로그인 방법이 꺼져 있어요","auth/network-request-failed":"네트워크 오류예요. 인터넷 연결을 확인하고 다시 해 주세요","auth/internal-error":"로그인 서버 내부 오류예요. 잠시 후 다시 해 주세요","auth/web-storage-unsupported":"브라우저 저장소(쿠키)가 막혀 있어요. 시크릿 모드·추적 방지·서드파티 쿠키 차단을 풀어 주세요","auth/operation-not-supported-in-this-environment":"이 환경에서는 Google 로그인이 안 돼요. https://chessset.netlify.app/ 을 Chrome·Safari로 열어 주세요","permission-denied":"권한이 없어요 (Firestore 규칙을 확인하세요)","unavailable":"서버에 연결할 수 없어요"})[c]??(c?"문제가 생겼어요 (오류 코드: "+c+")":(e&&e.message||String(e)))}
 
  async function init(){
@@ -2506,13 +2508,33 @@ const Online=(()=>{
   auth.onAuthStateChanged(async u=>{stop();me=u;prof=null;
    if(u){try{const d=await db.doc("users/"+u.uid).get();prof=d.exists?d.data():null}catch(e){toast(errMsg(e))}
     if(prof&&prof.banned){prof=null;toast("이용이 정지된 계정이에요");auth.signOut()}
-    else if(prof)start();else nameUI(true)}
+    else if(prof){const up={};if(!prof.pid)up.pid=newPid();
+     try{if("email" in prof)up.email=FV.delete();if(Object.keys(up).length){await db.doc("users/"+u.uid).update(up);delete prof.email;if(up.pid)prof.pid=up.pid}
+      if(mail()){const pc=db.doc(`users/${u.uid}/private/contact`),c=await pc.get();if(!c.exists||c.data().email!==mail())await pc.set({email:mail()})}}catch(e){console.warn("profile",e)}
+     start()}else nameUI(true)}else skinGuest();
    if(!isAdmin())ov("adm",false);skinAuth();
    bar()});
  }
+ // 스킨: 로그인하면 계정(users/{uid}.skinData)에 저장돼서 어느 기기에서 로그인해도 같은 스킨을 써요. 로그아웃 상태에선 이 기기에만 저장
+ // (users/{uid}.skins는 최고 관리자가 지정 관리자에게 주는 스킨이라 따로 둬요) 이 기기의 저장본에 by(계정 번호)가 있으면 그 계정의 것이라 다른 계정·로그아웃 상태에는 보여 주지 않아요
+ let accEq=null; // 계정에 저장된 장착 스킨. 관리자가 준 스킨은 불러온 뒤에야 보유로 쳐서, 그때 skinAuth가 이 값으로 다시 맞춰 끼워요
+ const SK0=["pc:classic","bd:green","ag:classic"],SKD={pc:"classic",bd:"green",ag:"classic"},skStr=x=>typeof x==="string";
+ function skinNorm(sk){const own=[...new Set([...SK0,...((sk&&sk.own)||[]).filter(x=>skStr(x)&&!skAdm(...x.split(":")))])].sort(),e=(sk&&sk.eq)||{};
+  return{eq:{pc:skStr(e.pc)?e.pc:SKD.pc,bd:skStr(e.bd)?e.bd:SKD.bd,ag:skStr(e.ag)?e.ag:SKD.ag},own}}
+ function skinFrom(sk){const n=skinNorm(sk);accEq=sk?{...n.eq}:null;Object.assign(SKIN,n.eq);SKIN_OWN.length=0;SKIN_OWN.push(...n.own);skinApply()}
+ const skinSame=sk=>JSON.stringify(skinNorm(sk))===JSON.stringify(skinNorm({eq:accEq||SKIN,own:SKIN_OWN})),skinLocal=()=>{try{return JSON.parse(localStorage.getItem("chessSkin")||"null")}catch(e){return null}};
+ function saveSkins(d){if(me&&prof){const n=skinNorm(d);accEq={...n.eq};db.doc("users/"+me.uid).update({skinData:n}).then(()=>{prof.skinData=n}).catch(e=>toast(errMsg(e)))}}
+ function skinLogin(){const L=skinLocal();
+  if(prof.skinData)skinFrom(prof.skinData);
+  else if(L&&!L.by&&Array.isArray(L.own)&&(L.own.some(x=>skStr(x)&&!SK0.includes(x)&&!skAdm(...x.split(":")))||Object.entries(L.eq||{}).some(([k,v])=>v!==SKD[k]))){skinFrom(L);saveSkins({eq:{...SKIN},own:[...SKIN_OWN]})} // 계정에 저장된 스킨이 없으면, 로그인 전에 이 기기에서 모은 스킨을 처음 한 번만 가져와요
+  else skinFrom(null);
+  skinStore()}
+ function skinGuest(){const L=skinLocal();if(L&&L.by){skinFrom(null);try{localStorage.removeItem("chessSkin")}catch(e){}}}
+ function skinLive(){if(prof.skinData&&!skinSame(prof.skinData)){skinFrom(prof.skinData);skinAuth()}}
  // 로그인 후 실시간 구독: 내 프로필 · 친구 · 친구 신청 · 대전 초대
  function start(){const u=me.uid,L=(q,f)=>subs.push(q.onSnapshot(f,e=>console.warn(e))),D=q=>q.docs.map(d=>({id:d.id,...d.data()}));
-  L(db.doc("users/"+u),d=>{if(d.exists){prof=d.data();giftSync();if(prof.banned){toast("이용이 정지된 계정이에요");return logout()}bar();if(tab==="stats"&&!view)refresh()}});
+  skinLogin();
+  L(db.doc("users/"+u),d=>{if(d.exists){prof=d.data();skinLive();giftSync();if(prof.banned){toast("이용이 정지된 계정이에요");return logout()}bar();if(tab==="stats"&&!view)refresh()}});
   L(db.collection(`users/${u}/friends`),q=>{friends=D(q).map(f=>({uid:f.id,name:f.name})).sort((a,b)=>a.name.localeCompare(b.name));bar();refresh();if($("acc").classList.contains("on")&&tab==="friends")loadFi();fwatch()});
   L(db.collection("friendRequests").where("to","==",u),q=>{reqs=D(q);bar();refresh()});
   L(db.collection("games").where("inviteTo","==",u),q=>{invs=D(q).filter(g=>g.status==="invited");invUI()});
@@ -2571,11 +2593,11 @@ const Online=(()=>{
  }
  async function setName(n){
   if(!/^[가-힣A-Za-z0-9_]{2,12}$/.test(n))throw "2~12자의 한글·영문·숫자·_ 만 쓸 수 있어요";
-  const lo=n.toLowerCase(),u=me.uid,old=prof&&prof.nameLower,ref=db.doc("names/"+lo),uref=db.doc("users/"+u);
+  const lo=n.toLowerCase(),u=me.uid,old=prof&&prof.nameLower,ref=db.doc("names/"+lo),uref=db.doc("users/"+u),np=prof?null:newPid(),em=mail();
   await db.runTransaction(async t=>{const d=await t.get(ref);if(d.exists&&d.data().uid!==u)throw "이미 쓰는 닉네임이에요";
    if(!d.exists)t.set(ref,{uid:u});if(old&&old!==lo)t.delete(db.doc("names/"+old));
-   if(prof)t.update(uref,{name:n,nameLower:lo});else t.set(uref,{name:n,nameLower:lo,stats:{},createdAt:FV.serverTimestamp(),lastSeen:FV.serverTimestamp()})});
-  prof={...(prof||{stats:{}}),name:n,nameLower:lo};
+   if(prof)t.update(uref,{name:n,nameLower:lo});else t.set(uref,{name:n,nameLower:lo,pid:np,stats:{},createdAt:FV.serverTimestamp(),lastSeen:FV.serverTimestamp()});if(!prof&&em)t.set(db.doc(`users/${u}/private/contact`),{email:em})});
+  prof={...(prof||{stats:{},pid:np}),name:n,nameLower:lo};
  }
  // 접속 상태: users/{uid}.online + lastSeen(25초마다). 사이트를 닫거나 숨기면 online:false (로그인은 유지)
  // 닫는 순간엔 SDK 쓰기가 안 끝날 수 있어서, 미리 받아 둔 ID 토큰으로 REST keepalive 요청도 함께 보냄 (규칙은 똑같이 적용)
@@ -2744,13 +2766,14 @@ const Online=(()=>{
  async function admLoad(){if(!isAdmin())return ov("adm",false);adE=null;admDraw(true);
   const T=p=>p.then(q=>q,e=>{adE=e;return null});
   const[u,g,r]=await Promise.all([T(db.collection("users").get()),T(db.collection("games").where("status","==","active").get()),db.collection("friendRequests").get().then(q=>q.size,()=>null)]);
-  adU=u?u.docs.map(d=>({uid:d.id,...d.data()})):[];adG=g?g.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>ms(b.at)-ms(a.at)):[];adR=r;admDraw()}
+  adU=u?u.docs.map(d=>({uid:d.id,...d.data()})):[];adG=g?g.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>ms(b.at)-ms(a.at)):[];adR=r;admDraw();if(isOwner())admMig(adU)}
  function admDraw(ld){const T=$("admT");T.innerHTML="";
   [["dash","대시보드"],["users","사용자"],["admins","관리자 목록"],["games","대전 모니터"],["aug","증강 밸런스"],["ntc","공지"]].forEach(([k,n])=>{const b=document.createElement("button");b.textContent=n+(k==="games"&&adG.length?` (${adG.length})`:"");if(k===adTab)b.className="on";b.onclick=()=>{adTab=k;admDraw()};T.appendChild(b)});
   const B=$("admB"),need=["dash","users","games","admins"].includes(adTab);
   if(need&&(ld||!adU))return B.innerHTML='<div class="empty">불러오는 중…</div>';
   const er=need&&adE?`<div class="er">일부 정보를 불러오지 못했어요: ${esc(errMsg(adE))}</div>`:"";
   if(adTab==="dash")dashUI(B,er);else if(adTab==="users")usersUI(B,er);else if(adTab==="games"){B.innerHTML=er+gamesP(0);wire(B)}else if(adTab==="aug")augUI(B);else if(adTab==="admins")adminsUI(B,er);else ntcUI(B);
+  if(adTab==="dash"&&isOwner())backupP(B);
   if(!isOwner()){B.insertAdjacentHTML("afterbegin",`<div class="ntc">👀 ${RO_MSG}</div>`);roLock(B)}}
  function wire(B){B.querySelectorAll("[data-end]").forEach(b=>b.onclick=()=>admEnd(b.dataset.end));const a=B.querySelector("[data-gt]");if(a)a.onclick=e=>{e.preventDefault();adTab="games";admDraw()}}
  function dashUI(B,er){const M={},wk=Date.now()-7*864e5;adU.forEach(u=>["ai","online"].forEach(k=>Object.entries((u.st||{})[k]||{}).forEach(([m,x])=>{M[m]=(M[m]||0)+(x.w||0)+(x.l||0)+(x.d||0)})));
@@ -2774,6 +2797,20 @@ const Online=(()=>{
   if(!await ask(msg,k==="reset"?"초기화":u.banned?"해제":"정지"))return;
   const up=k==="reset"?{st:{ai:{},online:{}},stMig:true}:{banned:!u.banned};
   try{await db.doc("users/"+uid).update(up);Object.assign(u,up);toast(k==="reset"?"전적을 초기화했어요":u.banned?"이용을 정지했어요":"정지를 풀었어요");userRows()}catch(e){toast(errMsg(e))}}
+ // 예전에 공개 프로필(users/{uid})에 들어간 이메일을 비공개 문서로 옮기고 공개 쪽에서는 지움 (여러 번 해도 안전)
+ async function admMig(L){const x=L.filter(u=>u.email);if(!x.length)return;
+  try{for(let i=0;i<x.length;i+=200){const b=db.batch();x.slice(i,i+200).forEach(u=>{b.set(db.doc(`users/${u.uid}/private/contact`),{email:u.email});b.update(db.doc("users/"+u.uid),{email:FV.delete()})});await b.commit()}
+   x.forEach(u=>delete u.email);toast(`${x.length}명의 이메일을 비공개로 옮겼어요`)}catch(e){console.warn("migrate",e)}}
+ // 전체 백업: 계정·전적·친구·대국 기록·대전·설정을 JSON 파일 하나로 내려받음 (이메일이 들어 있으니 비공개로 보관). 로그인 시스템을 옮길 때도 이 파일이 기준이 돼요
+ function backupP(B){B.insertAdjacentHTML("beforeend",`<div class="panel" style="padding:16px"><div class="lb" style="margin-top:0">데이터 백업</div><small>계정·전적·친구·대국 기록·대전·설정을 파일 하나로 내려받아요. 이메일이 들어 있으니 다른 사람에게 보이지 않게 보관하세요.</small><div style="margin-top:10px"><button id="admBk">백업 파일 내려받기</button> <small id="admBs"></small></div></div>`);$("admBk").onclick=backup}
+ async function backup(){if(!roOK())return;const st=$("admBs"),b=$("admBk");b.disabled=true;
+  try{const D=q=>q.docs.map(d=>({id:d.id,...d.data()})),out={version:1,exportedAt:new Date().toISOString(),users:[]},us=await db.collection("users").get();let n=0;
+   for(const d of us.docs){st.textContent=`사용자 ${++n}/${us.size}`;const[f,g,c]=await Promise.all([db.collection(`users/${d.id}/friends`).get(),db.collection(`users/${d.id}/games`).get(),db.doc(`users/${d.id}/private/contact`).get()]);out.users.push({uid:d.id,...d.data(),...(c.exists?{email:c.data().email}:{}),friends:D(f),games:D(g)})}
+   const[nm,fr,gm,cf]=await Promise.all([db.collection("names").get(),db.collection("friendRequests").get(),db.collection("games").get(),db.collection("config").get()]);
+   out.names=D(nm);out.friendRequests=D(fr);out.games=D(gm);out.config=D(cf);
+   const blob=new Blob([JSON.stringify(out,function(k,v){const r=this[k];return r&&typeof r.toMillis==="function"?{__ts:r.toMillis()}:v},1)],{type:"application/json"}),a=document.createElement("a");
+   a.href=URL.createObjectURL(blob);a.download=`chess-backup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+   st.textContent=`완료 · 사용자 ${out.users.length}명`}catch(e){st.textContent="실패: "+errMsg(e)}finally{b.disabled=false}}
  // 스킨 주기: 체크한 스킨이 users/{uid}.skins에 저장됨. 체크를 풀고 저장하면 회수 (상점에서 산 스킨은 그 사람 기기에 있어서 회수 안 됨)
  // 관리자 지정/해제: 최고 관리자만. 지정된 관리자는 관리자 탭 전체를 쓸 수 있지만 다른 사람을 관리자로 만들 수는 없음
  async function admSet(uid){if(!isOwner())return toast("최고 관리자만 관리자를 지정할 수 있어요");const u=(adU||[]).find(x=>x.uid===uid),nm=u?u.name:"이 사용자",on=admUids.includes(uid);
@@ -2820,7 +2857,7 @@ const Online=(()=>{
  function ntcUI(B){B.innerHTML=`<div class="panel" style="padding:16px"><div class="lb" style="margin-top:0">로비 공지</div><textarea id="admN" maxlength="300" aria-label="로비 공지" placeholder="로비 맨 위에 보일 문구예요. 비우고 올리면 공지가 사라져요">${esc(ntcT)}</textarea><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button id="admNs">공지 올리기</button><button class="g" id="admNd">공지 내리기</button></div></div>`;
   const put=t=>!roOK()?0:db.doc("config/notice").set({text:t,by:me.uid,at:FV.serverTimestamp()}).then(()=>toast(t?"공지를 올렸어요":"공지를 내렸어요")).catch(e=>toast(errMsg(e)));
   $("admNs").onclick=()=>put($("admN").value.trim());$("admNd").onclick=()=>{$("admN").value="";put("")}}
- return{init,push,record,resign,leave,quit,dots,dot,invite,admOpen,admLoad,admin:()=>isAdmin(),owner:()=>isOwner(),me:()=>me&&prof?me:null,friends:()=>friends};
+ return{init,push,record,resign,leave,quit,dots,dot,invite,admOpen,admLoad,uid:()=>me?me.uid:"",saveSkins,eq:()=>accEq,admin:()=>isAdmin(),owner:()=>isOwner(),me:()=>me&&prof?me:null,friends:()=>friends};
 })();
 $("acx").onclick=()=>$("acc").classList.remove("on");
 
@@ -2899,8 +2936,9 @@ function skinGift(a){const g=Array.isArray(a)?a.filter(x=>typeof x==="string"):[
  if(nw.length&&SKIN_GIFT.length)toast(`관리자가 스킨을 보냈어요: ${nw.map(x=>{const[k,id]=x.split(":"),it=(SHOP[k]||[]).find(i=>i.id===id);return it?it.n+" "+{pc:"말",bd:"보드",ag:"증강"}[k]:x}).join(", ")}`);
  if(ch)skinAuth()}
 // 로그인 상태가 바뀌면: 관리자에서 나가며 못 가진 스킨을 끼고 있으면 기본으로 되돌리고, 열린 상점·장착 화면을 새로 그림
-function skinAuth(){const D={pc:"classic",bd:"green",ag:"classic"};let ch=false;Object.keys(D).forEach(k=>{if(!skOwn(k,SKIN[k])){SKIN[k]=D[k];ch=true}});if(ch){skinSave();skinApply()}if($("shp").classList.contains("on"))shopDraw()}
-function skinSave(){try{localStorage.setItem("chessSkin",JSON.stringify({eq:SKIN,own:SKIN_OWN}))}catch(e){}}
+function skinAuth(){const D={pc:"classic",bd:"green",ag:"classic"},A=Online.eq();let ch=false;Object.keys(D).forEach(k=>{const w=(A&&A[k])||SKIN[k],v=skOwn(k,w)?w:D[k];if(v!==SKIN[k]){SKIN[k]=v;ch=true}});if(ch){skinStore();skinApply()}if($("shp").classList.contains("on"))shopDraw()}
+function skinStore(){try{localStorage.setItem("chessSkin",JSON.stringify({eq:{...SKIN},own:[...SKIN_OWN],by:Online.uid()}))}catch(e){}}
+function skinSave(){skinStore();Online.saveSkins({eq:{...SKIN},own:[...SKIN_OWN]})}
 const BDS=["wood","glass","neon","dragon","crys"]; // CSS 클래스로 그리는 보드 스킨
 function skinApply(){const pv=$("pv");BDS.forEach(x=>{$("bd").classList.toggle(x,SKIN.bd===x);if(pv)pv.classList.toggle(x,SKIN.bd===x)});document.documentElement.dataset.ag=SKIN.ag;drawPreview();if(S)render()}
 function skinGet(k,id){if(skOwn(k,id))return;SKIN_OWN.push(k+":"+id);
