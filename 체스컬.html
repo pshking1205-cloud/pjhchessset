@@ -197,6 +197,20 @@ body.ingame .nav>*:not(#gear):not(.sp){display:none!important}
 #opo{z-index:50}#opo .pop{max-width:380px;max-height:88vh;overflow:auto;text-align:left}#opo h3{margin:0 0 12px;padding-right:44px}#opo .xb{border-radius:50%;width:34px;height:34px;padding:0}
 #opo .opt.soon{opacity:.5;cursor:default}#opo .opt.soon:hover{filter:none}
 
+/* 로비 체스판 위 내 아이콘·이름 (누르면 프로필 창) */
+.pme{display:flex;align-items:center;gap:10px;min-width:0}
+.pme .pmb{margin:0;padding:0;border:0;background:none;box-shadow:none;cursor:pointer;border-radius:8px;flex:none}
+.pme .pmb:hover .pav{filter:brightness(1.12)}.pme .pmb:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.pme b{font-size:16px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pav{width:40px;height:40px;border-radius:8px;display:grid;place-items:center;background:var(--pg,#81b64c);flex:none;overflow:hidden}
+.pav svg{width:80%;height:80%}.pav.big{width:64px;height:64px;border-radius:12px}
+#pfo{z-index:52}#pfo .pop{max-width:440px}
+.pfh{display:flex;align-items:center;gap:12px;margin:0 30px 10px 0}.pfh b{font-size:18px;display:block}.pfh small{color:var(--mut)}
+.pfg{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin:6px 0}
+.pfg button{margin:0;padding:3px;aspect-ratio:1;display:grid;place-items:center;border-radius:8px;background:var(--card2);border:2px solid transparent;box-shadow:none}
+.pfg button.on{border-color:var(--ac)}.pfg button svg{width:82%;height:82%}
+.pfc{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.pfc button{margin:0;width:30px;height:30px;padding:0;border-radius:50%;border:3px solid transparent;box-shadow:none}.pfc button.on{border-color:var(--fg)}
 /* 로비 */
 #mn{z-index:40;top:calc(var(--navh) + env(safe-area-inset-top,0px));background:var(--bg);overflow:auto;padding:0}
 #mn.on{display:block}
@@ -1242,6 +1256,7 @@ html[data-ag="crys"] #cv :is(.uab,.luua){display:none!important}
  <div class="lobby">
   <section class="hero">
    <div id="ntc" class="ntc" style="display:none"></div>
+   <div class="pme" id="pme"><button class="pmb" id="pmeB" aria-label="내 프로필 보기·편집"></button><b id="pmeN"></b></div>
    <div id="pv" aria-hidden="true"></div>
   </section>
   <section class="play">
@@ -1271,6 +1286,7 @@ html[data-ag="crys"] #cv :is(.uab,.luua){display:none!important}
 <div class="ov" id="wdo" style="background:rgba(0,0,0,.35);z-index:25;pointer-events:none"><div class="pop" style="max-width:280px;font-weight:700">상대가 증강을 고르는 중이에요</div></div>
 <div class="ov" id="opo"><div class="pop" role="dialog" aria-labelledby="opT"><button class="g xb" id="opX" aria-label="닫기">✕</button><h3 id="opT"></h3><div class="opts" id="opb"></div><div id="opx"></div><button id="opGo">게임 시작</button></div></div>
 <div class="ov" id="ask"><div class="pop"><div id="askT" style="font-weight:700;line-height:1.5"></div><div class="rb"><button class="g" id="askN">취소</button><button id="askY">확인</button></div></div></div>
+<div class="ov" id="pfo"><div class="pop wd"><button class="g xb" id="pfX" aria-label="닫기">✕</button><div id="pfB"></div></div></div>
 <div id="tst"></div>
 <div class="ov" id="shp"><div class="shw">
  <nav class="shs" id="shS" aria-label="상점 분류"><h1>상점</h1></nav>
@@ -1818,7 +1834,7 @@ const STD={id:"standard",name:"♔ 표준 체스",coords:true,undo:true,cards:fa
   if(n.over)n.msg=n.over.why;
   return n;
  },
- info:s=>`50수 규칙: ${s.hm>>1}/50 · 같은 局面 최대 반복 ${Math.max(...Object.values(s.reps))}회`
+ info:s=>""
 };
 // 증강 체스 (나무위키 '증강체스' 규칙·미들 COMMON 증강 참고, 문구는 직접 요약): 킹을 잡아야 승리 · 스테일메이트는 당한 쪽 패배 · 시작 및 6수(양쪽 합쳐 12번 이동)마다 3장 중 1장 선택 · s.nd = 다음 증강 선택 시점
 const AUGS={
@@ -2286,7 +2302,7 @@ function showAug(id){augSel=augSel===id?null:id;render()}
 let sM="standard",sO=1,sL="보통",sF=null; // sO: 0=한 기기 2인 1=AI 2=친구(온라인) 3=일반 매칭 4=랭크 매칭
 function applyTheme(id){const t=CONFIG.themes.find(x=>x.id===id),r=document.documentElement;
  ["bg","fg","card","bd","ac","lt","dk"].forEach(k=>r.style.setProperty("--"+k,t[k]));r.dataset.theme=t.dark?"dark":"light";r.style.colorScheme=t.dark?"dark":"light"}
-const pname=n=>net?(net.names[n]||"?")+(n===net.seat?"(나)":""):n===1&&ai?"AI":"플레이어"+(n+1);
+const pname=n=>net?(net.names[n]||"?")+(n===net.seat?"(나)":""):n===1&&ai?"AI":ai&&n===0?Online.myName():"플레이어"+(n+1);
 const aiTurn=()=>ai&&S.seat[S.turn]===1;
 const actor=()=>S.draft&&S.draft.length?S.seat[S.draft[0].c]:S.seat[S.turn]; // 지금 조작할 좌석(증강 선택 중이면 고르는 쪽)
 const lockTurn=()=>aiTurn()||(!!net&&actor()!==net.seat);
@@ -2440,6 +2456,7 @@ function resultUI(){const w=S.over.win,me=net?net.seat:ai?0:-1,res=!w?"draw":me<
  const L=me>=0&&S.seat.b===me?["b","w"]:["w","b"];$("rpl").innerHTML=card(L[0])+'<span class="vs">vs</span>'+card(L[1]);
  const ag=net?Online.againLabel():null;$("rn").style.display=net?"none":"";$("rag").style.display=ag?"":"none";if(ag)$("rag").textContent=ag}
 $("rag").onclick=()=>{$("rso").classList.remove("on");Online.again()};
+$("pmeB").onclick=()=>Online.profile();$("pfX").onclick=()=>$("pfo").classList.remove("on");
 // 로비 메뉴(#mn)가 열려 있는지에 따라 게임 화면 표시(ingame)를 켜고 끔
 new MutationObserver(()=>document.body.classList.toggle("ingame",!$("mn").classList.contains("on"))).observe($("mn"),{attributes:true,attributeFilter:["class"]});document.body.classList.toggle("ingame",!$("mn").classList.contains("on"));
 $("rc").onclick=()=>{dismissed=true;$("rso").classList.remove("on")};
@@ -2525,7 +2542,7 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";"
 const Online=(()=>{
  const ON=!!(FIREBASE_CONFIG.apiKey&&FIREBASE_CONFIG.projectId),SDK="https://www.gstatic.com/firebasejs/10.12.2/firebase-";
  const ms=t=>t?(t.toMillis?t.toMillis():+t):0,OLD={random:"🎲 랜덤 체스",speed:"⏱ 속도 체스",card:"🃏 카드 체스"},mname=id=>(MODES.find(m=>m.id===id)||{name:OLD[id]||id}).name,RES={w:"승",l:"패",d:"무"};
- let auth,db,FV,me=null,prof=null,stK="ai",friends=[],reqs=[],invs=[],subs=[],fsub={},tok=null,hb,tab="stats",fi={},view=null,waitUn=null,shownInv=null;
+ let auth,db,FV,me=null,prof=null,stK="normal",friends=[],reqs=[],invs=[],subs=[],fsub={},tok=null,hb,tab="stats",fi={},view=null,waitUn=null,shownInv=null;
  const load=src=>new Promise((ok,no)=>{const s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s)});
  const ov=(id,on)=>$(id).classList.toggle("on",on);
  // pid: 로그인 방식(uid)과 상관없는 영구 번호. 나중에 로그인 시스템을 바꿔도 이 번호와 이메일로 계정을 이어 줘요. 이메일은 공개 프로필이 아니라 users/{uid}/private/contact에만 저장
@@ -2578,7 +2595,7 @@ const Online=(()=>{
   L(db.collection("games").where("inviteTo","==",u),q=>{invs=D(q).filter(g=>g.status==="invited");invUI()});
   // 내가 없을 때 끝난 대전(pendW/pendB=true)은 다음 접속 때 전적에 반영
   ["w","b"].forEach(k=>L(db.collection("games").where(k,"==",u).where(k==="w"?"pendW":"pendB","==",true),q=>D(q).forEach(settle)));
-  if(!prof.stMig)games(u).then(q=>db.doc("users/"+u).update({st:tally(q.docs),stMig:true})).catch(e=>console.warn("stMig",e));
+  if(!prof.stMig)games(u).then(q=>db.doc("users/"+u).update({st:stAgg(q.docs),stMig:true})).catch(e=>console.warn("stMig",e));
   beat();hb=setInterval(beat,25000);
  }
  const giftSync=()=>skinGift(me&&prof&&admUids.includes(me.uid)?prof.skins:[]);
@@ -2586,7 +2603,34 @@ const Online=(()=>{
  const refresh=()=>{if($("acc").classList.contains("on"))panel()};
 
  /* --- 메뉴 상단 계정 영역 --- */
- function bar(){const b=$("acb");
+ /* --- 내 프로필: 로비 체스판 위 아이콘·이름. 아이콘을 누르면 편집(아이콘·이름)과 전적(일반·랭크) --- */
+ const PAVBG=["#81b64c","#5a8dee","#e0b13a","#d84a3a","#9b59d0","#3fbfae","#8a8780","#3b3833"],PAVP=["K","Q","R","B","N","P"];
+ const avParse=s=>{const[a,c,g]=String(s||"").split(".");return{p:PAVP.includes(a)?a:"K",c:c==="b"?"b":"w",g:Math.min(PAVBG.length-1,Math.max(0,+g||0))}},avStr=a=>`${a.p}.${a.c}.${a.g}`;
+ const avHtml=(s,big)=>{const a=avParse(s);return`<span class="pav${big?" big":""}" style="--pg:${PAVBG[a.g]}">${pcSvg(a.p,a.c,"classic")}</span>`};
+ const guest=()=>{try{return JSON.parse(localStorage.getItem("chessMe")||"null")||{}}catch(e){return{}}};
+ const myName=()=>me&&prof?prof.name:(guest().name||"게스트"),myAv=()=>me&&prof?(prof.av||""):(guest().av||"");
+ function meDraw(){const b=$("pmeB");if(!b)return;b.innerHTML=avHtml(myAv());$("pmeN").textContent=myName()}
+ let pfEdit=false;
+ function profile(){pfEdit=false;pfDraw();ov("pfo",true)}
+ function pfDraw(){const B=$("pfB"),lg=!!(me&&prof);
+  B.innerHTML=`<div class="pfh">${avHtml(myAv(),true)}<div style="min-width:0"><b>${esc(myName())}</b><small>${lg?"":"로그인하지 않음 · 이 기기에만 저장돼요"}</small></div><button class="g" id="pfEd" style="margin:0 0 0 auto">${pfEdit?"편집 닫기":"편집"}</button></div><div id="pfE"></div><div id="pfS" style="margin-top:6px"></div>`;
+  $("pfEd").onclick=()=>{pfEdit=!pfEdit;pfDraw()};if(pfEdit)pfEditUI($("pfE"));
+  if(lg)statsUI($("pfS"),me.uid,prof,false,true);
+  else{$("pfS").innerHTML=`<div class="md">로그인하면 일반 게임·랭크 게임 전적이 기록돼요.</div><button id="pfL" style="width:100%">로그인</button>`;$("pfL").onclick=()=>{ov("pfo",false);ON?loginUI():toast("로그인을 쓸 수 없어요")}}}
+ function pfEditUI(E){const sel=avParse(myAv());
+  const draw=n=>{E.innerHTML=`<div class="lb" style="margin-top:2px">아이콘</div><div class="pfg">${["w","b"].flatMap(c=>PAVP.map(t=>`<button data-p="${t}" data-c="${c}" class="${sel.p===t&&sel.c===c?"on":""}" aria-label="아이콘 고르기">${pcSvg(t,c,"classic")}</button>`)).join("")}</div>
+   <div class="lb">배경색</div><div class="pfc">${PAVBG.map((g,i)=>`<button data-g="${i}" class="${sel.g===i?"on":""}" style="background:${g}" aria-label="배경색 ${i+1}"></button>`).join("")}</div>
+   <div class="lb">이름</div><input id="pfNm" maxlength="12" value="${esc(n)}"><div class="er" id="pfR"></div><button id="pfSv" style="width:100%">저장</button>`;
+   const pv=$("pfB").querySelector(".pfh .pav");if(pv)pv.outerHTML=avHtml(avStr(sel),true); // 고른 아이콘을 위쪽에 미리 보여 줌
+   E.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{sel.p=b.dataset.p;sel.c=b.dataset.c;draw($("pfNm").value)});
+   E.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{sel.g=+b.dataset.g;draw($("pfNm").value)});
+   $("pfSv").onclick=save;$("pfNm").onkeydown=e=>{if(e.key==="Enter")save()}};
+  async function save(){const n=$("pfNm").value.trim(),av=avStr(sel);
+   try{if(me&&prof){if(n!==prof.name)await setName(n);if(av!==(prof.av||"")){await db.doc("users/"+me.uid).update({av});prof.av=av}}
+    else{if(!/^[가-힣A-Za-z0-9_]{2,12}$/.test(n))throw "2~12자의 한글·영문·숫자·_ 만 쓸 수 있어요";try{localStorage.setItem("chessMe",JSON.stringify({name:n,av}))}catch(e){}}
+    toast("프로필을 저장했어요");pfEdit=false;pfDraw();bar()}catch(e){$("pfR").textContent=typeof e==="string"?e:errMsg(e)}}
+  draw(myName())}
+ function bar(){meDraw();const b=$("acb");
   if(!ON)b.innerHTML=`<button class="g" id="abL">🔒 로그인</button>`;
   else if(!me)b.innerHTML=`<button id="abL">로그인</button>`;
   else if(!prof)b.innerHTML=`<button class="g" id="abN">닉네임 정하기</button>`;
@@ -2657,21 +2701,24 @@ const Online=(()=>{
  function statsTable(st){st=st||{};const T={w:0,l:0,d:0},row=(n,x)=>{const g=x.w+x.l+x.d;return`<tr><td>${n}</td><td>${x.w}</td><td>${x.l}</td><td>${x.d}</td><td>${g?Math.round(x.w*100/g)+"%":"-"}</td></tr>`};
   const rows=MODES.map(m=>{const x={w:0,l:0,d:0,...(st[m.id]||{})};T.w+=x.w;T.l+=x.l;T.d+=x.d;return row(m.name,x)}).join("");
   return`<table class="tb"><tr><th>모드</th><th>승</th><th>패</th><th>무</th><th>승률</th></tr>${rows}${row("<b>합계</b>",T)}</table>`}
- // 전적은 AI 대전(st.ai)·온라인 대전(st.online)으로 나눠 저장. 예전 합산 stats만 있는 계정은 대국 기록에서 다시 계산
+ // 전적: 일반 게임(친구 대전 포함)·랭크 게임. users/{uid}/games의 대국 기록에서 직접 셈 (AI 대전·한 기기 2인은 보여 주지 않음)
  const games=(u,n)=>{const q=db.collection(`users/${u}/games`).orderBy("at","desc");return(n?q.limit(n):q).get()};
- function tally(docs){const st={ai:{},online:{}};docs.forEach(x=>{const g=x.data(),k=g.online?"online":"ai",m=st[k][g.mode]=st[k][g.mode]||{w:0,l:0,d:0};if(g.res in m)m[g.res]++});return st}
- function statsUI(p,uid,d,back){
-  const tt=`<b>${esc(d.name||"")}</b>님의 전적`;
-  p.innerHTML=(back?`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><button class="g" id="stB" style="margin:0;padding:3px 8px;font-size:12px">← 친구 목록</button><span style="text-align:right">${tt}</span></div>`:tt)+`${rankRow(d,uid)}
-  <div class="tabs" id="stK" style="margin-top:6px"><button data-k="ai">🤖 AI 대전</button><button data-k="online">🌐 온라인 대전</button></div><div id="stT" style="margin-top:6px"></div>
-  <div class="lb">최근 대국</div><div id="stR" style="font-size:12px">불러오는 중…</div>${back?"":`<div style="font-size:11px;opacity:.6;margin-top:8px">로그인한 상태에서 AI 대결과 친구 온라인 대전 결과가 기록돼요. (한 기기 2인 대결은 제외)</div>`}`;
+ const gkind=g=>!g.online?null:g.kind==="ranked"||g.ranked?"ranked":"normal";
+ // users/{uid}.st(관리자 화면용 합계)는 예전처럼 AI·온라인으로 나눠 셈
+ function stAgg(docs){const st={ai:{},online:{}};docs.forEach(x=>{const g=x.data(),m=st[g.online?"online":"ai"],r=m[g.mode]=m[g.mode]||{w:0,l:0,d:0};if(g.res in r)r[g.res]++});return st}
+ function tally(docs){const st={normal:{},ranked:{}};docs.forEach(x=>{const g=x.data(),k=gkind(g);if(!k)return;const m=st[k][g.mode]=st[k][g.mode]||{w:0,l:0,d:0};if(g.res in m)m[g.res]++});return st}
+ function statsUI(p,uid,d,back,noTitle){
+  const tt=noTitle?"":`<b>${esc(d.name||"")}</b>님의 전적`;
+  p.innerHTML=(back?`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><button class="g" id="stB" style="margin:0;padding:3px 8px;font-size:12px">← 친구 목록</button><span style="text-align:right">${tt}</span></div>`:tt)+`
+  <div class="tabs" id="stK" style="margin-top:6px"><button data-k="normal">일반 게임</button><button data-k="ranked">랭크 게임</button></div><div id="stT" style="margin-top:6px"></div>
+  <div class="lb">최근 대국</div><div id="stR" style="font-size:12px">불러오는 중…</div>${back?"":`<div style="font-size:11px;opacity:.6;margin-top:8px">온라인 대전 결과만 기록돼요. 친구 대전은 일반 게임에 함께 들어가요.</div>`}`;
   if(back)$("stB").onclick=()=>{view=null;panel()};
-  let st=d.stMig?d.st:null,docs=null;
+  let st=null,docs=null;
   const show=()=>{$("stK").querySelectorAll("button").forEach(b=>{b.className=b.dataset.k===stK?"on":"";b.onclick=()=>{stK=b.dataset.k;show()}});
-   $("stT").innerHTML=st?statsTable(st[stK]):"불러오는 중…";if(!docs)return;
-   $("stR").innerHTML=docs.map(x=>x.data()).filter(g=>!!g.online===(stK==="online")).slice(0,20).map(g=>{const t=ms(g.at);return`<div class="li"><span>${t?new Date(t).toLocaleDateString():""} · ${mname(g.mode)} · vs ${esc(g.opp)}<br><small style="opacity:.7">${esc(g.why)}</small></span><b>${RES[g.res]||""}${g.ranked?(g.pl?` <small>배치 ${g.pl}/5</small>`:typeof g.d==="number"?` <small>${g.d>=0?"+":""}${g.d}</small>`:""):""}</b></div>`}).join("")||"아직 기록이 없어요"};
+   $("stT").innerHTML=(stK==="ranked"?rankRow(d,uid):"")+(st?statsTable(st[stK]):"불러오는 중…");if(!docs)return;
+   $("stR").innerHTML=docs.map(x=>x.data()).filter(g=>gkind(g)===stK).slice(0,20).map(g=>{const t=ms(g.at);return`<div class="li"><span>${t?new Date(t).toLocaleDateString():""} · ${mname(g.mode)} · vs ${esc(g.opp)}<br><small style="opacity:.7">${esc(g.why)}</small></span><b>${RES[g.res]||""}${g.ranked?(g.pl?` <small>배치 ${g.pl}/5</small>`:typeof g.d==="number"?` <small>${g.d>=0?"+":""}${g.d}</small>`:""):""}</b></div>`}).join("")||"아직 기록이 없어요"};
   show();
-  games(uid,st?60:0).then(q=>{if(!$("stR"))return;docs=q.docs;if(!st)st=tally(docs);show()})
+  games(uid,0).then(q=>{if(!$("stR"))return;docs=q.docs;st=tally(docs);show()})
    .catch(e=>{const r=$("stR");if(r)r.textContent=errMsg(e)});
  }
  // 친구 접속 상태: online!==false이고 lastSeen이 60초 안이면 🟢. dot은 아직 모르면 빈 문자열
@@ -2911,7 +2958,8 @@ const Online=(()=>{
   const msg=k==="reset"?`${u.name}님의 전적을 모두 0으로 초기화할까요? 되돌릴 수 없어요.`:u.banned?`${u.name}님의 이용 정지를 풀까요?`:`${u.name}님을 이용 정지할까요? 접속 중이면 바로 로그아웃돼요.`;
   if(!await ask(msg,k==="reset"?"초기화":u.banned?"해제":"정지"))return;
   const up=k==="reset"?{st:{ai:{},online:{}},stMig:true}:{banned:!u.banned};
-  try{await db.doc("users/"+uid).update(up);Object.assign(u,up);toast(k==="reset"?"전적을 초기화했어요":u.banned?"이용을 정지했어요":"정지를 풀었어요");userRows()}catch(e){toast(errMsg(e))}}
+  try{if(k==="reset"){const q=await db.collection(`users/${uid}/games`).get();for(let i=0;i<q.docs.length;i+=400){const b=db.batch();q.docs.slice(i,i+400).forEach(d=>b.delete(d.ref));await b.commit()}}
+   await db.doc("users/"+uid).update(up);Object.assign(u,up);toast(k==="reset"?"전적을 초기화했어요":u.banned?"이용을 정지했어요":"정지를 풀었어요");userRows()}catch(e){toast(errMsg(e))}}
  // 예전에 공개 프로필(users/{uid})에 들어간 이메일을 비공개 문서로 옮기고 공개 쪽에서는 지움 (여러 번 해도 안전)
  async function admMig(L){const x=L.filter(u=>u.email);if(!x.length)return;
   try{for(let i=0;i<x.length;i+=200){const b=db.batch();x.slice(i,i+200).forEach(u=>{b.set(db.doc(`users/${u.uid}/private/contact`),{email:u.email});b.update(db.doc("users/"+u.uid),{email:FV.delete()})});await b.commit()}
@@ -2972,7 +3020,7 @@ const Online=(()=>{
  function ntcUI(B){B.innerHTML=`<div class="panel" style="padding:16px"><div class="lb" style="margin-top:0">로비 공지</div><textarea id="admN" maxlength="300" aria-label="로비 공지" placeholder="로비 맨 위에 보일 문구예요. 비우고 올리면 공지가 사라져요">${esc(ntcT)}</textarea><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button id="admNs">공지 올리기</button><button class="g" id="admNd">공지 내리기</button></div></div>`;
   const put=t=>!roOK()?0:db.doc("config/notice").set({text:t,by:me.uid,at:FV.serverTimestamp()}).then(()=>toast(t?"공지를 올렸어요":"공지를 내렸어요")).catch(e=>toast(errMsg(e)));
   $("admNs").onclick=()=>put($("admN").value.trim());$("admNd").onclick=()=>{$("admN").value="";put("")}}
- return{init,push,record,resign,leave,quit,dots,dot,invite,admOpen,admLoad,match,again,againLabel,rating:m=>rkOf(prof,m),rankText:m=>me&&prof?rankOf(prof,me.uid,m):"로그인하면 등급이 생겨요",uid:()=>me?me.uid:"",saveSkins,eq:()=>accEq,admin:()=>isAdmin(),owner:()=>isOwner(),me:()=>me&&prof?me:null,friends:()=>friends};
+ return{init,push,record,resign,leave,quit,dots,dot,invite,admOpen,admLoad,match,again,againLabel,profile,myName,rating:m=>rkOf(prof,m),rankText:m=>me&&prof?rankOf(prof,me.uid,m):"로그인하면 등급이 생겨요",uid:()=>me?me.uid:"",saveSkins,eq:()=>accEq,admin:()=>isAdmin(),owner:()=>isOwner(),me:()=>me&&prof?me:null,friends:()=>friends};
 })();
 $("acx").onclick=()=>$("acc").classList.remove("on");
 
