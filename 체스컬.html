@@ -90,10 +90,16 @@ body.ingame .nav>*:not(#gear):not(.sp){display:none!important}
 #tmr,#tmr2{font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
 #hs{max-height:250px;overflow:auto;font-family:var(--f-mono);font-size:13px}
 .mr{display:grid;grid-template-columns:44px 1fr 1fr;padding:5px 14px}.mr:nth-child(odd){background:rgba(127,127,127,.07)}
-.mr i{font-style:normal;color:var(--mut)}.mr span{justify-self:start;padding:0 6px;border-radius:3px;min-width:0;overflow-wrap:anywhere}.mr span.cur{background:var(--card2);font-weight:700}
+.mr i{font-style:normal;color:var(--mut)}
+/* 기보 머리줄(백·흑)과 칸 앞 색 점 */
+.mr.mh{position:sticky;top:0;background:var(--card);font-family:inherit;font-size:11px;font-weight:700;color:var(--mut);padding-top:6px;padding-bottom:6px;border-bottom:1px solid var(--bd);z-index:1}
+.mr span.w::before,.mr span.b::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px;border:1px solid #777}
+.mr span.w::before{background:#f2f2f2}.mr span.b::before{background:#222}.mr span{justify-self:start;padding:0 6px;border-radius:3px;min-width:0;overflow-wrap:anywhere}.mr span.cur{background:var(--card2);font-weight:700}
 #hs>div:not(.mr){padding:4px 14px}
 .empty{padding:14px;color:var(--mut);font-family:var(--f-body)}
 #inf{padding:12px 14px;font-size:13px;line-height:1.6}
+.dlg{margin-top:8px;font-size:12px}.dlg .lb{margin:0 0 2px}.dlg b,.dlg span{cursor:pointer}.dlg span{opacity:.55}
+.wdl{display:flex;flex-direction:column;gap:6px;margin-top:10px;font-weight:400;font-size:13px}
 .ag2{cursor:pointer;display:inline-block;padding:2px 8px;margin:2px;border:1px solid var(--bd);border-radius:999px;background:var(--card2)}.ag2.u{opacity:.5}
 /* 증강 칩 등급 색: COMMON 회색 · RARE 파랑 · EPIC 자주 · LEGEND 금 · LUNACY 장미 */
 .ag2 .rkt{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.5px;padding:0 5px;margin-right:4px;border-radius:999px;color:#fff;vertical-align:1px}
@@ -1230,10 +1236,13 @@ html[data-ag="crys"] #cv :is(.uab,.luua){display:none!important}
 
 /* 상점: 등급 배지 · 세트 표시 · 증강 스킨 미리보기 */
 .skr{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.5px;padding:1px 7px;border-radius:999px;background:#7d828c;color:#fff;flex:0 0 auto}
-.shr small{font-size:12px;white-space:nowrap}.shi.lk .sht{filter:grayscale(.75) brightness(.7)}
+.shr small{font-size:12px;white-space:nowrap}
+/* 좁은 화면: 이름이 잘리지 않게 이름 줄과 등급·세트 줄을 나눔 */
+@media (max-width:520px){.shr{flex-wrap:wrap;row-gap:4px}.shr b{flex:1 0 100%}}.shi.lk .sht{filter:grayscale(.75) brightness(.7)}
 .sks{font-size:13px;color:var(--mut);background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:9px 12px;line-height:1.5}.sks b{color:var(--fg)}
 .agm{width:100%;height:100%;display:flex;align-items:center;justify-content:center;gap:5%;background:radial-gradient(ellipse at 50% 30%,#3a3632,#1d1b19)}
 .agm .dc,.agv .dc{animation:none;pointer-events:none}
+.agz{width:245px;height:245px;flex:none;display:flex;align-items:center;justify-content:center;gap:inherit}
 .agm .dc{width:29%;padding:2px!important;border-radius:7px}
 /* 루나시 카드 한 장만 보여 주므로 크게 */.agm .dc{width:42%}.agm .dcn{font-size:13px!important}.agm .dct{font-size:9px!important}
 .agm .dcf{min-height:0;aspect-ratio:3/4.3;padding:10% 4%;gap:5%;border-radius:5px}
@@ -1289,7 +1298,7 @@ html[data-ag="crys"] #cv :is(.uab,.luua){display:none!important}
 <div class="ov" id="acc"><div class="pop wd"><button class="g xb" id="acx">✕</button><div class="tabs" id="act" style="margin-right:44px"></div><div id="acp" style="margin-top:12px"></div></div></div>
 <div class="ov" id="ivo"><div class="pop" id="ivb"></div></div>
 <div class="ov" id="wto"><div class="pop" id="wtb"></div></div>
-<div class="ov" id="wdo" style="background:rgba(0,0,0,.35);z-index:25;pointer-events:none"><div class="pop" style="max-width:280px;font-weight:700">상대가 증강을 고르는 중이에요</div></div>
+<div class="ov" id="wdo" style="background:rgba(0,0,0,.35);z-index:25;pointer-events:none"><div class="pop" id="wdoP" style="max-width:300px;font-weight:700">상대가 증강을 고르는 중이에요</div></div>
 <div class="ov" id="opo"><div class="pop" role="dialog" aria-labelledby="opT"><button class="g xb" id="opX" aria-label="닫기">✕</button><h3 id="opT"></h3><div class="opts" id="opb"></div><div id="opx"></div><button id="opGo">게임 시작</button></div></div>
 <div class="ov" id="ask"><div class="pop"><div id="askT" style="font-weight:700;line-height:1.5"></div><div class="rb"><button class="g" id="askN">취소</button><button id="askY">확인</button></div></div></div>
 <div class="ov" id="pfo"><div class="pop wd"><button class="g xb" id="pfX" aria-label="닫기">✕</button><div id="pfB"></div></div></div>
@@ -1831,7 +1840,7 @@ const STD={id:"standard",name:"♔ 표준 체스",coords:true,undo:true,cards:fa
   const ls=Engine.all(n),ck=Engine.inCheck(n.b,you);
   let san=mv.castle?(mv.to>mv.from?"O-O":"O-O-O"):(p.t==="P"?(cap?FILE[mv.from&7]+"x":""):(p.t+(cap?"x":"")))+(mv.castle?"":sqName(mv.to))+(mv.promo?"="+mv.promo:"");
   san+=ck?(ls.length?"+":"#"):"";
-  n.log=[...s.log,san];n.reps={...s.reps};const k=Engine.key(n);n.reps[k]=(n.reps[k]||0)+1;
+  n.log=[...s.log,san];n.lc=lcAdd(s,me);n.reps={...s.reps};const k=Engine.key(n);n.reps[k]=(n.reps[k]||0)+1;
   n.msg=(you==="w"?"백":"흑")+" 차례"+(ck&&ls.length?" · 체크!":"");
   if(!ls.length)n.over=ck?{win:me,why:"체크메이트"}:{win:null,why:"스테일메이트"};
   else if(Engine.insufficient(n.b))n.over={win:null,why:"기물 부족"};
@@ -2054,6 +2063,8 @@ const OPEN={
  iqp(n,c){const hs=c==="w"?[12,10]:[52,50];n.b=n.b.slice();hs.forEach(i=>{if(n.b[i]&&n.b[i].t==="P"&&n.b[i].c!==c)n.b[i]=null})},
  ban(n,c){n.bans=[...n.bans,{c:opp(c),left:8}]}
 };
+// 기보의 각 수를 둔 색 (예전 판은 lc가 없어서 번갈아 둔 것으로 봄)
+const lcAdd=(s,c)=>[...(s.lc||s.log.map((_,i)=>i&1?"b":"w")),c];
 const mkDraft=(s,c)=>{const own=s.aug[c].map(a=>a.id),pool=Object.keys(AUGS).filter(k=>!own.includes(k)&&!AUG_OFF.has(k)&&(s.n===0?!!AUGS[k].o:!AUGS[k].o));
  const tiers=[...new Set(pool.map(k=>AUGS[k].r))];
  const tw=r=>AUGW[r]*pool.filter(k=>AUGS[k].r===r).length,tot=tiers.reduce((a,r)=>a+tw(r),0);
@@ -2066,7 +2077,7 @@ const mkDraft=(s,c)=>{const own=s.aug[c].map(a=>a.id),pool=Object.keys(AUGS).fil
 const AUGC={...STD,id:"augment",name:"✦ 증강 체스",
  setup(){const s=Engine.initial();Engine.setX(augXM);s.aug={w:[],b:[]};s.eff=[];s.fz=[];s.st=[];s.kp=[];s.bans=[];s.chk={w:0,b:0};s.bq=[];s.pal=[];s.icbm=null;s.gale=null;s.only=null;s.pan=null;s.n=0;s.nd=12;s.reps={};
   s.draft=[mkDraft(s,"w"),mkDraft(s,"b")];s.msg="게임 시작! 먼저 증강을 고르세요";return s},
- pick(s,id){const q=s.draft[0],n={...s,aug:{...s.aug,[q.c]:[...s.aug[q.c],{id,used:false}]},draft:s.draft.slice(1)};
+ pick(s,id){const q=s.draft[0],n={...s,dlog:[...(s.dlog||[]),{c:q.c,o:q.opts,id}],aug:{...s.aug,[q.c]:[...s.aug[q.c],{id,used:false}]},draft:s.draft.slice(1)};
   if(OPEN[id])OPEN[id](n,q.c);
   // 획득 즉시 효과 (하얀 상자로 얻은 증강도 같은 효과를 받음)
   const acq=k=>{
@@ -2166,7 +2177,7 @@ const AUGC={...STD,id:"augment",name:"✦ 증강 체스",
    if(cap&&p.frz)extra2=true;
    if(cap&&A2.includes("guard"))n.kp.push({c:you,until:K+3});
   }
-  n.log=[...s.log,(p.t==="P"?(cap?FILE[mv.from&7]+"x":""):p.t+(cap?"x":""))+(blocked?"⊘":"")+sqName(mv.to)+(mv.promo?"="+mv.promo:"")];
+  n.lc=lcAdd(s,me);n.log=[...s.log,(p.t==="P"?(cap?FILE[mv.from&7]+"x":""):p.t+(cap?"x":""))+(blocked?"⊘":"")+sqName(mv.to)+(mv.promo?"="+mv.promo:"")];
   if(cap&&cap.t==="K"){n.over={win:me,why:"킹 포획"};n.msg="킹 포획!";n.turn=you;return n}
   n.b=n.b.map(q=>q&&q.c===me&&q.zb?(q.zb>1?{...q,zb:q.zb-1}:{...q,zb:0,t:q.t==="P"?"Q":q.t}):q);
   if((s.bans||[]).length){n.bans=s.bans.map(x=>x.c===me?{...x,left:x.left-1}:x).filter(x=>x.left>0);if(cap||Engine.inCheck(n.b,"w")||Engine.inCheck(n.b,"b"))n.bans=[]}
@@ -2237,6 +2248,8 @@ const AUGC={...STD,id:"augment",name:"✦ 증강 체스",
  // 얻은 증강 표시: 칩 색과 앞의 등급 글자로 등급을 바로 알 수 있게 (C·R·E·L·LU)
  info(s){const RA={COMMON:"C",RARE:"R",EPIC:"E",LEGEND:"L",LUNACY:"LU"},row=c=>s.aug[c].map(a=>{const d=AUGS[a.id],r=RA[d.r]?d.r:"COMMON";return`<span class="ag2 rk-${r}${a.used?" u":""}" title="${a.wb?"하얀 상자.":""}${d.n} [${r}] ${d.d}" onclick="showAug('${a.id}')"><i class="rkt">${RA[r]}</i>${d.p?"🔹":a.used?"▫️":"🔸"}${a.wb?"하얀 상자.":""}${d.n}</span>`}).join(" ")||"-";
   let o=`백: ${row("w")}<br>흑: ${row("b")}<br><small>🔹PASSIVE 🔸사용 가능 ▫️사용함 · 이름을 누르면 설명이 나와요</small>`;
+  // 증강 선택 기록: 그때 나온 증강 3개 중 고른 것은 굵게 (상대가 무엇을 받고 골랐는지 볼 수 있음)
+  if((s.dlog||[]).length)o+=`<div class="dlg"><div class="lb">증강 선택 기록</div>${s.dlog.map(x=>`<div>${x.c==="w"?"백":"흑"} · ${x.o.map(id=>{const d=AUGS[id]||{n:id};return id===x.id?`<b onclick="showAug('${id}')">${d.n}</b>`:`<span onclick="showAug('${id}')">${d.n}</span>`}).join(" · ")}</div>`).join("")}</div>`;
   if(s.lastUse)o+=`<div class="adc" style="border-left:4px solid #8e44ad">✦ 최근 사용: <b>${s.lastUse}</b></div>`;
   if(augSel&&AUGS[augSel])o+=`<div class="adc"><b>${AUGS[augSel].n}</b> <small class="aty">${AUGS[augSel].r}${AUGS[augSel].p?" · PASSIVE":" · ACTIVE"}${AUGS[augSel].o?" · OPENING":""}</small><br>${AUGS[augSel].d}</div>`;
   const ef=s.eff.map(e=>`${(AUGS[e.k]||{n:e.k}).n}(${e.c==="w"?"백":"흑"} ${e.left})`).concat(s.fz.filter(f=>f.until>s.n).length?["❄ 얼음 "+s.fz.filter(f=>f.until>s.n).length+"개"]:[]);
@@ -2427,9 +2440,12 @@ function render(){
  document.title=(net&&hu?"● 내 차례 · ":"")+"체스 컬렉션";
  if(!mode.timeLimit){$("tmr").style.display=$("tmr2").style.display="none"}
  $("bdr").disabled=!(hu&&S.phase==="draw"&&(solo||sd===0));$("ben").disabled=!(hu&&S.phase==="move"&&(solo||sd===0));$("bdr2").disabled=!(hu&&S.phase==="draw"&&sd===1);$("ben2").disabled=!(hu&&S.phase==="move"&&sd===1);$("bun").disabled=!hist.length;
- $("inf").innerHTML=`<b>${mode.name}</b><br>${mode.info(S)}`;
+ {const t=mode.info(S);$("inf").innerHTML=t;$("inf").style.display=t?"":"none"}
  const h=$("hs");
- if(mode.paired){let o="";const L=S.log.length;for(let j=0;j<L;j+=2)o+=`<div class="mr"><i>${(j>>1)+1}.</i><span${j===L-1?' class="cur"':""}>${S.log[j]}</span><span${j+1===L-1?' class="cur"':""}>${S.log[j+1]||""}</span></div>`;h.innerHTML=o||'<div class="empty">아직 둔 수가 없어요</div>'}
+ // 기보: 백·흑 칸으로 나눠 보여 줌. 증강으로 한 사람이 연달아 두면 다음 줄로 넘기고 빈칸은 비워 둠
+ if(mode.paired){const L=S.log.length,R=[];S.log.forEach((m,j)=>{const c=(S.lc||[])[j]||(j&1?"b":"w"),r=R[R.length-1];if(c==="b"&&r&&r.b==null)r.b=j;else R.push({[c]:j})});
+  const cell=(j,c)=>j==null?"<span></span>":`<span class="${c}${j===L-1?" cur":""}">${S.log[j]}</span>`;
+  h.innerHTML=R.length?'<div class="mr mh"><i></i><span class="w">백</span><span class="b">흑</span></div>'+R.map((r,k)=>`<div class="mr"><i>${k+1}.</i>${cell(r.w,"w")}${cell(r.b,"b")}</div>`).join(""):'<div class="empty">아직 둔 수가 없어요</div>'}
  else h.innerHTML=S.log.map(m=>`<div>${m}</div>`).join("");
  h.scrollTop=h.scrollHeight;
  const dq=S.draft&&S.draft[0],dm=$("dro");
@@ -2439,7 +2455,8 @@ function render(){
   const IC={o:'<path d="M7 3h2v18H7zM10 4h10l-3 4 3 4H10z"/>',p:'<path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/>',a:'<path d="M13 2L4 14h6l-1 8 9-12h-6z"/>'},RK={COMMON:1,RARE:1,EPIC:1,LEGEND:1,LUNACY:1};
   dq.opts.forEach((id,k)=>{const a=AUGS[id],r=RK[a.r]?a.r:"COMMON",ty=a.o?"o":a.p?"p":"a",b=document.createElement("button");b.className="dc rc-"+r;b.style.setProperty("--i",k);
    b.innerHTML=`<span class="dcf"><span class="dci"><svg viewBox="0 0 24 24">${IC[ty]}</svg></span><b class="dcn">${a.n}</b><span class="dct">${r} · ${a.p?"PASSIVE":"ACTIVE"}${a.o?" · OPENING":""}</span><span class="dcd">${a.d}</span></span>`;b.onclick=()=>pickFx(b,id,r);if(r==="LEGEND")lgSkin(b,"L");if(r==="LUNACY"){luSkin(b);b.style.setProperty("--i",0)}else if(dq.opts.some(x=>AUGS[x].r==="LUNACY"))b.style.setProperty("--i",k?2:1);bx.appendChild(b)});const drShow=()=>{dm.classList.add("on");if(dq.opts.some(x=>AUGS[x].r==="LUNACY")&&luShown!==dq){luShown=dq;luReveal(bx)}else if(luShown===dq&&document.getElementById("lurv"))bx.classList.add("luwait")};if(drSeen!==dq){drSeen=dq;drReady=false;dm.classList.remove("on");clearTimeout(drT);drT=setTimeout(()=>{drReady=true;if(S.draft&&S.draft[0]===dq)render()},CONFIG_DRAFT_DELAY)}else if(drReady)drShow()}else{dm.classList.remove("on");clearTimeout(drT);drSeen=null}
- $("wdo").classList.toggle("on",!!(net&&!S.over&&dq&&S.seat[dq.c]!==net.seat)); // 온라인: 상대가 증강 고르는 동안 살짝 어둡게
+ {const on=!!(net&&!S.over&&dq&&S.seat[dq.c]!==net.seat);$("wdo").classList.toggle("on",on); // 온라인: 상대가 증강 고르는 동안 살짝 어둡게 + 상대에게 나온 증강 보여 줌
+  if(on)$("wdoP").innerHTML=`상대가 증강을 고르는 중이에요<div class="wdl">${dq.opts.map(id=>{const a=AUGS[id]||{n:id,r:"COMMON"};return`<span class="ag2 rk-${a.r||"COMMON"}"><i class="rkt">${({COMMON:"C",RARE:"R",EPIC:"E",LEGEND:"L",LUNACY:"LU"})[a.r]||"C"}</i>${a.n}</span>`}).join("")}</div>`}
  if(S.over&&!dismissed){if($("rso").classList.contains("on"))resultUI();else if(!rsT)rsT=setTimeout(()=>{rsT=0;if(S&&S.over&&!dismissed){resultUI();$("rso").classList.add("on")}},1800)}else{clearTimeout(rsT);rsT=0;$("rso").classList.remove("on")}
  renderBars();
 }
@@ -3123,10 +3140,13 @@ const miniBd=(c,r,L,cls,sk)=>`<div class="mbd ${cls||""}" style="grid-template-c
 const fullBd=()=>{const B="RNBQKBNR".split("");return[...B.map(t=>"b"+t),...Array(8).fill("bP"),...Array(32).fill(""),...Array(8).fill("wP"),...B.map(t=>"w"+t)]};
 // 증강 스킨 미리보기용 카드: 루나시 카드 하나만, 이름은 모두 「증강」
 const AGR=["COMMON","RARE","EPIC","LEGEND","LUNACY"],AGI='<path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/>';
-const agCard=r=>{const e=Object.values(AUGS).find(a=>(a.r||"COMMON")===r)||{n:r,d:""};return`<div class="dc rc-${r}"><span class="dcf"><span class="dci"><svg viewBox="0 0 24 24">${AGI}</svg></span><b class="dcn">증강</b><span class="dct">${r}</span><span class="dcd">${e.d}</span></span></div>`};
-const agDeco=el=>{el.querySelectorAll(".dc.rc-LEGEND").forEach(c=>lgSkin(c,"L"));el.querySelectorAll(".dc.rc-LUNACY").forEach(c=>luSkin(c))};
+const agCard=(r,real)=>{const e=Object.values(AUGS).find(a=>(a.r||"COMMON")===r)||{n:r,d:""};return`<div class="dc rc-${r}"><span class="dcf"><span class="dci"><svg viewBox="0 0 24 24">${AGI}</svg></span><b class="dcn">${real?e.n:"증강"}</b><span class="dct">${r}</span><span class="dcd">${e.d}</span></span></div>`};
+// 상점 타일의 카드는 넓은 화면(타일 245px) 기준 크기로 그린 뒤 타일 폭에 맞춰 통째로 줄임 → 휴대폰에서도 글자·장식이 깨지지 않음
+const agFit=()=>document.querySelectorAll(".agm").forEach(m=>{const z=m.querySelector(".agz");if(z&&m.clientWidth)z.style.zoom=m.clientWidth/245});
+addEventListener("resize",agFit);
+const agDeco=el=>{el.querySelectorAll(".dc.rc-LEGEND").forEach(c=>lgSkin(c,"L"));el.querySelectorAll(".dc.rc-LUNACY").forEach(c=>luSkin(c));agFit()};
 const skTile=(k,it)=>k==="pc"?miniBd(4,4,["bR","bN","bB","bQ","bP","bP","","bP","","","wP","","wK","wQ","wN","wB"],"",it.id)
- :k==="bd"?miniBd(8,8,[],BDS.includes(it.id)?it.id:""):`<div class="agm" data-ag="${it.id}">${agCard("LUNACY")}</div>`;
+ :k==="bd"?miniBd(8,8,[],BDS.includes(it.id)?it.id:""):`<div class="agm" data-ag="${it.id}"><div class="agz">${agCard("LUNACY")}</div></div>`;
 function shopDraw(){const inv=shMode==="inv";$("shp").classList.toggle("inv",inv);$("shS").querySelector("h1").textContent=inv?"스킨 장착":"상점";$("shS").setAttribute("aria-label",inv?"스킨 장착 분류":"상점 분류");
  $("shW").innerHTML=coin("bg",false)+"<span>"+shCoins.toLocaleString()+"</span>";
  const list=k=>inv?SHOP[k].filter(it=>skOwn(k,it.id)||it.adm||it.p!=null||it.reward).sort((a,b)=>skOwn(k,b.id)-skOwn(k,a.id)):SHOP[k].filter(it=>!it.adm&&(it.p!=null||it.reward)); // 상점엔 파는 것+세트 보상, 장착 탭엔 가진 것 먼저 + 못 가진 것(관리자 전용 제외)
@@ -3151,13 +3171,13 @@ function crPvFx(kind,t){const M=document.querySelector("#skB .mbd");if(!M)return
  if(kind==="promo"){lay.insertAdjacentHTML("beforeend",`<i class="crpil" style="left:${b.left+b.width/2}px;--b:${innerHeight-b.bottom}px;--w:${b.width*1.5|0}px"></i><i class="crhit" style="left:${b.left+b.width/2}px;top:${b.top+b.height/2}px;--s:${b.width*4|0}px"></i>`);
   crShards(lay,{left:b.left,top:b.top,width:b.width,height:b.height},CR_PAL.LUNACY,30,b.width*3.5,150,-80);crRings(lay,b.left+b.width/2,b.top+b.height/2,CR_PAL.LUNACY,4,7,0);crPromoSnd()}
  setTimeout(()=>lay.remove(),2200)}
-function skinOpen(it,t){const k=shCat,inv=shMode==="inv",B=$("skB"),own=skOwn(k,it.id),eq=SHOP_EQ[k]===it.id;t=k==="ag"?"LUNACY":(t||"P");
+function skinOpen(it,t){const k=shCat,inv=shMode==="inv",B=$("skB"),own=skOwn(k,it.id),eq=SHOP_EQ[k]===it.id;t=t||(k==="ag"?"LUNACY":"P");
  const st=it.set&&SKIN_SET[it.set],nm={pc:"말",bd:"보드",ag:"증강"}[k];
  const view=k==="pc"?`<div class="skv"><span class="pnm">${SKN[t]}</span>${miniBd(2,2,["","b"+t,"w"+t,""],"",it.id)}</div>`
   :k==="bd"?`<div class="skv">${miniBd(8,8,fullBd(),"b8"+(BDS.includes(it.id)?" "+it.id:""))}</div>`
-  :`<div class="skv ag"><div class="agv" data-ag="${it.id}">${agCard(t)}</div></div>`;
+  :`<div class="skv ag"><div class="agv" data-ag="${it.id}">${agCard(t,true)}</div></div>`;
  const pick=k==="pc"?`<div class="skp">${"PNBRQK".split("").map(x=>`<button data-t="${x}" class="${x===t?"on":""}" aria-label="${SKN[x]}">${pcSvg(x,"w",it.id)}</button>`).join("")}</div>`
-  :"";
+  :k==="ag"?`<div class="skp">${AGR.map(x=>`<button data-t="${x}" class="gr${x===t?" on":""}">${x}</button>`).join("")}</div>`:"";
  const sets=st&&!inv?`<div class="sks">${it.reward?`세트 보상이에요. <b>${st.n} 말</b>과 <b>${st.n} 보드</b>를 모두 사면 받아요. (${setCnt(it.set)}/${st.need.length})`:`<b>${st.n} 말</b> + <b>${st.n} 보드</b>를 모두 사면 <b>${st.n} 증강 스킨</b>을 받아요. (${setCnt(it.set)}/${st.need.length})`}</div>`:"";
  // 상점: 구매만 / 스킨 장착: 장착만
  const snd=it.snd?`<div class="sks snd"><span>이동·잡기 소리가 <b>${it.n}</b> 소리로 바뀌어요.</span><button class="g" id="skS">소리 듣기</button></div>`:"";
