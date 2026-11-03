@@ -2261,7 +2261,7 @@ let revSeen=null,revFx=null;const PNM={P:"폰",N:"나이트",B:"비숍",R:"룩",
 // 부활 알림: 상태(S.rev)로 전달되어 두 사람 모두에게 똑같이 보임
 function showRevive(rv){revFx={sq:rv.to,until:Date.now()+2000};setTimeout(()=>{if(S)render()},2100)}
 function showAug(id){augSel=augSel===id?null:id;render()}
-let sM="standard",sO=1,sL="보통",sF=null; // sO: 0=한 기기 2인 1=AI 2=친구(온라인)
+let sM="standard",sO=1,sL="보통",sF=null; // sO: 0=한 기기 2인 1=AI 2=친구(온라인) 3=일반 매칭 4=랭크 매칭
 function applyTheme(id){const t=CONFIG.themes.find(x=>x.id===id),r=document.documentElement;
  ["bg","fg","card","bd","ac","lt","dk"].forEach(k=>r.style.setProperty("--"+k,t[k]));r.dataset.theme=t.dark?"dark":"light";r.style.colorScheme=t.dark?"dark":"light"}
 const pname=n=>net?(net.names[n]||"?")+(n===net.seat?"(나)":""):n===1&&ai?"AI":"플레이어"+(n+1);
@@ -2279,7 +2279,7 @@ function after(remote){
  render();clearTimeout(aiT);
  if(net&&!remote)Online.push(S);
  if(S.over&&gid&&!recd.has(gid)){recd.add(gid);const w=S.over.win,my=net?net.seat:0;
-  Online.record(gid,{mode:mode.id,opp:net?net.names[1-net.seat]:"AI "+level,res:!w?"d":S.seat[w]===my?"w":"l",why:S.over.why,online:!!net},net?net.seat:null)}
+  Online.record(gid,{mode:mode.id,opp:net?net.names[1-net.seat]:"AI "+level,res:!w?"d":S.seat[w]===my?"w":"l",why:S.over.why,online:!!net,...(net&&net.kind?{kind:net.kind}:{}),...(net&&net.kind==="ranked"?{ranked:true,oppR:net.rt?net.rt[net.seat?"w":"b"]:1000}:{})},net?net.seat:null)}
  if(ai&&!S.over&&aiTurn()&&!(S.draft&&S.draft.length))aiT=setTimeout(aiStep,CONFIG.aiDelay);
  clearInterval(spdT);spdT=null;
  if(mode.timeLimit&&!S.over&&!(S.draft&&S.draft.length)){spdTick();spdT=setInterval(spdTick,200)}
@@ -2420,21 +2420,21 @@ function menu(){
   if(sl)t.addEventListener("wheel",e=>{if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){t.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
   items.forEach(([v,n])=>{const b=document.createElement("button");b.textContent=n;if(v===cur)b.className="on";b.onclick=()=>{fn(v);menu()};t.appendChild(b)});box.appendChild(t)};
  cards("모드",MODES.map(m=>{const ic=m.name.split(" ")[0],nm=m.name.slice(ic.length+1);return[m.id,ic,nm,m.desc||MSUB[m.id]||""]}),sM,v=>sM=v);
- const fr=Online.friends();if(sO===2&&!Online.me())sO=1;
+ const fr=Online.friends();if(sO>=2&&!Online.me())sO=1;
  // 상대: 오프라인/온라인 두 개만. 누르면 작은 창에서 세부 방식을 고름 (oppPick)
- cards("상대",[["off","🏠","오프라인",sO===1?`AI 대결 · ${sL}`:sO===0?"2인 (한 기기)":"2인 (한 기기) · AI 대결"],["on","🌐","온라인",sO===2?"친구 대전":"친구 대전 · 일반 게임 · 랭크 게임"]],sO===2?"on":"off",v=>oppPick(v));
+ cards("상대",[["off","🏠","오프라인",sO===1?`AI 대결 · ${sL}`:sO===0?"2인 (한 기기)":"2인 (한 기기) · AI 대결"],["on","🌐","온라인",sO===2?"친구 대전":sO===3?"일반 게임 매칭":sO===4?"랭크 게임 매칭":"친구 대전 · 일반 게임 · 랭크 게임"]],sO>=2?"on":"off",v=>oppPick(v));
  if($("opo").classList.contains("on"))oppDraw(); // 열린 선택 창도 최신 상태로 (친구 목록·접속 표시)
  const nw=box.querySelector(".sl");if(nw)nw.scrollLeft=sc;
 }
-// 상대 고르기 창: 세부 방식 + (오프라인) AI 난이도 / (온라인) 친구 고르기 + 게임 시작·대전 신청까지 이 창에서. 일반·랭크 게임은 아직 없어서 눌러도 아무 일도 없음
+// 상대 고르기 창: 세부 방식 + (오프라인) AI 난이도 / (온라인) 친구 고르기 + 게임 시작·대전 신청까지 이 창에서. 일반·랭크 게임은 온라인 매칭(Online.match)으로 상대를 찾음
 let opK="off";
-function oppPick(k){opK=k;if(k==="off"&&sO===2)sO=1;oppDraw();$("opo").classList.add("on")}
+function oppPick(k){opK=k;if(k==="off"&&sO>=2)sO=1;oppDraw();$("opo").classList.add("on")}
 function oppDraw(){const k=opK,L=k==="off"?[[1,"🤖","AI 대결","쉬움·보통·어려움 중에서 골라요"],[0,"👥","2인 (한 기기)","한 화면에서 마주 보고 둬요"]]
-  :[[2,"⚔","친구 대전","친구에게 대전을 신청해요"],["n","🎮","일반 게임","준비 중이에요"],["r","🏆","랭크 게임","준비 중이에요"]];
+  :[[2,"⚔","친구 대전","친구에게 대전을 신청해요"],[3,"🎮","일반 게임","같은 모드의 상대를 찾아 바로 시작해요 · 점수는 그대로"],[4,"🏆","랭크 게임","점수가 비슷한 상대와 겨뤄요 · 이기면 오르고 지면 내려가요"]];
  $("opT").textContent=k==="off"?"오프라인":"온라인";const bx=$("opb");bx.innerHTML="";
  L.forEach(([v,ic,n,sub])=>{const b=document.createElement("button"),soon=typeof v!=="number";b.className="opt"+(v===sO?" on":"")+(soon?" soon":"");if(soon)b.setAttribute("aria-disabled","true");
   b.innerHTML=`<span class="oi">${ic}</span><span class="ot"><b>${n}</b><small>${sub}</small></span>`;
-  b.onclick=()=>{if(soon)return;if(v===2&&!Online.me())return toast("로그인하면 친구 대전을 할 수 있어요");sO=v;menu();oppDraw()};bx.appendChild(b)});
+  b.onclick=()=>{if(soon)return;if(v>=2&&!Online.me())return toast("로그인하면 온라인 게임을 할 수 있어요");sO=v;menu();oppDraw()};bx.appendChild(b)});
  const x=$("opx");x.innerHTML="";
  const lab=t=>{const l=document.createElement("div");l.className="lb";l.textContent=t;x.appendChild(l)};
  const seg=(items,cur,fn,sl)=>{const t=document.createElement("div");t.className="seg"+(sl?" sl":"");
@@ -2447,6 +2447,9 @@ function oppDraw(){const k=opK,L=k==="off"?[[1,"🤖","AI 대결","쉬움·보�
    if(fr.length)seg(fr.map(f=>[f.uid,(Online.dot(f.uid)+" "+f.name).trim()]),sF,v=>sF=v,true);
    else{const e=document.createElement("div");e.className="md";e.textContent="아직 친구가 없어요. 위쪽의 친구 버튼에서 닉네임으로 친구를 추가하세요.";x.appendChild(e)}
    go.textContent="대전 신청 보내기";go.disabled=!sF}
+  else if(sO>=3){const rk=sO===4,mm=MODES.find(m=>m.id===sM);lab(rk?"랭크 점수":"매칭 방식");const e=document.createElement("div");e.className="md";
+   e.textContent=rk?`${mm.name} · 내 점수 ${Online.rating(sM)}. 점수가 비슷한 상대를 찾고, 오래 걸리면 범위를 넓혀요. 결과에 따라 점수가 바뀌어요.`:`${mm.name} · 같은 모드를 하려는 아무 상대와 바로 붙어요. 점수는 바뀌지 않아요.`;x.appendChild(e);
+   go.textContent=rk?"랭크 매칭 시작":"일반 매칭 시작";go.disabled=!Online.me()}
   else{go.textContent="게임 시작";go.disabled=true}}}
 $("opX").onclick=()=>$("opo").classList.remove("on");$("opo").onclick=e=>{if(e.target.id==="opo")$("opo").classList.remove("on")};
 // 플레이어 바: 이름 · 잡은 기물 · 기물 점수 차이 · 차례 표시
@@ -2469,7 +2472,8 @@ function ask(msg,yes){return new Promise(ok=>{$("askT").textContent=msg;$("askY"
 $("home").onclick=async()=>{if(!$("mn").classList.contains("on")&&!await Online.quit())return;shopShow(false);["adm","skm","rso"].forEach(i=>$(i).classList.remove("on"));if(!$("mn").classList.contains("on"))$("bmn").onclick()};
 setInterval(()=>Online.dots(),15000); // 친구 접속 상태: 시간이 지나 오프라인이 된 친구 반영
 // 게임 시작 / 친구 대전 신청 (선택 창의 버튼)
-function startGame(){if(sO===2){if(!sF)return toast("함께할 친구를 고르세요");$("opo").classList.remove("on");return Online.invite(sF,sM)}
+function startGame(){if(sO>=3){$("opo").classList.remove("on");return Online.match(sO===4?"ranked":"normal",sM)}
+ if(sO===2){if(!sF)return toast("함께할 친구를 고르세요");$("opo").classList.remove("on");return Online.invite(sF,sM)}
  $("opo").classList.remove("on");mode=MODES.find(m=>m.id===sM);ai=sO===1;level=sL;$("mn").classList.remove("on");newGame()}
 $("opGo").onclick=startGame;
 function updateSndBtn(){$("sndTgl").textContent=soundOn?"🔊 소리 켜짐 (끄기)":"🔇 소리 꺼짐 (켜기)";$("ckTgl").textContent=checkPop?"⚠ 체크 알림 켜짐 (끄기)":"체크 알림 꺼짐 (켜기)"}
@@ -2544,7 +2548,7 @@ const Online=(()=>{
   beat();hb=setInterval(beat,25000);
  }
  const giftSync=()=>skinGift(me&&prof&&admUids.includes(me.uid)?prof.skins:[]);
- function stop(){subs.forEach(f=>f());subs=[];SKIN_GIFT=[];clearInterval(hb);Object.values(fsub).forEach(f=>f());fsub={};friends=[];reqs=[];invs=[];fi={};invUI()}
+ function stop(){mqStop();subs.forEach(f=>f());subs=[];SKIN_GIFT=[];clearInterval(hb);Object.values(fsub).forEach(f=>f());fsub={};friends=[];reqs=[];invs=[];fi={};invUI()}
  const refresh=()=>{if($("acc").classList.contains("on"))panel()};
 
  /* --- 메뉴 상단 계정 영역 --- */
@@ -2624,14 +2628,14 @@ const Online=(()=>{
  function tally(docs){const st={ai:{},online:{}};docs.forEach(x=>{const g=x.data(),k=g.online?"online":"ai",m=st[k][g.mode]=st[k][g.mode]||{w:0,l:0,d:0};if(g.res in m)m[g.res]++});return st}
  function statsUI(p,uid,d,back){
   const tt=`<b>${esc(d.name||"")}</b>님의 전적`;
-  p.innerHTML=(back?`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><button class="g" id="stB" style="margin:0;padding:3px 8px;font-size:12px">← 친구 목록</button><span style="text-align:right">${tt}</span></div>`:tt)+`
+  p.innerHTML=(back?`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><button class="g" id="stB" style="margin:0;padding:3px 8px;font-size:12px">← 친구 목록</button><span style="text-align:right">${tt}</span></div>`:tt)+`${rankRow(d)}
   <div class="tabs" id="stK" style="margin-top:6px"><button data-k="ai">🤖 AI 대전</button><button data-k="online">🌐 온라인 대전</button></div><div id="stT" style="margin-top:6px"></div>
   <div class="lb">최근 대국</div><div id="stR" style="font-size:12px">불러오는 중…</div>${back?"":`<div style="font-size:11px;opacity:.6;margin-top:8px">로그인한 상태에서 AI 대결과 친구 온라인 대전 결과가 기록돼요. (한 기기 2인 대결은 제외)</div>`}`;
   if(back)$("stB").onclick=()=>{view=null;panel()};
   let st=d.stMig?d.st:null,docs=null;
   const show=()=>{$("stK").querySelectorAll("button").forEach(b=>{b.className=b.dataset.k===stK?"on":"";b.onclick=()=>{stK=b.dataset.k;show()}});
    $("stT").innerHTML=st?statsTable(st[stK]):"불러오는 중…";if(!docs)return;
-   $("stR").innerHTML=docs.map(x=>x.data()).filter(g=>!!g.online===(stK==="online")).slice(0,20).map(g=>{const t=ms(g.at);return`<div class="li"><span>${t?new Date(t).toLocaleDateString():""} · ${mname(g.mode)} · vs ${esc(g.opp)}<br><small style="opacity:.7">${esc(g.why)}</small></span><b>${RES[g.res]||""}</b></div>`}).join("")||"아직 기록이 없어요"};
+   $("stR").innerHTML=docs.map(x=>x.data()).filter(g=>!!g.online===(stK==="online")).slice(0,20).map(g=>{const t=ms(g.at);return`<div class="li"><span>${t?new Date(t).toLocaleDateString():""} · ${mname(g.mode)} · vs ${esc(g.opp)}<br><small style="opacity:.7">${esc(g.why)}</small></span><b>${RES[g.res]||""}${g.ranked&&typeof g.d==="number"?` <small>${g.d>=0?"+":""}${g.d}</small>`:""}</b></div>`}).join("")||"아직 기록이 없어요"};
   show();
   games(uid,st?60:0).then(q=>{if(!$("stR"))return;docs=q.docs;if(!st)st=tally(docs);show()})
    .catch(e=>{const r=$("stR");if(r)r.textContent=errMsg(e)});
@@ -2698,6 +2702,59 @@ const Online=(()=>{
   $("ivA").onclick=()=>{ov("ivo",false);ref.update({status:"active",inviteTo:null}).then(()=>openGame(g.id)).catch(e=>toast(errMsg(e)))};
   $("ivD").onclick=()=>{ov("ivo",false);ref.update({status:"declined",inviteTo:null}).catch(()=>{})};
  }
+ /* --- 온라인 매칭 (일반·랭크): queue/{uid} 대기표를 올리고, 같은 종류·모드의 다른 대기표를 지켜보다가 짝을 맞춰요 ---
+    맞는 상대를 찾으면 트랜잭션 하나로 두 대기표를 matched로 바꾸면서 대전(games)을 만들어요. 두 사람이 동시에 서로를 잡으려 해도 한 번만 성공하고, 진 쪽은 자기 대기표가 바뀐 걸 보고 그 대전에 들어가요
+    랭크는 점수 차이가 허용 범위 안일 때만 맺고, 기다릴수록 범위가 넓어져요. 색(백/흑)은 무작위 */
+ let mq=null;
+ const RK0=1000,rkOf=(u,m)=>{const r=u&&u.rk&&u.rk[m];return typeof r==="number"?r:RK0},rkWin=s=>100+Math.floor(s/5)*50,mqFmt=s=>`${s/60|0}:${String(s%60).padStart(2,"0")}`;
+ const rankRow=d=>`<div class="li" style="flex-wrap:wrap;gap:4px 14px;border-bottom:0"><span style="flex:none">🏆 랭크 점수</span>${MODES.map(m=>{const r=(d.rk||{})[m.id];return`<span style="flex:none;font-size:12px">${esc(m.name)} <b>${typeof r==="number"?r:"—"}</b></span>`}).join("")}</div>`;
+ function mqStop(){const Q=mq;if(!Q)return;mq=null;Q.done=true;clearInterval(Q.timer);if(Q.u1)Q.u1();if(Q.u2)Q.u2();ov("wto",false)}
+ async function match(kind,mid){
+  if(!me||!prof)return toast("로그인하면 온라인 게임을 할 수 있어요");if(mq)return;if(live())return toast("진행 중인 대전을 먼저 끝내 주세요");
+  const m=MODES.find(x=>x.id===mid);if(!m)return;
+  const ref=db.doc("queue/"+me.uid),r0=kind==="ranked"?rkOf(prof,mid):0;
+  try{await ref.set({uid:me.uid,name:prof.name,kind,mode:mid,rating:r0,state:"waiting",gid:null,at:FV.serverTimestamp(),hb:FV.serverTimestamp()})}catch(e){return toast(errMsg(e))}
+  const Q=mq={ref,kind,mid,m,r0,t0:Date.now(),hb:Date.now(),busy:false,done:false,cands:[],seen:{},skip:{}};
+  $("wtb").innerHTML=`<h3>상대를 찾는 중…</h3><div class="md">${kind==="ranked"?"🏆 랭크 게임":"🎮 일반 게임"} · ${esc(m.name)}${kind==="ranked"?` · 내 점수 ${r0}`:""}</div><div id="mqT" style="font-size:22px;font-weight:700;margin:10px 0">0:00</div><div class="md" id="mqS">${kind==="ranked"?`점수 차이 ±${rkWin(0)} 안에서 찾는 중`:"같은 모드를 하려는 상대를 기다리는 중"}</div><button class="g" id="mqX">매칭 취소</button>`;
+  ov("wto",true);$("mqX").onclick=cancelMatch;
+  // 내 대기표가 matched로 바뀌면(내가 잡았든 상대가 잡았든) 그 대전으로 들어감
+  Q.u1=ref.onSnapshot(d=>{const t=d.data();if(mq!==Q||!t)return;if(t.state==="matched"&&t.gid)joinMatch(Q,t.gid)},e=>{if(mq===Q){mqStop();toast(errMsg(e))}});
+  // 같은 종류·모드로 기다리는 다른 대기표들 (정렬은 코드에서 해서 복합 인덱스가 필요 없음)
+  Q.u2=db.collection("queue").where("kind","==",kind).where("mode","==",mid).where("state","==","waiting").onSnapshot(q=>{if(mq!==Q)return;const n=Date.now();
+   Q.cands=q.docs.map(d=>d.data()).filter(c=>c.uid!==me.uid);
+   Q.cands.forEach(c=>{const h=ms(c.hb),s=Q.seen[c.uid];if(!s)Q.seen[c.uid]={hb:h,first:n,chg:n};else if(h!==s.hb){s.hb=h;s.chg=n}});scan(Q)},e=>{if(mq===Q){mqStop();ref.delete().catch(()=>{});toast(errMsg(e))}});
+  Q.timer=setInterval(()=>{if(mq!==Q)return;const n=Date.now(),s=Math.floor((n-Q.t0)/1000);$("mqT").textContent=mqFmt(s);
+   if(kind==="ranked")$("mqS").textContent=`점수 차이 ±${rkWin(s)} 안에서 찾는 중`;
+   if(n-Q.hb>=10000){Q.hb=n;ref.update({hb:FV.serverTimestamp()}).catch(()=>{})}scan(Q)},1000);
+ }
+ // 상대 후보 고르기: 신호(hb)가 45초 넘게 안 바뀐 대기표는 나간 사람으로 봄 (서로 시계가 달라도 되게 내 시계로 "바뀐 시점"을 잼)
+ function scan(Q){if(Q.busy||Q.done||mq!==Q)return;const n=Date.now(),mine=(n-Q.t0)/1000;
+  Q.cands.forEach(c=>{const s=Q.seen[c.uid];if(s&&n-s.chg>130000&&!s.del){s.del=true;db.doc("queue/"+c.uid).delete().catch(()=>{})}}); // 오래 멈춘 대기표 치우기 (규칙이 서버 시간으로 한 번 더 확인)
+  const L=Q.cands.filter(c=>{const s=Q.seen[c.uid];if(!s||n-s.chg>45000||(Q.skip[c.uid]||0)>n)return false;
+   if(c.uid<me.uid&&n-s.first<3000)return false; // 둘이 동시에 서로를 잡으려는 걸 줄이려고, user id가 작은 쪽이 먼저 잡고 큰 쪽은 3초 뒤에도 안 잡혔을 때만 직접 잡음
+   return Q.kind!=="ranked"||Math.abs((c.rating||0)-Q.r0)<=Math.min(rkWin(mine),rkWin((n-s.first)/1000))}); // 랭크: 둘 다 허용하는 점수 차이 안일 때만
+  if(!L.length)return;
+  L.sort((a,b)=>(Q.kind==="ranked"?Math.abs(a.rating-Q.r0)-Math.abs(b.rating-Q.r0):0)||ms(a.at)-ms(b.at));
+  claim(Q,L[0])}
+ async function claim(Q,c){Q.busy=true;const gref=db.collection("games").doc(),tref=db.doc("queue/"+c.uid);
+  try{Q.s0=Q.s0||(()=>{const s=Q.m.setup();Engine.setX(null);return JSON.stringify(s)})();
+   await db.runTransaction(async t=>{const a=await t.get(Q.ref),b=await t.get(tref);
+    if(!a.exists||a.data().state!=="waiting")throw{code:"mine"};
+    const th=b.exists?b.data():null;if(!th||th.state!=="waiting"||th.kind!==Q.kind||th.mode!==Q.mid)throw{code:"gone"};
+    const mw=Math.random()<.5;
+    t.set(gref,{mode:Q.mid,kind:Q.kind,mq:true,w:mw?me.uid:c.uid,b:mw?c.uid:me.uid,names:mw?[prof.name,th.name]:[th.name,prof.name],rt:{w:mw?Q.r0:th.rating,b:mw?th.rating:Q.r0},status:"active",state:Q.s0,rev:0,at:FV.serverTimestamp()});
+    t.update(Q.ref,{state:"matched",gid:gref.id});t.update(tref,{state:"matched",gid:gref.id})});
+   joinMatch(Q,gref.id)}
+  catch(e){if(e&&e.code==="mine")return; // 내 대기표가 이미 다른 사람에게 잡힘 → 내 대기표 구독이 알려 줌
+   Q.skip[c.uid]=Date.now()+(e&&e.code==="gone"?3000:8000);if(!e||e.code!=="gone")console.warn("match",e)}
+  finally{Q.busy=false}}
+ function joinMatch(Q,gid){if(Q.done)return;const ref=Q.ref;mqStop();ref.delete().catch(()=>{});toast("상대를 찾았어요!");openGame(gid)}
+ async function cancelMatch(){const Q=mq;if(!Q)return;
+  try{const t=(await Q.ref.get()).data();if(t&&t.state==="matched"&&t.gid)return joinMatch(Q,t.gid)}catch(e){} // 취소를 누른 순간 이미 짝이 맞았으면 그 대전으로
+  mqStop();Q.ref.delete().catch(()=>{});toast("매칭을 취소했어요")}
+ // 창을 닫으면 대기표 지우기 (못 지워도 다른 사람이 45초 뒤엔 건너뛰고, 2분 넘게 멈춘 대기표는 규칙상 누구나 지울 수 있음)
+ addEventListener("pagehide",()=>{const Q=mq;if(!Q||Q.done)return;try{Q.ref.delete()}catch(e){}
+  if(tok)try{fetch(`https://firestore.googleapis.com/v1/projects/${FIREBASE_CONFIG.projectId}/databases/(default)/documents/queue/${me.uid}`,{method:"DELETE",keepalive:true,headers:{Authorization:"Bearer "+tok}}).catch(()=>{})}catch(e){}});
  // 접속 확인: 10초마다 내 hbW/hbB를 갱신. 상대 값이 45초 넘게 안 바뀌거나 나감 표시(leftW/leftB)가 있으면 상대 패배로 끝냄
  // 시계 차이를 피하려고 상대 값이 "바뀐 시점"을 내 시계로 잼. 내 탭이 잠들어 있었으면(타이머 20초 이상 밀림) 다시 셈
  function openGame(id){leave();clearTimeout(aiT);
@@ -2711,7 +2768,7 @@ const Online=(()=>{
    if(rem<15000&&n-my.warn>4000){my.warn=n;toast(`상대 연결이 끊겼어요 · ${Math.ceil(rem/1000)}초 안에 안 돌아오면 승리로 처리돼요`)}};
   my.hbT=setInterval(()=>{const n=Date.now();if(n-my.tk>20000)my.seen=n;my.tk=n;if(n-my.lb>=10000){my.lb=n;beat()}chk()},2000);
   my.unsub=ref.onSnapshot(d=>{if(net!==my)return;const g=d.data();if(!g)return;
-   if(g.rev>my.rev){const first=my.rev<0;my.rev=g.rev;my.seat=g.w===me.uid?0:1;my.names=g.names;load1(g,first);
+   if(g.rev>my.rev){const first=my.rev<0;my.rev=g.rev;my.seat=g.w===me.uid?0:1;my.names=g.names;my.kind=g.kind||"";my.rt=g.rt||null;load1(g,first);
     if(first){my.lb=Date.now();beat();my.ous=db.doc("users/"+(my.seat?g.w:g.b)).onSnapshot(u=>{if(net===my)my.oon=(u.data()||{}).online!==false},()=>{})}}chk(g)},e=>toast(errMsg(e)));
  }
  function load1(g,first){
@@ -2745,12 +2802,16 @@ const Online=(()=>{
   if(tok)try{fetch(`https://firestore.googleapis.com/v1/projects/${FIREBASE_CONFIG.projectId}/databases/(default)/documents/games/${net.gid}?updateMask.fieldPaths=${f}`,{method:"PATCH",keepalive:true,headers:{Authorization:"Bearer "+tok,"Content-Type":"application/json"},body:`{"fields":{"${f}":{"booleanValue":true}}}`}).catch(()=>{})}catch(e){}});
  // 결과 1회 기록: users/{uid}/games/{게임id}가 이미 있으면 건너뜀
  function record(id,g,seat){if(!me||!prof)return;const uref=db.doc("users/"+me.uid),gref=db.doc(`users/${me.uid}/games/${id}`);
-  db.runTransaction(async t=>{const d=await t.get(gref);if(d.exists)return;t.set(gref,{...g,at:FV.serverTimestamp()});t.update(uref,{[`st.${g.online?"online":"ai"}.${g.mode}.${g.res}`]:FV.increment(1)})})
-   .then(()=>{if(g.online&&seat!=null)return db.doc("games/"+id).update({[seat?"pendB":"pendW"]:false})}).catch(e=>console.warn("record",e))}
+  let rr=null; // 랭크 게임이면 같은 트랜잭션에서 점수(Elo, K=32)도 함께 바꿈. 대국 기록이 이미 있으면 건너뛰어서 두 번 반영되지 않음
+  db.runTransaction(async t=>{const d=await t.get(gref);if(d.exists)return;const up={[`st.${g.online?"online":"ai"}.${g.mode}.${g.res}`]:FV.increment(1)},rec={...g,at:FV.serverTimestamp()};
+   if(g.ranked){const u=await t.get(uref),r0=((u.data()||{}).rk||{})[g.mode],a=typeof r0==="number"?r0:RK0,o=typeof g.oppR==="number"?g.oppR:RK0,s=g.res==="w"?1:g.res==="l"?0:.5,nr=Math.max(0,Math.round(a+32*(s-1/(1+Math.pow(10,(o-a)/400)))));
+    up[`rk.${g.mode}`]=nr;rec.rk=nr;rec.d=nr-a;rr={a,nr}}
+   t.set(gref,rec);t.update(uref,up)})
+   .then(()=>{if(rr)toast(`랭크 점수 ${rr.a} → ${rr.nr} (${rr.nr>=rr.a?"+":""}${rr.nr-rr.a})`);if(g.online&&seat!=null)return db.doc("games/"+id).update({[seat?"pendB":"pendW"]:false})}).catch(e=>console.warn("record",e))}
  const settling=new Set();
  function settle(g){if(settling.has(g.id))return;settling.add(g.id);let s;try{s=JSON.parse(g.state)}catch(e){return}if(!s.over)return;
   const seat=g.w===me.uid?0:1,w=s.over.win;recd.add(g.id);
-  record(g.id,{mode:g.mode,opp:g.names[1-seat],res:!w?"d":s.seat[w]===seat?"w":"l",why:s.over.why,online:true},seat)}
+  record(g.id,{mode:g.mode,opp:g.names[1-seat],res:!w?"d":s.seat[w]===seat?"w":"l",why:s.over.why,online:true,...(g.kind?{kind:g.kind}:{}),...(g.kind==="ranked"?{ranked:true,oppR:(g.rt||{})[seat?"w":"b"]}:{})},seat)}
 
  /* --- 관리자 탭: ADMIN_EMAILS에 있는 (이메일 인증된) 계정만 열림. 실제 데이터 보호는 Firestore 규칙이 해요 --- */
  const RA={COMMON:"C",RARE:"R",EPIC:"E",LEGEND:"L",LUNACY:"LU"},TIERS=Object.keys(RA),CL={COMMON:"#7d828c",RARE:"#2f7fd8",EPIC:"#9440c8",LEGEND:"#f0c544",LUNACY:"#e0457f"};
@@ -2857,7 +2918,7 @@ const Online=(()=>{
  function ntcUI(B){B.innerHTML=`<div class="panel" style="padding:16px"><div class="lb" style="margin-top:0">로비 공지</div><textarea id="admN" maxlength="300" aria-label="로비 공지" placeholder="로비 맨 위에 보일 문구예요. 비우고 올리면 공지가 사라져요">${esc(ntcT)}</textarea><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button id="admNs">공지 올리기</button><button class="g" id="admNd">공지 내리기</button></div></div>`;
   const put=t=>!roOK()?0:db.doc("config/notice").set({text:t,by:me.uid,at:FV.serverTimestamp()}).then(()=>toast(t?"공지를 올렸어요":"공지를 내렸어요")).catch(e=>toast(errMsg(e)));
   $("admNs").onclick=()=>put($("admN").value.trim());$("admNd").onclick=()=>{$("admN").value="";put("")}}
- return{init,push,record,resign,leave,quit,dots,dot,invite,admOpen,admLoad,uid:()=>me?me.uid:"",saveSkins,eq:()=>accEq,admin:()=>isAdmin(),owner:()=>isOwner(),me:()=>me&&prof?me:null,friends:()=>friends};
+ return{init,push,record,resign,leave,quit,dots,dot,invite,admOpen,admLoad,match,rating:m=>rkOf(prof,m),uid:()=>me?me.uid:"",saveSkins,eq:()=>accEq,admin:()=>isAdmin(),owner:()=>isOwner(),me:()=>me&&prof?me:null,friends:()=>friends};
 })();
 $("acx").onclick=()=>$("acc").classList.remove("on");
 
