@@ -2448,7 +2448,7 @@ function oppDraw(){const k=opK,L=k==="off"?[[1,"🤖","AI 대결","쉬움·보�
    else{const e=document.createElement("div");e.className="md";e.textContent="아직 친구가 없어요. 위쪽의 친구 버튼에서 닉네임으로 친구를 추가하세요.";x.appendChild(e)}
    go.textContent="대전 신청 보내기";go.disabled=!sF}
   else if(sO>=3){const rk=sO===4,mm=MODES.find(m=>m.id===sM);lab(rk?"랭크 점수":"매칭 방식");const e=document.createElement("div");e.className="md";
-   e.textContent=rk?`${mm.name} · 내 점수 ${Online.rating(sM)}. 점수가 비슷한 상대를 찾고, 오래 걸리면 범위를 넓혀요. 결과에 따라 점수가 바뀌어요.`:`${mm.name} · 같은 모드를 하려는 아무 상대와 바로 붙어요. 점수는 바뀌지 않아요.`;x.appendChild(e);
+   e.textContent=rk?`${mm.name} · ${Online.rankText(sM)}. 첫 5판은 배치고사예요(0점에서 시작, 최대 플래티넘). 점수가 비슷한 상대를 먼저 찾고, 30초가 지나면 점수와 관계없이 맺어요. 높은 상대에게 이기면 더 많이 오르고 지면 덜 떨어져요.`:`${mm.name} · 같은 모드를 하려는 아무 상대와 바로 붙어요. 점수는 바뀌지 않아요.`;x.appendChild(e);
    go.textContent=rk?"랭크 매칭 시작":"일반 매칭 시작";go.disabled=!Online.me()}
   else{go.textContent="게임 시작";go.disabled=true}}}
 $("opX").onclick=()=>$("opo").classList.remove("on");$("opo").onclick=e=>{if(e.target.id==="opo")$("opo").classList.remove("on")};
@@ -2539,6 +2539,7 @@ const Online=(()=>{
  function start(){const u=me.uid,L=(q,f)=>subs.push(q.onSnapshot(f,e=>console.warn(e))),D=q=>q.docs.map(d=>({id:d.id,...d.data()}));
   skinLogin();
   L(db.doc("users/"+u),d=>{if(d.exists){prof=d.data();skinLive();giftSync();if(prof.banned){toast("이용이 정지된 계정이에요");return logout()}bar();if(tab==="stats"&&!view)refresh()}});
+  loadLun();
   L(db.collection(`users/${u}/friends`),q=>{friends=D(q).map(f=>({uid:f.id,name:f.name})).sort((a,b)=>a.name.localeCompare(b.name));bar();refresh();if($("acc").classList.contains("on")&&tab==="friends")loadFi();fwatch()});
   L(db.collection("friendRequests").where("to","==",u),q=>{reqs=D(q);bar();refresh()});
   L(db.collection("games").where("inviteTo","==",u),q=>{invs=D(q).filter(g=>g.status==="invited");invUI()});
@@ -2628,14 +2629,14 @@ const Online=(()=>{
  function tally(docs){const st={ai:{},online:{}};docs.forEach(x=>{const g=x.data(),k=g.online?"online":"ai",m=st[k][g.mode]=st[k][g.mode]||{w:0,l:0,d:0};if(g.res in m)m[g.res]++});return st}
  function statsUI(p,uid,d,back){
   const tt=`<b>${esc(d.name||"")}</b>님의 전적`;
-  p.innerHTML=(back?`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><button class="g" id="stB" style="margin:0;padding:3px 8px;font-size:12px">← 친구 목록</button><span style="text-align:right">${tt}</span></div>`:tt)+`${rankRow(d)}
+  p.innerHTML=(back?`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><button class="g" id="stB" style="margin:0;padding:3px 8px;font-size:12px">← 친구 목록</button><span style="text-align:right">${tt}</span></div>`:tt)+`${rankRow(d,uid)}
   <div class="tabs" id="stK" style="margin-top:6px"><button data-k="ai">🤖 AI 대전</button><button data-k="online">🌐 온라인 대전</button></div><div id="stT" style="margin-top:6px"></div>
   <div class="lb">최근 대국</div><div id="stR" style="font-size:12px">불러오는 중…</div>${back?"":`<div style="font-size:11px;opacity:.6;margin-top:8px">로그인한 상태에서 AI 대결과 친구 온라인 대전 결과가 기록돼요. (한 기기 2인 대결은 제외)</div>`}`;
   if(back)$("stB").onclick=()=>{view=null;panel()};
   let st=d.stMig?d.st:null,docs=null;
   const show=()=>{$("stK").querySelectorAll("button").forEach(b=>{b.className=b.dataset.k===stK?"on":"";b.onclick=()=>{stK=b.dataset.k;show()}});
    $("stT").innerHTML=st?statsTable(st[stK]):"불러오는 중…";if(!docs)return;
-   $("stR").innerHTML=docs.map(x=>x.data()).filter(g=>!!g.online===(stK==="online")).slice(0,20).map(g=>{const t=ms(g.at);return`<div class="li"><span>${t?new Date(t).toLocaleDateString():""} · ${mname(g.mode)} · vs ${esc(g.opp)}<br><small style="opacity:.7">${esc(g.why)}</small></span><b>${RES[g.res]||""}${g.ranked&&typeof g.d==="number"?` <small>${g.d>=0?"+":""}${g.d}</small>`:""}</b></div>`}).join("")||"아직 기록이 없어요"};
+   $("stR").innerHTML=docs.map(x=>x.data()).filter(g=>!!g.online===(stK==="online")).slice(0,20).map(g=>{const t=ms(g.at);return`<div class="li"><span>${t?new Date(t).toLocaleDateString():""} · ${mname(g.mode)} · vs ${esc(g.opp)}<br><small style="opacity:.7">${esc(g.why)}</small></span><b>${RES[g.res]||""}${g.ranked?(g.pl?` <small>배치 ${g.pl}/5</small>`:typeof g.d==="number"?` <small>${g.d>=0?"+":""}${g.d}</small>`:""):""}</b></div>`}).join("")||"아직 기록이 없어요"};
   show();
   games(uid,st?60:0).then(q=>{if(!$("stR"))return;docs=q.docs;if(!st)st=tally(docs);show()})
    .catch(e=>{const r=$("stR");if(r)r.textContent=errMsg(e)});
@@ -2706,8 +2707,17 @@ const Online=(()=>{
     맞는 상대를 찾으면 트랜잭션 하나로 두 대기표를 matched로 바꾸면서 대전(games)을 만들어요. 두 사람이 동시에 서로를 잡으려 해도 한 번만 성공하고, 진 쪽은 자기 대기표가 바뀐 걸 보고 그 대전에 들어가요
     랭크는 점수 차이가 허용 범위 안일 때만 맺고, 기다릴수록 범위가 넓어져요. 색(백/흑)은 무작위 */
  let mq=null;
- const RK0=1000,rkOf=(u,m)=>{const r=u&&u.rk&&u.rk[m];return typeof r==="number"?r:RK0},rkWin=s=>100+Math.floor(s/5)*50,mqFmt=s=>`${s/60|0}:${String(s%60).padStart(2,"0")}`;
- const rankRow=d=>`<div class="li" style="flex-wrap:wrap;gap:4px 14px;border-bottom:0"><span style="flex:none">🏆 랭크 점수</span>${MODES.map(m=>{const r=(d.rk||{})[m.id];return`<span style="flex:none;font-size:12px">${esc(m.name)} <b>${typeof r==="number"?r:"—"}</b></span>`}).join("")}</div>`;
+ const RK0=0,rkOf=(u,m)=>{const r=u&&u.rk&&u.rk[m];return typeof r==="number"?r:RK0},rkWin=s=>100+Math.floor(s/5)*100,MQANY=30,mqFmt=s=>`${s/60|0}:${String(s%60).padStart(2,"0")}`;
+ // 랭크 등급: 점수 구간별 이름. 그랜드마스터(1600~) 중 모드별 상위 5명은 루나시. 첫 5판은 배치고사(점수·등급 숨김, 변동 폭 큼)
+ const RT=[[1600,"그랜드마스터","#e0453a"],[1300,"마스터","#9b59d0"],[1100,"다이아몬드","#5a8dee"],[800,"플래티넘","#3fbfae"],[600,"골드","#e0b13a"],[400,"실버","#a8b3bd"],[200,"브론즈","#b0703a"],[0,"아이언","#8a8a8a"]],LUNA=["루나시","#e0457f"],PLACE=5,PMAX=1099; // PMAX: 배치고사로 받을 수 있는 최고 점수(플래티넘 끝)
+ let lun={}; // 모드별 루나시(그랜드마스터 상위 5명) uid 목록
+ const rkN=(u,m)=>(((u&&u.rkn)||{})[m])||0,tierOf=(r,uid,m)=>{if(r>=1600&&(lun[m]||[]).includes(uid))return LUNA;const t=RT.find(x=>r>=x[0]);return[t[1],t[2]]};
+ // 등급 표시: 한 번도 안 했으면 "—", 배치 중이면 "배치고사 n/5", 끝났으면 "골드 812"
+ function rankOf(u,uid,m,html){const n=rkN(u,m),r=((u&&u.rk)||{})[m];if(!n&&typeof r!=="number")return html?"—":"아직 랭크 게임 기록이 없어요";if(n<PLACE)return`배치고사 ${n}/${PLACE}`;
+  const[t,c]=tierOf(r,uid,m);return html?`<b style="color:${c}">${t}</b> ${r}`:`${t} ${r}`}
+ async function loadLun(){try{const nx={};for(const m of MODES){const q=await db.collection("users").orderBy(`rk.${m.id}`,"desc").limit(20).get();
+   nx[m.id]=q.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>rkN(u,m.id)>=PLACE&&u.rk[m.id]>=1600).slice(0,5).map(u=>u.uid)}lun=nx;refresh()}catch(e){console.warn("lunacy",e)}}
+ const rankRow=(d,uid)=>`<div class="li" style="flex-wrap:wrap;gap:4px 14px;border-bottom:0"><span style="flex:none">🏆 랭크 등급</span>${MODES.map(m=>`<span style="flex:none;font-size:12px">${esc(m.name)} ${rankOf(d,uid,m.id,true)}</span>`).join("")}</div>`;
  function mqStop(){const Q=mq;if(!Q)return;mq=null;Q.done=true;clearInterval(Q.timer);if(Q.u1)Q.u1();if(Q.u2)Q.u2();ov("wto",false)}
  async function match(kind,mid){
   if(!me||!prof)return toast("로그인하면 온라인 게임을 할 수 있어요");if(mq)return;if(live())return toast("진행 중인 대전을 먼저 끝내 주세요");
@@ -2715,24 +2725,28 @@ const Online=(()=>{
   const ref=db.doc("queue/"+me.uid),r0=kind==="ranked"?rkOf(prof,mid):0;
   try{await ref.set({uid:me.uid,name:prof.name,kind,mode:mid,rating:r0,state:"waiting",gid:null,at:FV.serverTimestamp(),hb:FV.serverTimestamp()})}catch(e){return toast(errMsg(e))}
   const Q=mq={ref,kind,mid,m,r0,t0:Date.now(),hb:Date.now(),busy:false,done:false,cands:[],seen:{},skip:{}};
-  $("wtb").innerHTML=`<h3>상대를 찾는 중…</h3><div class="md">${kind==="ranked"?"🏆 랭크 게임":"🎮 일반 게임"} · ${esc(m.name)}${kind==="ranked"?` · 내 점수 ${r0}`:""}</div><div id="mqT" style="font-size:22px;font-weight:700;margin:10px 0">0:00</div><div class="md" id="mqS">${kind==="ranked"?`점수 차이 ±${rkWin(0)} 안에서 찾는 중`:"같은 모드를 하려는 상대를 기다리는 중"}</div><button class="g" id="mqX">매칭 취소</button>`;
+  $("wtb").innerHTML=`<h3>상대를 찾는 중…</h3><div class="md">${kind==="ranked"?"🏆 랭크 게임":"🎮 일반 게임"} · ${esc(m.name)}${kind==="ranked"?` · ${esc(rankOf(prof,me.uid,mid))}`:""}</div><div id="mqT" style="font-size:22px;font-weight:700;margin:10px 0">0:00</div><div class="md" id="mqS">${kind==="ranked"?`점수 차이 ±${rkWin(0)} 안에서 찾는 중`:""}</div><button class="g" id="mqX">매칭 취소</button>`;
   ov("wto",true);$("mqX").onclick=cancelMatch;
   // 내 대기표가 matched로 바뀌면(내가 잡았든 상대가 잡았든) 그 대전으로 들어감
-  Q.u1=ref.onSnapshot(d=>{const t=d.data();if(mq!==Q||!t)return;if(t.state==="matched"&&t.gid)joinMatch(Q,t.gid)},e=>{if(mq===Q){mqStop();toast(errMsg(e))}});
+  Q.u1=ref.onSnapshot(d=>{const t=d.data();if(mq!==Q||!t)return;if(t.at&&!Q.at)Q.at=ms(t.at);/* 내 대기표의 서버 시각 → 상대가 기다린 시간을 시계 차이 없이 계산 */if(t.state==="matched"&&t.gid)joinMatch(Q,t.gid)},e=>{if(mq===Q){mqStop();toast(errMsg(e))}});
   // 같은 종류·모드로 기다리는 다른 대기표들 (정렬은 코드에서 해서 복합 인덱스가 필요 없음)
   Q.u2=db.collection("queue").where("kind","==",kind).where("mode","==",mid).where("state","==","waiting").onSnapshot(q=>{if(mq!==Q)return;const n=Date.now();
    Q.cands=q.docs.map(d=>d.data()).filter(c=>c.uid!==me.uid);
    Q.cands.forEach(c=>{const h=ms(c.hb),s=Q.seen[c.uid];if(!s)Q.seen[c.uid]={hb:h,first:n,chg:n};else if(h!==s.hb){s.hb=h;s.chg=n}});scan(Q)},e=>{if(mq===Q){mqStop();ref.delete().catch(()=>{});toast(errMsg(e))}});
   Q.timer=setInterval(()=>{if(mq!==Q)return;const n=Date.now(),s=Math.floor((n-Q.t0)/1000);$("mqT").textContent=mqFmt(s);
-   if(kind==="ranked")$("mqS").textContent=`점수 차이 ±${rkWin(s)} 안에서 찾는 중`;
+   if(kind==="ranked")$("mqS").textContent=s>=MQANY?"점수와 관계없이 찾는 중":`점수 차이 ±${rkWin(s)} 안에서 찾는 중`;
    if(n-Q.hb>=10000){Q.hb=n;ref.update({hb:FV.serverTimestamp()}).catch(()=>{})}scan(Q)},1000);
  }
  // 상대 후보 고르기: 신호(hb)가 45초 넘게 안 바뀐 대기표는 나간 사람으로 봄 (서로 시계가 달라도 되게 내 시계로 "바뀐 시점"을 잼)
  function scan(Q){if(Q.busy||Q.done||mq!==Q)return;const n=Date.now(),mine=(n-Q.t0)/1000;
   Q.cands.forEach(c=>{const s=Q.seen[c.uid];if(s&&n-s.chg>130000&&!s.del){s.del=true;db.doc("queue/"+c.uid).delete().catch(()=>{})}}); // 오래 멈춘 대기표 치우기 (규칙이 서버 시간으로 한 번 더 확인)
-  const L=Q.cands.filter(c=>{const s=Q.seen[c.uid];if(!s||n-s.chg>45000||(Q.skip[c.uid]||0)>n)return false;
+  // 상대가 기다린 시간: 두 대기표의 서버 시각 차이로 계산 (예전엔 "내가 처음 본 때"부터 세서 오래 기다린 사람도 0초로 취급했음)
+  const age=c=>{const s=Q.seen[c.uid];return Q.at&&ms(c.at)?Math.max(0,mine+(Q.at-ms(c.at))/1000):(n-s.first)/1000};
+  // 신호가 90초 넘게 안 바뀌면 나간 사람으로 봄 (뒤로 간 탭은 브라우저가 타이머를 1분에 한 번으로 늦춰서, 45초면 기다리는 사람을 잘못 건너뛰었음)
+  const L=Q.cands.filter(c=>{const s=Q.seen[c.uid];if(!s||n-s.chg>90000||(Q.skip[c.uid]||0)>n)return false;
    if(c.uid<me.uid&&n-s.first<3000)return false; // 둘이 동시에 서로를 잡으려는 걸 줄이려고, user id가 작은 쪽이 먼저 잡고 큰 쪽은 3초 뒤에도 안 잡혔을 때만 직접 잡음
-   return Q.kind!=="ranked"||Math.abs((c.rating||0)-Q.r0)<=Math.min(rkWin(mine),rkWin((n-s.first)/1000))}); // 랭크: 둘 다 허용하는 점수 차이 안일 때만
+   if(Q.kind!=="ranked")return true;const ca=age(c);
+   return mine>=MQANY||ca>=MQANY||Math.abs((c.rating||0)-Q.r0)<=Math.max(rkWin(mine),rkWin(ca))}); // 랭크: 더 오래 기다린 쪽의 범위 안이거나, 누가 30초 넘게 기다렸으면 맺음
   if(!L.length)return;
   L.sort((a,b)=>(Q.kind==="ranked"?Math.abs(a.rating-Q.r0)-Math.abs(b.rating-Q.r0):0)||ms(a.at)-ms(b.at));
   claim(Q,L[0])}
@@ -2803,11 +2817,14 @@ const Online=(()=>{
  // 결과 1회 기록: users/{uid}/games/{게임id}가 이미 있으면 건너뜀
  function record(id,g,seat){if(!me||!prof)return;const uref=db.doc("users/"+me.uid),gref=db.doc(`users/${me.uid}/games/${id}`);
   let rr=null; // 랭크 게임이면 같은 트랜잭션에서 점수(Elo, K=32)도 함께 바꿈. 대국 기록이 이미 있으면 건너뛰어서 두 번 반영되지 않음
-  db.runTransaction(async t=>{const d=await t.get(gref);if(d.exists)return;const up={[`st.${g.online?"online":"ai"}.${g.mode}.${g.res}`]:FV.increment(1)},rec={...g,at:FV.serverTimestamp()};
-   if(g.ranked){const u=await t.get(uref),r0=((u.data()||{}).rk||{})[g.mode],a=typeof r0==="number"?r0:RK0,o=typeof g.oppR==="number"?g.oppR:RK0,s=g.res==="w"?1:g.res==="l"?0:.5,nr=Math.max(0,Math.round(a+32*(s-1/(1+Math.pow(10,(o-a)/400)))));
-    up[`rk.${g.mode}`]=nr;rec.rk=nr;rec.d=nr-a;rr={a,nr}}
+  db.runTransaction(async t=>{rr=null;const d=await t.get(gref);if(d.exists)return;const up={[`st.${g.online?"online":"ai"}.${g.mode}.${g.res}`]:FV.increment(1)},rec={...g,at:FV.serverTimestamp()};
+   // 배치고사(첫 5판, 0점에서 시작): 승 +200, 무 +80, 패 -40에 상대 점수 차이 보정(±60, 높은 상대일수록 더 오르고 덜 떨어짐). 최대 1099(플래티넘)까지
+   // 배치 뒤: Elo(체스 국제 방식, K=32). 기대 승률 = 1/(1+10^((상대-나)/400)) → 높은 상대에게 이기면 더 오르고, 지면 덜 떨어짐. FIDE처럼 점수 차이는 400까지만 반영
+   if(g.ranked){const u=await t.get(uref),ud=u.data()||{},r0=(ud.rk||{})[g.mode],c0=rkN(ud,g.mode),a=typeof r0==="number"?r0:RK0,o=typeof g.oppR==="number"?g.oppR:RK0,s=g.res==="w"?1:g.res==="l"?0:.5,adj=Math.max(-60,Math.min(60,(o-a)/5)),nr=c0<PLACE?Math.max(0,Math.min(PMAX,Math.round(a+(s===1?200+adj:s===0?-40+adj/2:80+adj/2)))):Math.max(0,Math.round(a+32*(s-1/(1+Math.pow(10,Math.max(-400,Math.min(400,o-a))/400)))));
+    up[`rk.${g.mode}`]=nr;up[`rkn.${g.mode}`]=c0+1;rec.rk=nr;rec.d=nr-a;if(c0<PLACE)rec.pl=c0+1;rr={a,nr,c0,m:g.mode}}
    t.set(gref,rec);t.update(uref,up)})
-   .then(()=>{if(rr)toast(`랭크 점수 ${rr.a} → ${rr.nr} (${rr.nr>=rr.a?"+":""}${rr.nr-rr.a})`);if(g.online&&seat!=null)return db.doc("games/"+id).update({[seat?"pendB":"pendW"]:false})}).catch(e=>console.warn("record",e))}
+   .then(()=>{if(rr){const t0=tierOf(rr.a,me.uid,rr.m)[0],t1=tierOf(rr.nr,me.uid,rr.m)[0];
+     toast(rr.c0<PLACE-1?`배치고사 ${rr.c0+1}/${PLACE} 완료`:rr.c0===PLACE-1?`배치고사 완료! 첫 등급은 ${t1} (${rr.nr})`:`랭크 점수 ${rr.a} → ${rr.nr} (${rr.nr>=rr.a?"+":""}${rr.nr-rr.a})${t0!==t1?` · ${t0} → ${t1} ${rr.nr>rr.a?"승급!":"강등"}`:""}`);loadLun()}if(g.online&&seat!=null)return db.doc("games/"+id).update({[seat?"pendB":"pendW"]:false})}).catch(e=>console.warn("record",e))}
  const settling=new Set();
  function settle(g){if(settling.has(g.id))return;settling.add(g.id);let s;try{s=JSON.parse(g.state)}catch(e){return}if(!s.over)return;
   const seat=g.w===me.uid?0:1,w=s.over.win;recd.add(g.id);
@@ -2918,7 +2935,7 @@ const Online=(()=>{
  function ntcUI(B){B.innerHTML=`<div class="panel" style="padding:16px"><div class="lb" style="margin-top:0">로비 공지</div><textarea id="admN" maxlength="300" aria-label="로비 공지" placeholder="로비 맨 위에 보일 문구예요. 비우고 올리면 공지가 사라져요">${esc(ntcT)}</textarea><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button id="admNs">공지 올리기</button><button class="g" id="admNd">공지 내리기</button></div></div>`;
   const put=t=>!roOK()?0:db.doc("config/notice").set({text:t,by:me.uid,at:FV.serverTimestamp()}).then(()=>toast(t?"공지를 올렸어요":"공지를 내렸어요")).catch(e=>toast(errMsg(e)));
   $("admNs").onclick=()=>put($("admN").value.trim());$("admNd").onclick=()=>{$("admN").value="";put("")}}
- return{init,push,record,resign,leave,quit,dots,dot,invite,admOpen,admLoad,match,rating:m=>rkOf(prof,m),uid:()=>me?me.uid:"",saveSkins,eq:()=>accEq,admin:()=>isAdmin(),owner:()=>isOwner(),me:()=>me&&prof?me:null,friends:()=>friends};
+ return{init,push,record,resign,leave,quit,dots,dot,invite,admOpen,admLoad,match,rating:m=>rkOf(prof,m),rankText:m=>me&&prof?rankOf(prof,me.uid,m):"로그인하면 등급이 생겨요",uid:()=>me?me.uid:"",saveSkins,eq:()=>accEq,admin:()=>isAdmin(),owner:()=>isOwner(),me:()=>me&&prof?me:null,friends:()=>friends};
 })();
 $("acx").onclick=()=>$("acc").classList.remove("on");
 
