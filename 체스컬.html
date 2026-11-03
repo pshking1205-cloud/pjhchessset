@@ -204,6 +204,12 @@ body.ingame .nav>*:not(#gear):not(.sp){display:none!important}
 .pme b{font-size:16px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pav{width:40px;height:40px;border-radius:8px;display:grid;place-items:center;background:var(--pg,#81b64c);flex:none;overflow:hidden}
 .pav svg{width:80%;height:80%}.pav.big{width:64px;height:64px;border-radius:12px}
+/* 프로필 창 최근 대국: 한 줄 */
+.rgl{display:flex;align-items:center;gap:8px;padding:5px 2px;border-bottom:1px solid rgba(127,127,127,.15)}
+.rgl .rg{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:11px;color:#fff;background:#8a8780;flex:none}
+.rgl .rg.w{background:#81b64c}.rgl .rg.l{background:#d84a3a}
+.rgl .ro{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rgl .rm{opacity:.6;font-size:11px;white-space:nowrap}
 #pfo{z-index:52}#pfo .pop{max-width:440px}
 .pfh{display:flex;align-items:center;gap:12px;margin:0 30px 10px 0}.pfh b{font-size:18px;display:block}.pfh small{color:var(--mut)}
 .pfg{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin:6px 0}
@@ -2716,7 +2722,10 @@ const Online=(()=>{
   let st=null,docs=null;
   const show=()=>{$("stK").querySelectorAll("button").forEach(b=>{b.className=b.dataset.k===stK?"on":"";b.onclick=()=>{stK=b.dataset.k;show()}});
    $("stT").innerHTML=(stK==="ranked"?rankRow(d,uid):"")+(st?statsTable(st[stK]):"불러오는 중…");if(!docs)return;
-   $("stR").innerHTML=docs.map(x=>x.data()).filter(g=>gkind(g)===stK).slice(0,20).map(g=>{const t=ms(g.at);return`<div class="li"><span>${t?new Date(t).toLocaleDateString():""} · ${mname(g.mode)} · vs ${esc(g.opp)}<br><small style="opacity:.7">${esc(g.why)}</small></span><b>${RES[g.res]||""}${g.ranked?(g.pl?` <small>배치 ${g.pl}/5</small>`:typeof g.d==="number"?` <small>${g.d>=0?"+":""}${g.d}</small>`:""):""}</b></div>`}).join("")||"아직 기록이 없어요"};
+   const L=docs.map(x=>x.data()).filter(g=>gkind(g)===stK);
+   // 프로필 창(noTitle)에서는 한 줄로 짧게: 결과 · vs 상대 · 모드 아이콘 · 날짜 (최근 10판)
+   if(noTitle){$("stR").innerHTML=L.slice(0,10).map(g=>{const t=ms(g.at),dt=t?new Date(t):null;return`<div class="rgl"><b class="rg ${g.res}">${RES[g.res]||""}</b><span class="ro">vs ${esc(g.opp)}</span>${g.ranked&&!g.pl&&typeof g.d==="number"?`<small>${g.d>=0?"+":""}${g.d}</small>`:""}<span class="rm">${mname(g.mode).split(" ")[0]} ${dt?`${dt.getMonth()+1}/${dt.getDate()}`:""}</span></div>`}).join("")||"아직 기록이 없어요";return}
+   $("stR").innerHTML=L.slice(0,20).map(g=>{const t=ms(g.at);return`<div class="li"><span>${t?new Date(t).toLocaleDateString():""} · ${mname(g.mode)} · vs ${esc(g.opp)}<br><small style="opacity:.7">${esc(g.why)}</small></span><b>${RES[g.res]||""}${g.ranked?(g.pl?` <small>배치 ${g.pl}/5</small>`:typeof g.d==="number"?` <small>${g.d>=0?"+":""}${g.d}</small>`:""):""}</b></div>`}).join("")||"아직 기록이 없어요"};
   show();
   games(uid,0).then(q=>{if(!$("stR"))return;docs=q.docs;st=tally(docs);show()})
    .catch(e=>{const r=$("stR");if(r)r.textContent=errMsg(e)});
