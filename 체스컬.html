@@ -32,6 +32,9 @@ button:disabled{opacity:.35;cursor:default}
 small{color:var(--mut)}
 
 /* 내비 */
+/* 게임 중(로비 메뉴가 닫혀 있을 때): 위쪽 바는 설정(⚙)만 남기고 바탕과 같은 색으로 */
+body.ingame .nav{background:var(--bg);border-bottom-color:transparent}
+body.ingame .nav>*:not(#gear):not(.sp){display:none!important}
 .nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:45;height:var(--navh);background:var(--nav);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .logo{display:flex;align-items:center;gap:8px;background:none;box-shadow:none;color:var(--fg);padding:4px 6px 4px 0;font-family:var(--f-disp);font-size:20px;font-weight:400;letter-spacing:.5px}
 .logo .pc{width:28px;height:28px}
@@ -1259,7 +1262,7 @@ html[data-ag="crys"] #cv :is(.uab,.luua){display:none!important}
  <div class="md" style="margin-top:4px">꺼도 체크된 킹은 빨갛게 표시되고, 킹이 잡히는 쪽으로는 움직일 수 없어요.</div>
  <button id="stgClose" class="g" style="margin-top:18px">닫기</button>
 </div></div>
-<div class="ov" id="rso"><div class="pop"><button class="g rx" id="rc" aria-label="닫고 보드 보기">✕</button><div class="rh"><div class="rki" id="rki"></div><h2 id="rt"></h2><div id="rw"></div></div><div class="rpl" id="rpl"></div><div class="rb"><button id="rn">새 게임</button><button id="rag">다시 찾기</button><button class="g" id="rm">로비로</button></div></div></div>
+<div class="ov" id="rso"><div class="pop"><button class="g rx" id="rc" aria-label="닫고 보드 보기">✕</button><div class="rh"><h2 id="rt"></h2><div id="rw"></div></div><div class="rpl" id="rpl"></div><div class="rb"><button id="rn">새 게임</button><button id="rag">다시 찾기</button><button class="g" id="rm">로비로</button></div></div></div>
 <div class="ov" id="dro"><div class="pop"><div id="drt" style="font-weight:700;margin-bottom:6px"></div><div id="drb"></div></div></div>
 <div class="ov" id="lgo"><div class="pop wd" id="lgb"></div></div>
 <div class="ov" id="acc"><div class="pop wd"><button class="g xb" id="acx">✕</button><div class="tabs" id="act" style="margin-right:44px"></div><div id="acp" style="margin-top:12px"></div></div></div>
@@ -2415,7 +2418,7 @@ function render(){
   dq.opts.forEach((id,k)=>{const a=AUGS[id],r=RK[a.r]?a.r:"COMMON",ty=a.o?"o":a.p?"p":"a",b=document.createElement("button");b.className="dc rc-"+r;b.style.setProperty("--i",k);
    b.innerHTML=`<span class="dcf"><span class="dci"><svg viewBox="0 0 24 24">${IC[ty]}</svg></span><b class="dcn">${a.n}</b><span class="dct">${r} · ${a.p?"PASSIVE":"ACTIVE"}${a.o?" · OPENING":""}</span><span class="dcd">${a.d}</span></span>`;b.onclick=()=>pickFx(b,id,r);if(r==="LEGEND")lgSkin(b,"L");if(r==="LUNACY"){luSkin(b);b.style.setProperty("--i",0)}else if(dq.opts.some(x=>AUGS[x].r==="LUNACY"))b.style.setProperty("--i",k?2:1);bx.appendChild(b)});const drShow=()=>{dm.classList.add("on");if(dq.opts.some(x=>AUGS[x].r==="LUNACY")&&luShown!==dq){luShown=dq;luReveal(bx)}else if(luShown===dq&&document.getElementById("lurv"))bx.classList.add("luwait")};if(drSeen!==dq){drSeen=dq;drReady=false;dm.classList.remove("on");clearTimeout(drT);drT=setTimeout(()=>{drReady=true;if(S.draft&&S.draft[0]===dq)render()},CONFIG_DRAFT_DELAY)}else if(drReady)drShow()}else{dm.classList.remove("on");clearTimeout(drT);drSeen=null}
  $("wdo").classList.toggle("on",!!(net&&!S.over&&dq&&S.seat[dq.c]!==net.seat)); // 온라인: 상대가 증강 고르는 동안 살짝 어둡게
- if(S.over&&!dismissed){if($("rso").classList.contains("on"))resultUI();else if(!rsT)rsT=setTimeout(()=>{rsT=0;if(S&&S.over&&!dismissed){resultUI();$("rso").classList.add("on")}},700)}else{clearTimeout(rsT);rsT=0;$("rso").classList.remove("on")}
+ if(S.over&&!dismissed){if($("rso").classList.contains("on"))resultUI();else if(!rsT)rsT=setTimeout(()=>{rsT=0;if(S&&S.over&&!dismissed){resultUI();$("rso").classList.add("on")}},1800)}else{clearTimeout(rsT);rsT=0;$("rso").classList.remove("on")}
  renderBars();
 }
 $("bdr").onclick=()=>{if(S.phase==="draw"&&!S.over&&!lockTurn()){S=mode.draw(S);sel=null;after()}};
@@ -2431,13 +2434,14 @@ $("bmn").onclick=$("rm").onclick=async()=>{if(!await Online.quit())return;clearT
 let rsT=0;
 function resultUI(){const w=S.over.win,me=net?net.seat:ai?0:-1,res=!w?"draw":me<0||S.seat[w]===me?"win":"lose";
  $("rso").querySelector(".rh").className="rh"+(res==="lose"?" lose":res==="draw"?" draw":"");
- $("rki").textContent=res==="draw"?"🤝":res==="lose"?"🏳️":"🏆";
  $("rt").textContent=res==="draw"?"무승부":me<0?`${w==="w"?"백":"흑"} 승리!`:res==="win"?"승리!":"패배";
  $("rw").textContent=S.over.why||"";
  const card=c=>`<div class="pp ${!w?"":c===w?"win":"lose"}"><div class="rav">${pcSvg("K",c)}</div><b>${esc(pname(S.seat[c]))}</b><small>${c==="w"?"백":"흑"}</small></div>`;
  const L=me>=0&&S.seat.b===me?["b","w"]:["w","b"];$("rpl").innerHTML=card(L[0])+'<span class="vs">vs</span>'+card(L[1]);
  const ag=net?Online.againLabel():null;$("rn").style.display=net?"none":"";$("rag").style.display=ag?"":"none";if(ag)$("rag").textContent=ag}
 $("rag").onclick=()=>{$("rso").classList.remove("on");Online.again()};
+// 로비 메뉴(#mn)가 열려 있는지에 따라 게임 화면 표시(ingame)를 켜고 끔
+new MutationObserver(()=>document.body.classList.toggle("ingame",!$("mn").classList.contains("on"))).observe($("mn"),{attributes:true,attributeFilter:["class"]});document.body.classList.toggle("ingame",!$("mn").classList.contains("on"));
 $("rc").onclick=()=>{dismissed=true;$("rso").classList.remove("on")};
 const MSUB={standard:"국제 규칙 그대로. 캐슬링·앙파상·승급·50수·3회 반복까지",augment:"시작할 때와 6수마다 증강 카드를 골라 규칙을 비틀어요"};
 function menu(){
@@ -2450,22 +2454,22 @@ function menu(){
  const seg=(label,items,cur,fn,sl)=>{lab(label);const t=document.createElement("div");t.className="seg"+(sl?" sl":"");
   if(sl)t.addEventListener("wheel",e=>{if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){t.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
   items.forEach(([v,n])=>{const b=document.createElement("button");b.textContent=n;if(v===cur)b.className="on";b.onclick=()=>{fn(v);menu()};t.appendChild(b)});box.appendChild(t)};
- cards("모드",MODES.map(m=>{const ic=m.name.split(" ")[0],nm=m.name.slice(ic.length+1);return[m.id,ic,nm,m.desc||MSUB[m.id]||""]}),sM,v=>sM=v);
+ cards("모드",MODES.map(m=>{const ic=m.name.split(" ")[0],nm=m.name.slice(ic.length+1);return[m.id,ic,nm,""]}),sM,v=>sM=v);
  const fr=Online.friends();if(sO>=2&&!Online.me())sO=1;
  // 상대: 오프라인/온라인 두 개만. 누르면 작은 창에서 세부 방식을 고름 (oppPick)
- cards("상대",[["off","🏠","오프라인",sO===1?`AI 대결 · ${sL}`:sO===0?"2인 (한 기기)":"2인 (한 기기) · AI 대결"],["on","🌐","온라인",sO===2?"친구 대전":sO===3?"일반 게임 매칭":sO===4?"랭크 게임 매칭":"친구 대전 · 일반 게임 · 랭크 게임"]],sO>=2?"on":"off",v=>oppPick(v));
+ cards("상대",[["off","🏠","오프라인",""],["on","🌐","온라인",""]],sO>=2?"on":"off",v=>oppPick(v));
  if($("opo").classList.contains("on"))oppDraw(); // 열린 선택 창도 최신 상태로 (친구 목록·접속 표시)
  const nw=box.querySelector(".sl");if(nw)nw.scrollLeft=sc;
 }
 // 상대 고르기 창: 세부 방식 + (오프라인) AI 난이도 / (온라인) 친구 고르기 + 게임 시작·대전 신청까지 이 창에서. 일반·랭크 게임은 온라인 매칭(Online.match)으로 상대를 찾음
 let opK="off";
 function oppPick(k){opK=k;if(k==="off"&&sO>=2)sO=1;oppDraw();$("opo").classList.add("on")}
-function oppDraw(){const k=opK,L=k==="off"?[[1,"🤖","AI 대결","쉬움·보통·어려움 중에서 골라요"],[0,"👥","2인 (한 기기)","한 화면에서 마주 보고 둬요"]]
-  :[[2,"⚔","친구 대전","친구에게 대전을 신청해요"],[3,"🎮","일반 게임","같은 모드의 상대를 찾아 바로 시작해요 · 점수는 그대로"],["r","🏆","랭크 게임","준비 중이에요"]];
+function oppDraw(){const k=opK,L=k==="off"?[[1,"🤖","AI 대결",""],[0,"👥","2인 (한 기기)",""]]
+  :[[2,"⚔","친구 대전",""],[3,"🎮","일반 게임",""],["r","🏆","랭크 게임",""]];
  $("opT").textContent=k==="off"?"오프라인":"온라인";const bx=$("opb");bx.innerHTML="";
  L.forEach(([v,ic,n,sub])=>{const b=document.createElement("button"),soon=typeof v!=="number";b.className="opt"+(v===sO?" on":"")+(soon?" soon":"");if(soon)b.setAttribute("aria-disabled","true");
-  b.innerHTML=`<span class="oi">${ic}</span><span class="ot"><b>${n}</b><small>${sub}</small></span>`;
-  b.onclick=()=>{if(soon)return;if(v>=2&&!Online.me())return toast("로그인하면 온라인 게임을 할 수 있어요");sO=v;menu();oppDraw()};bx.appendChild(b)});
+  b.innerHTML=`<span class="oi">${ic}</span><span class="ot"><b>${n}</b>${sub?`<small>${sub}</small>`:""}</span>`;
+  b.onclick=()=>{if(soon)return toast("준비 중이에요");if(v>=2&&!Online.me())return toast("로그인하면 온라인 게임을 할 수 있어요");sO=v;menu();oppDraw()};bx.appendChild(b)});
  const x=$("opx");x.innerHTML="";
  const lab=t=>{const l=document.createElement("div");l.className="lb";l.textContent=t;x.appendChild(l)};
  const seg=(items,cur,fn,sl)=>{const t=document.createElement("div");t.className="seg"+(sl?" sl":"");
