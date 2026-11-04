@@ -1355,7 +1355,7 @@ function neonUse(v,r){const lv={COMMON:0,RARE:1,EPIC:2,LEGEND:3,LUNACY:4}[r]||0,
  const fx=document.createElement("div");fx.className="nfx";fx.innerHTML=h;v.appendChild(fx);setTimeout(()=>fx.remove(),3600)}
 function neonPick(b,id,r){const q=b.getBoundingClientRect();b.classList.add("npk");b.parentNode.querySelectorAll(".dc").forEach(x=>{if(x!==b)x.classList.add("faded")});
  const{fx,end}=neonBurst(document.body,q.left+q.width/2,q.top+q.height/2,r,380);
- setTimeout(()=>fx.remove(),end+30);setTimeout(()=>{pickFx.busy=0;S=mode.pick(S,id);after()},Math.max(end,760)+100)}
+ setTimeout(()=>fx.remove(),end+30);setTimeout(()=>{pickFx.busy=0;pkDone(id)},Math.max(end,760)+100)}
 // 증강 소리: AGS[스킨].pick / .use (등급 lv 0~4가 높을수록 화려하게). 증강 스킨에 소리가 없으면(클래식·COMMON) 기본 고르기 소리만 남
 const tn=(ac,t,type,f0,f1,g,d,dl,lp)=>{const o=ac.createOscillator(),e=ac.createGain(),fl=ac.createBiquadFilter();o.type=type;o.frequency.setValueAtTime(f0,t+dl);if(f1!==f0)o.frequency.exponentialRampToValueAtTime(f1,t+dl+d);fl.type="lowpass";fl.frequency.value=lp||12000;
  e.gain.setValueAtTime(.0001,t+dl);e.gain.exponentialRampToValueAtTime(Math.max(.0002,g),t+dl+.006);e.gain.exponentialRampToValueAtTime(.0001,t+dl+d);o.connect(fl);fl.connect(e);e.connect(ac.destination);o.start(t+dl);o.stop(t+dl+d+.03)};
@@ -1445,7 +1445,7 @@ function dragonPick(b,id,r){const lv={COMMON:0,RARE:1,EPIC:2,LEGEND:3,LUNACY:4}[
  const path=(a0,dir)=>{let d="";for(let i=0;i<=64;i++){const u=i/64,a=a0+dir*u*Math.PI*2.35,k=1-u*.82,x=cx+Math.cos(a)*q.width*.78*k,y=cy+Math.sin(a)*q.height*.6*k;d+=(i?"L":"M")+x.toFixed(1)+","+y.toFixed(1)}return d};
  dgSnake(box,{d:path(2.4,1),w:W,h:H,R,dur,len:420+lv*30});if(lv>=4)dgSnake(box,{d:path(-.7,-1),w:W,h:H,R:R*.9,dur,dl:60,len:400});
  const{fx,end}=DG_PICK==="ring"?dgBurst(box,cx,cy,lv,dur-40):dgGlow(cx,cy,lv,dur-60);
- setTimeout(()=>{box.remove();fx.remove()},end+60);setTimeout(()=>{pickFx.busy=0;S=mode.pick(S,id);after()},Math.max(end*.7,dur+380))}
+ setTimeout(()=>{box.remove();fx.remove()},end+60);setTimeout(()=>{pickFx.busy=0;pkDone(id)},Math.max(end*.7,dur+380))}
 // 사용: 카드 뒤로 용이 화면을 S자로 가로지름 → 카드가 사라질 때 옥빛으로 터짐 (LUNACY는 두 마리)
 function dragonUse(v,r){const lv={COMMON:0,RARE:1,EPIC:2,LEGEND:3,LUNACY:4}[r]||0,W=innerWidth,H=innerHeight,R=Math.max(10,Math.min(W,H)*.032)*(1+lv*.08);
  const box=document.createElement("div");box.className="dgfx";v.insertBefore(box,v.firstChild);
@@ -1523,7 +1523,7 @@ function crPick(b,id,r){const lv={COMMON:0,RARE:1,EPIC:2,LEGEND:3,LUNACY:4}[r]||
   const C=[pal[2],"rgba(20,10,30,.55)",pal[2]],np=3+lv*2,gl=document.createElement("div");gl.className="pkfx crdust";
   gl.innerHTML=Array.from({length:np},(_,i)=>{const a=i/np*Math.PI*2,d=far*(.35+R()*.4);return`<i class="ps" style="left:${cxs}px;top:${cys}px;--x:${Math.cos(a)*d|0}px;--y:${(Math.sin(a)*d-30)|0}px;--s:${50+lv*16+R()*40|0}px;--c:${C[i%3]};--t:${1.1+lv*.1+R()*.4}s;--d:${R()*80|0}ms"></i>`}).join("");document.body.appendChild(gl);
   setTimeout(()=>{box.remove();gl.remove()},end+1400)},T2);
- setTimeout(()=>{b.style.visibility="";pickFx.busy=0;S=mode.pick(S,id);after()},T2+1050+lv*110)}
+ setTimeout(()=>{b.style.visibility="";pickFx.busy=0;pkDone(id)},T2+1050+lv*110)}
 // 사용: ① 수정 조각이 카드로 빨려듦 → ② 장미 덩굴이 카드를 휘감음 → ③ 카드 위에 루비 장미가 핌(등급↑ 장미·덩굴↑) 카드가 떨리며 빛남 → ④ 장미가 꽃잎으로 터지며 카드가 산산조각 + 수정 가시 + 충격파
 function crUseRose(v,r){const lv={COMMON:0,RARE:1,EPIC:2,LEGEND:3,LUNACY:4}[r]||0,pal=CR_PAL[r]||CR_PAL.COMMON,W=innerWidth,H=innerHeight,c=v.querySelector(".uac");if(!c)return;
  const R=Math.random,box=document.createElement("div");box.className="crfx";box.style.zIndex=40;box.style.setProperty("--g",pal[2]);box.style.setProperty("--c1",pal[0]);box.style.setProperty("--c2",pal[1]);const PRM=CR_PRISMS[r]||CR_PRISMS.COMMON;document.body.appendChild(box);const F=Math.max(W,H),M=W<600,TH=1950;
@@ -1661,6 +1661,9 @@ function crPieceFx(){const P=crPrev;crPrev=S;if(!P||!S||P===S||SKIN.pc!==CR_ID||
  if(pf.t==="P"&&nt&&nt.t!=="P"&&nt.c===pf.c&&b){lay.insertAdjacentHTML("beforeend",`<i class="crpil" style="left:${b.left+b.width/2}px;--b:${innerHeight-b.bottom}px;--w:${b.width*1.5|0}px"></i><i class="crhit" style="left:${b.left+b.width/2}px;top:${b.top+b.height/2}px;--s:${b.width*4|0}px"></i>`);
   crShards(lay,{left:b.left,top:b.top,width:b.width,height:b.height},CR_PAL.LUNACY,30,b.width*3.5,150,-80);crRings(lay,b.left+b.width/2,b.top+b.height/2,CR_PAL.LUNACY,4,7,0);crPromoSnd()}
  setTimeout(()=>lay.remove(),2200)}
+// 선택 연출이 끝난 뒤: 내가 고른 거면 적용, 상대가 고른 걸 보여 주는 중(view)이면 창만 닫음
+function pkDone(id){if(pickFx.view){pickFx.view=0;spFx=0;render();return}S=mode.pick(S,id);after()}
+let spDq=null,spFx=0; // 온라인: 지금 보고 있는 상대의 증강 선택지 / 상대 선택 연출 중
 function pickFx(b,id,r){if(pickFx.busy)return;pickFx.busy=1;agSound("pick",r);if(crOn())return crPick(b,id,r);if(dgOn())return dragonPick(b,id,r);if(document.documentElement.dataset.ag==="neon")return neonPick(b,id,r);const R=Math.random,q=b.getBoundingClientRect(),cx=q.left+q.width/2,cy=q.top+q.height/2,
  C={COMMON:["rgba(205,210,220,.85)","rgba(140,145,158,.8)","#e6e8ee"],RARE:["rgba(120,185,255,.85)","rgba(40,110,220,.8)","#bfe3ff"],EPIC:["rgba(215,125,255,.85)","rgba(140,40,200,.8)","#efc2ff"],LEGEND:["rgba(255,215,110,.9)","rgba(215,150,35,.8)","#fff1a8"],LUNACY:["rgba(255,110,165,.9)","rgba(170,15,65,.85)","#ffd0e2"]}[r]||[],G=[C[2],"#ffffff",C[0]];
  const lv={COMMON:0,RARE:1,EPIC:2,LEGEND:3,LUNACY:4}[r]||0,np=6+lv*7,ng=8+lv*12,far=lv>=4?Math.max(innerWidth,innerHeight)*.55:70+lv*55;let end=0;
@@ -1668,7 +1671,7 @@ function pickFx(b,id,r){if(pickFx.busy)return;pickFx.busy=1;agSound("pick",r);if
  fx.innerHTML=Array.from({length:np},(_,i)=>{const a=i/np*Math.PI*2+R()*.4,d=far*(.5+R()*.6),t=1+lv*.18+R()*.5,dl=R()*120|0;end=Math.max(end,dl+t*1000);return`<i class="ps" style="left:${cx}px;top:${cy}px;--x:${Math.cos(a)*d|0}px;--y:${(Math.sin(a)*d-40)|0}px;--s:${70+lv*30+R()*80|0}px;--c:${C[i%2]};--t:${t}s;--d:${dl}ms"></i>`}).join("")
   +Array.from({length:ng},(_,i)=>{const a=R()*Math.PI*2,d=far*(.3+R()*.9),t=.9+R()*.6,dl=R()*150|0;end=Math.max(end,dl+t*1000);return`<i class="pg" style="left:${cx}px;top:${cy}px;--x:${Math.cos(a)*d|0}px;--y:${(Math.sin(a)*d-30)|0}px;--s:${3+R()*5|0}px;--c:${G[i%3]};--t:${t}s;--d:${dl}ms"></i>`}).join("");
  document.body.appendChild(fx);b.classList.add("picked");b.parentNode.querySelectorAll(".dc").forEach(x=>{if(x!==b)x.classList.add("faded")});
- setTimeout(()=>fx.remove(),end+30);setTimeout(()=>{pickFx.busy=0;S=mode.pick(S,id);after()},end+100)}
+ setTimeout(()=>fx.remove(),end+30);setTimeout(()=>{pickFx.busy=0;pkDone(id)},end+100)}
 // 전설 카드 질감: 호박색 레진 속 석영 조각 + 육각 홀로그램 글리터 + 금가루 (캔버스로 한 번 그려 이미지로 재사용)
 const PAL={L:{bg:["#fbecc8","#d7a54a","#5e3a0e"],q:"255,244,225",h:[42,12],h2:[25,15],dust:"255,215,120",rim:"70,35,0"},U:{bg:["#ffdbe4","#b3304f","#2a0510"],q:"255,232,238",h:[348,14],h2:[335,12],dust:"255,120,150",rim:"70,0,15"}};
 function lgTex(w,h,orb,pk){const P=PAL[pk||"L"];const c=document.createElement("canvas"),x=c.getContext("2d");c.width=w;c.height=h;
@@ -2458,8 +2461,13 @@ function render(){
  const dq=S.draft&&S.draft[0],dm=$("dro");
  $("dro").classList.toggle("flip2",!!(dq&&!ai&&!net&&S.seat[dq.c]===1)); // 한 기기 2인: 맞은편(흑) 플레이어가 고를 때는 증강 선택 창을 그쪽으로 180도 돌림
  // 온라인에서 상대가 고르는 차례(spec)에도 같은 카드 창을 보여 줌. 누를 수는 없고 제목만 다름
- const spec=!!(net&&!S.over&&dq&&S.seat[dq.c]!==net.seat);dm.classList.toggle("spec",spec);
- if(dq&&!(ai&&S.seat[dq.c]===1)){$("drt").textContent=`${pname(S.seat[dq.c])} (${dq.c==="w"?"백":"흑"}) · ${spec?"증강을 고르는 중이에요":"증강을 고르세요"}`;const bx=$("drb");bx.innerHTML="";
+ const spec=!!(net&&!S.over&&dq&&S.seat[dq.c]!==net.seat);
+ // 상대가 골랐으면(보던 선택지가 사라지고 선택 기록에 남음) 그 카드에 선택 연출을 보여 준 뒤 다음으로 넘어감
+ if(spDq&&!spFx&&!pickFx.busy&&!(dq&&dq.c===spDq.c&&dq.opts.join()===spDq.opts.join())){const L=S.dlog||[],x=L[L.length-1],o=spDq;spDq=null;
+  const b=x&&x.c===o.c&&x.o.join()===o.opts.join()&&dm.classList.contains("on")?$("drb").children[o.opts.indexOf(x.id)]:null;
+  if(b){const a=AUGS[x.id]||{},r=["COMMON","RARE","EPIC","LEGEND","LUNACY"].includes(a.r)?a.r:"COMMON";spFx=1;pickFx.view=1;pickFx(b,x.id,r)}}
+ if(!spFx)dm.classList.toggle("spec",spec);
+ if(spFx);else if(dq&&!(ai&&S.seat[dq.c]===1)){if(spec)spDq={c:dq.c,opts:dq.opts.slice()};$("drt").textContent=`${pname(S.seat[dq.c])} (${dq.c==="w"?"백":"흑"}) · ${spec?"증강을 고르는 중이에요":"증강을 고르세요"}`;const bx=$("drb");bx.innerHTML="";
   // 아이콘: OPENING=깃발, PASSIVE=방패, ACTIVE=번개
   const IC={o:'<path d="M7 3h2v18H7zM10 4h10l-3 4 3 4H10z"/>',p:'<path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/>',a:'<path d="M13 2L4 14h6l-1 8 9-12h-6z"/>'},RK={COMMON:1,RARE:1,EPIC:1,LEGEND:1,LUNACY:1};
   dq.opts.forEach((id,k)=>{const a=AUGS[id],r=RK[a.r]?a.r:"COMMON",ty=a.o?"o":a.p?"p":"a",b=document.createElement("button");b.className="dc rc-"+r;b.style.setProperty("--i",k);
