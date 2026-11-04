@@ -2539,7 +2539,7 @@ function menu(){
   if(sl)t.addEventListener("wheel",e=>{if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){t.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
   items.forEach(([v,n])=>{const b=document.createElement("button");b.textContent=n;if(v===cur)b.className="on";b.onclick=()=>{fn(v);menu()};t.appendChild(b)});box.appendChild(t)};
  cards("모드",MODES.map(m=>{const ic=m.name.split(" ")[0],nm=m.name.slice(ic.length+1);return[m.id,ic,nm,""]}),sM,v=>sM=v);
- const fr=Online.friends();if(sO===2&&!Online.me())sO=1;
+ const fr=Online.friends();if((sO===2||sO===4)&&!Online.me())sO=sO===4?3:1;
  // 상대: 오프라인/온라인 두 개만. 누르면 작은 창에서 세부 방식을 고름 (oppPick)
  cards("상대",[["off","🏠","오프라인",""],["on","🌐","온라인",""]],sO>=2?"on":"off",v=>oppPick(v));
  if($("opo").classList.contains("on"))oppDraw(); // 열린 선택 창도 최신 상태로 (친구 목록·접속 표시)
@@ -2549,11 +2549,11 @@ function menu(){
 let opK="off";
 function oppPick(k){opK=k;if(k==="off"&&sO>=2)sO=1;oppDraw();$("opo").classList.add("on")}
 function oppDraw(){const k=opK,L=k==="off"?[[1,"🤖","AI 대결",""],[0,"👥","2인 (한 기기)",""]]
-  :[[2,"⚔","친구 대전",""],[3,"🎮","일반 게임",""],["r","🏆","랭크 게임",""]];
+  :[[2,"⚔","친구 대전",""],[3,"🎮","일반 게임",""],[4,"🏆","랭크 게임",""]];
  $("opT").textContent=k==="off"?"오프라인":"온라인";const bx=$("opb");bx.innerHTML="";
  L.forEach(([v,ic,n,sub])=>{const b=document.createElement("button"),soon=typeof v!=="number";b.className="opt"+(v===sO?" on":"")+(soon?" soon":"");if(soon)b.setAttribute("aria-disabled","true");
   b.innerHTML=`<span class="oi">${ic}</span><span class="ot"><b>${n}</b>${sub?`<small>${sub}</small>`:""}</span>`;
-  b.onclick=()=>{if(soon)return toast("준비 중이에요");if(v===2&&!Online.me())return toast("로그인하면 친구 대전을 할 수 있어요");sO=v;menu();oppDraw()};bx.appendChild(b)});
+  b.onclick=()=>{if(soon)return toast("준비 중이에요");if(v===2&&!Online.me())return toast("로그인하면 친구 대전을 할 수 있어요");if(v===4&&!Online.me())return toast("로그인하면 랭크 게임을 할 수 있어요");sO=v;menu();oppDraw()};bx.appendChild(b)});
  const x=$("opx");x.innerHTML="";
  const lab=t=>{const l=document.createElement("div");l.className="lb";l.textContent=t;x.appendChild(l)};
  const seg=(items,cur,fn,sl)=>{const t=document.createElement("div");t.className="seg"+(sl?" sl":"");
@@ -2566,7 +2566,7 @@ function oppDraw(){const k=opK,L=k==="off"?[[1,"🤖","AI 대결",""],[0,"👥",
    if(fr.length)seg(fr.map(f=>[f.uid,(Online.dot(f.uid)+" "+f.name).trim()]),sF,v=>sF=v,true);
    else{const e=document.createElement("div");e.className="md";e.textContent="아직 친구가 없어요. 위쪽의 친구 버튼에서 닉네임으로 친구를 추가하세요.";x.appendChild(e)}
    go.textContent="대전 신청 보내기";go.disabled=!sF}
-  else if(sO>=3){go.textContent="일반 매칭 시작";go.disabled=!Online.ready()}
+  else if(sO>=3){go.textContent=sO===4?"랭크 매칭 시작":"일반 매칭 시작";go.disabled=sO===4?!Online.me():!Online.ready()}
   else{go.textContent="게임 시작";go.disabled=true}}}
 $("opX").onclick=()=>$("opo").classList.remove("on");$("opo").onclick=e=>{if(e.target.id==="opo")$("opo").classList.remove("on")};
 // 플레이어 바: 이름 · 잡은 기물 · 기물 점수 차이 · 차례 표시
@@ -2877,8 +2877,7 @@ const Online=(()=>{
  const rankRow=(d,uid)=>`<div class="li" style="flex-wrap:wrap;gap:4px 14px;border-bottom:0"><span style="flex:none">🏆 랭크 등급</span>${MODES.map(m=>`<span style="flex:none;font-size:12px">${esc(m.name)} ${rankOf(d,uid,m.id,true)}</span>`).join("")}</div>`;
  function mqStop(){const Q=mq;if(!Q)return;mq=null;Q.done=true;clearInterval(Q.timer);if(Q.u1)Q.u1();if(Q.u2)Q.u2();ov("wto",false)}
  async function match(kind,mid){
-  if(kind==="ranked")return toast("랭크 게임은 준비 중이에요"); // 아직 열지 않음 (켜려면 이 줄과 메뉴의 "r" 항목을 되돌리면 됨)
-  if(!db)return toast("온라인 서버에 연결되지 않았어요");if(mq)return;if(live())return toast("진행 중인 대전을 먼저 끝내 주세요");
+   if(!db)return toast("온라인 서버에 연결되지 않았어요");if(mq)return;if(live())return toast("진행 중인 대전을 먼저 끝내 주세요");
   if(kind!=="normal"&&!(me&&prof))return toast("로그인하면 할 수 있어요");if(!await ensureUid())return;
   const m=MODES.find(x=>x.id===mid);if(!m)return;
   const ref=db.doc("queue/"+myUid()),r0=kind==="ranked"?rkOf(prof,mid):0;
