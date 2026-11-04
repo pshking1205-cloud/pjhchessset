@@ -99,7 +99,7 @@ body.ingame .nav>*:not(#gear):not(.sp){display:none!important}
 .empty{padding:14px;color:var(--mut);font-family:var(--f-body)}
 #inf{padding:12px 14px;font-size:13px;line-height:1.6}
 .dlg{margin-top:8px;font-size:12px}.dlg .lb{margin:0 0 2px}.dlg b,.dlg span{cursor:pointer}.dlg span{opacity:.55}
-.wdl{display:flex;flex-direction:column;gap:6px;margin-top:10px;font-weight:400;font-size:13px}
+#dro.spec .dc{pointer-events:none;cursor:default} /* 상대가 고르는 중: 카드는 보기만 */
 .ag2{cursor:pointer;display:inline-block;padding:2px 8px;margin:2px;border:1px solid var(--bd);border-radius:999px;background:var(--card2)}.ag2.u{opacity:.5}
 /* 증강 칩 등급 색: COMMON 회색 · RARE 파랑 · EPIC 자주 · LEGEND 금 · LUNACY 장미 */
 .ag2 .rkt{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.5px;padding:0 5px;margin-right:4px;border-radius:999px;color:#fff;vertical-align:1px}
@@ -2457,13 +2457,13 @@ function render(){
  h.scrollTop=h.scrollHeight;
  const dq=S.draft&&S.draft[0],dm=$("dro");
  $("dro").classList.toggle("flip2",!!(dq&&!ai&&!net&&S.seat[dq.c]===1)); // 한 기기 2인: 맞은편(흑) 플레이어가 고를 때는 증강 선택 창을 그쪽으로 180도 돌림
- if(dq&&!(ai&&S.seat[dq.c]===1)&&!(net&&S.seat[dq.c]!==net.seat)){$("drt").textContent=`${pname(S.seat[dq.c])} (${dq.c==="w"?"백":"흑"}) · 증강을 고르세요`;const bx=$("drb");bx.innerHTML="";
+ // 온라인에서 상대가 고르는 차례(spec)에도 같은 카드 창을 보여 줌. 누를 수는 없고 제목만 다름
+ const spec=!!(net&&!S.over&&dq&&S.seat[dq.c]!==net.seat);dm.classList.toggle("spec",spec);
+ if(dq&&!(ai&&S.seat[dq.c]===1)){$("drt").textContent=`${pname(S.seat[dq.c])} (${dq.c==="w"?"백":"흑"}) · ${spec?"증강을 고르는 중이에요":"증강을 고르세요"}`;const bx=$("drb");bx.innerHTML="";
   // 아이콘: OPENING=깃발, PASSIVE=방패, ACTIVE=번개
   const IC={o:'<path d="M7 3h2v18H7zM10 4h10l-3 4 3 4H10z"/>',p:'<path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/>',a:'<path d="M13 2L4 14h6l-1 8 9-12h-6z"/>'},RK={COMMON:1,RARE:1,EPIC:1,LEGEND:1,LUNACY:1};
   dq.opts.forEach((id,k)=>{const a=AUGS[id],r=RK[a.r]?a.r:"COMMON",ty=a.o?"o":a.p?"p":"a",b=document.createElement("button");b.className="dc rc-"+r;b.style.setProperty("--i",k);
-   b.innerHTML=`<span class="dcf"><span class="dci"><svg viewBox="0 0 24 24">${IC[ty]}</svg></span><b class="dcn">${a.n}</b><span class="dct">${r} · ${a.p?"PASSIVE":"ACTIVE"}${a.o?" · OPENING":""}</span><span class="dcd">${a.d}</span></span>`;b.onclick=()=>pickFx(b,id,r);if(r==="LEGEND")lgSkin(b,"L");if(r==="LUNACY"){luSkin(b);b.style.setProperty("--i",0)}else if(dq.opts.some(x=>AUGS[x].r==="LUNACY"))b.style.setProperty("--i",k?2:1);bx.appendChild(b)});const drShow=()=>{dm.classList.add("on");if(dq.opts.some(x=>AUGS[x].r==="LUNACY")&&luShown!==dq){luShown=dq;luReveal(bx)}else if(luShown===dq&&document.getElementById("lurv"))bx.classList.add("luwait")};if(drSeen!==dq){drSeen=dq;drReady=false;dm.classList.remove("on");clearTimeout(drT);drT=setTimeout(()=>{drReady=true;if(S.draft&&S.draft[0]===dq)render()},CONFIG_DRAFT_DELAY)}else if(drReady)drShow()}else{dm.classList.remove("on");clearTimeout(drT);drSeen=null}
- {const on=!!(net&&!S.over&&dq&&S.seat[dq.c]!==net.seat);$("wdo").classList.toggle("on",on); // 온라인: 상대가 증강 고르는 동안 살짝 어둡게 + 상대에게 나온 증강 보여 줌
-  if(on)$("wdoP").innerHTML=`상대가 증강을 고르는 중이에요<div class="wdl">${dq.opts.map(id=>{const a=AUGS[id]||{n:id,r:"COMMON"};return`<span class="ag2 rk-${a.r||"COMMON"}"><i class="rkt">${({COMMON:"C",RARE:"R",EPIC:"E",LEGEND:"L",LUNACY:"LU"})[a.r]||"C"}</i>${a.n}</span>`}).join("")}</div>`}
+   b.innerHTML=`<span class="dcf"><span class="dci"><svg viewBox="0 0 24 24">${IC[ty]}</svg></span><b class="dcn">${a.n}</b><span class="dct">${r} · ${a.p?"PASSIVE":"ACTIVE"}${a.o?" · OPENING":""}</span><span class="dcd">${a.d}</span></span>`;if(!spec)b.onclick=()=>pickFx(b,id,r);else b.tabIndex=-1;if(r==="LEGEND")lgSkin(b,"L");if(r==="LUNACY"){luSkin(b);b.style.setProperty("--i",0)}else if(dq.opts.some(x=>AUGS[x].r==="LUNACY"))b.style.setProperty("--i",k?2:1);bx.appendChild(b)});const drShow=()=>{dm.classList.add("on");if(dq.opts.some(x=>AUGS[x].r==="LUNACY")&&luShown!==dq){luShown=dq;luReveal(bx)}else if(luShown===dq&&document.getElementById("lurv"))bx.classList.add("luwait")};if(drSeen!==dq){drSeen=dq;drReady=false;dm.classList.remove("on");clearTimeout(drT);drT=setTimeout(()=>{drReady=true;if(S.draft&&S.draft[0]===dq)render()},CONFIG_DRAFT_DELAY)}else if(drReady)drShow()}else{dm.classList.remove("on");clearTimeout(drT);drSeen=null}
  if(S.over&&!dismissed){if($("rso").classList.contains("on"))resultUI();else if(!rsT)rsT=setTimeout(()=>{rsT=0;if(S&&S.over&&!dismissed){resultUI();$("rso").classList.add("on")}},1800)}else{clearTimeout(rsT);rsT=0;$("rso").classList.remove("on")}
  renderBars();
 }
