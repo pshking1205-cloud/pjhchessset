@@ -99,7 +99,17 @@ body.ingame .nav>*:not(#gear):not(.sp){display:none!important}
 .empty{padding:14px;color:var(--mut);font-family:var(--f-body)}
 #inf{padding:12px 14px;font-size:13px;line-height:1.6}
 .dlg{margin-top:8px;font-size:12px}.dlg .lb{margin:0 0 2px}.dlg b,.dlg span{cursor:pointer}.dlg span{opacity:.55}
-#dro.spec .dc{pointer-events:none;cursor:default} /* 상대가 고르는 중: 카드는 보기만 */
+#dro.spec .dc{pointer-events:none;cursor:default}
+/* 증강 용어: 설명 속 점선 밑줄 + 따로 뜨는 풀이 창 */
+u.gt{text-decoration:underline dotted;text-underline-offset:3px;text-decoration-thickness:1.5px}
+[data-aug]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+#agp{position:fixed;z-index:80;width:min(280px,calc(100vw - 16px));background:#1f1d1b;color:#f0ede8;border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:10px 12px;box-shadow:0 12px 34px rgba(0,0,0,.55);pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .15s,transform .15s;text-align:left}
+#agp.on{opacity:1;transform:none}
+#agp .agph{font-size:11px;color:#a9a39a;font-weight:700;letter-spacing:.3px;margin-bottom:6px}
+#agp .agpr{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-top:1px solid rgba(255,255,255,.07)}
+#agp .agpr:first-of-type{border-top:0}
+#agp .agpi{flex:none;width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.07);display:grid;place-items:center}#agp .agpi svg{width:28px;height:28px}
+#agp b{font-size:14px}#agp p{margin:2px 0 0;font-size:12.5px;line-height:1.5;color:#d8d3cb} /* 상대가 고르는 중: 카드는 보기만 */
 .ag2{cursor:pointer;display:inline-block;padding:2px 8px;margin:2px;border:1px solid var(--bd);border-radius:999px;background:var(--card2)}.ag2.u{opacity:.5}
 /* 증강 칩 등급 색: COMMON 회색 · RARE 파랑 · EPIC 자주 · LEGEND 금 · LUNACY 장미 */
 .ag2 .rkt{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.5px;padding:0 5px;margin-right:4px;border-radius:999px;color:#fff;vertical-align:1px}
@@ -1902,21 +1912,21 @@ const AUGS={
  ice:{n:"빙판",d:"사용: 상대의 룩·비숍·퀸이 다음 3수 동안 방향별 최대 사거리로만 이동해요."},
  relo:{n:"재배치",d:"사용: 이번 차례에 킹을 뺀 내 기물이 두 번 움직여요. 기물을 잡을 수 없어요."},
  split:{n:"분해",d:"사용: 이번 차례에 퀸을 움직이면 퀸이 이동한 위치에 비숍, 원래 위치에 룩으로 분해돼요."},
- bless:{n:"가호",d:"사용: 무작위 내 기물 하나가 가호를 얻어요(🛡). 다음 공격 한 번을 막고, 공격한 쪽은 차례만 넘겨요."},
- poison:{n:"독이 든 폰",d:"사용: 무작위 내 폰 최대 3개에 독(☠). 그 폰을 잡은 기물은 2수 동안 움직일 수 없어요."},
+ bless:{n:"가호",d:"사용: 무작위 내 기물 하나가 가호를 얻어요(🛡)."},
+ poison:{n:"독이 든 폰",d:"사용: 무작위 내 폰 최대 3개에 독을 발라요(☠)."},
  cham:{n:"카멜레온 변이",d:"사용: 무작위 내 기물(킹 제외) 최대 3개(🦎)가 기물을 잡으면 그 기물로 변신해요."},
- freeze:{n:"빙결",d:"사용: 무작위 상대 기물 3개를 3턴 동안 얼려요(❄). 얼면 움직이지도 잡히지도 않아요."},
+ freeze:{n:"빙결",d:"사용: 무작위 상대 기물 3개를 3턴 동안 빙결시켜요(❄)."},
  blizzard:{n:"블리자드",d:"사용: 양쪽 킹을 3수 동안 얼려요(❄)."},
  evac:{n:"긴급 피난",d:"사용: 무작위 내 기물(킹 제외) 최대 3개가 자기 진영 쪽으로 한 칸 후퇴해요. 피난한 기물은 이번 턴에 기물을 잡을 수 없어요. (고르기 대신 무작위)"},
  panic:{n:"패닉",d:"사용: 이 차례를 마치면 무작위 상대 기물 2개(킹 제외)가 이동 범위 내 빈 칸으로 흩어져요. (확인 필요: 빈 칸만)"},
  blackbox:{n:"검은 상자",d:"사용: 무작위 능동 증강 하나가 즉시 발동돼요."},
  advance:{n:"부정출발",o:1,p:1,r:"COMMON",d:"모든 아군 기물이 2칸 전진된 상태로 시작합니다."},
  london:{n:"런던 시스템",o:1,p:1,r:"COMMON",d:"런던 시스템의 첫 7수(d4·e3·c3·Bf4·Nf3·Nbd2·Bd3)가 진행된 상태로 내 진영을 배치합니다."},
- rocket:{n:"로켓",o:1,p:1,r:"RARE",d:"아군 룩이 각각 첫 이동에 한해 아마존(퀸+나이트)처럼 행마할 수 있습니다."},
- hill:{n:"언덕의 왕",o:1,p:1,r:"COMMON",d:"킹이 보드 중앙 4칸으로 들어올 경우 아마존(퀸+나이트)처럼 움직일 수 있습니다."},
+ rocket:{n:"로켓",o:1,p:1,r:"RARE",d:"아군 룩이 각각 첫 이동에 한해 아마존처럼 움직일 수 있습니다."},
+ hill:{n:"언덕의 왕",o:1,p:1,r:"COMMON",d:"킹이 보드 중앙 4칸으로 들어오면 아마존처럼 움직일 수 있습니다."},
  vanguard:{n:"선봉",o:1,p:1,r:"COMMON",d:"제일 선두에 있는 아군 폰이 하나라면, 해당 폰은 대각선으로도 이동할 수 있습니다. (확인 필요: 앞쪽 빈 대각선으로 해석)"},
  martyr:{n:"순교",o:1,p:1,r:"COMMON",d:"비숍을 전부 희생하여 모든 아군 폰에 가호를 부여합니다."},
- notice:{n:"예고장",o:1,p:1,r:"COMMON",d:"상대 무작위 비폰 기물(킹 제외) 하나에 예고장(✉)을 보냅니다. 해당 기물이 잡힐 경우, 같은 편의 다른 기물 하나를 추가로 제거합니다."},
+ notice:{n:"예고장",o:1,p:1,r:"COMMON",d:"상대 무작위 비폰 기물(킹 제외) 하나에 예고장(✉)을 보냅니다."},
  geneva:{n:"제네바 협약",o:1,p:1,r:"COMMON",d:"상대방 퀸이 아군 폰을 잡을 수 없습니다."},
  zonber:{n:"존버",o:1,p:1,r:"COMMON",d:"무작위 아군 폰 하나가 28수 뒤 퀸으로 승진합니다. (확인 필요: 내 이동 28번 기준, 고르기 대신 무작위)"},
  dash:{n:"질주",o:1,p:1,r:"COMMON",d:"폰이 첫 번째 이동으로 세 칸까지 갈 수 있습니다."},
@@ -1925,7 +1935,7 @@ const AUGS={
  hasty:{n:"성급한 승진",o:1,p:1,r:"RARE",d:"아군 폰의 프로모션 랭크가 3칸 내려옵니다. 단, 메이저 피스로는 변할 수 없습니다."},
  early:{n:"조기 진급",o:1,p:1,r:"RARE",d:"아군 폰의 프로모션 랭크가 2칸 내려옵니다."},
  special:{n:"특진",o:1,p:1,r:"RARE",d:"아군 폰이 기물을 2개 잡으면 즉시 프로모션(퀸)합니다."},
- locust:{n:"메뚜기떼",o:1,p:1,r:"EPIC",d:"아군 마이너 피스와 룩이 시작 위치에서 움직이지 않았다면 그래스호퍼(기물 하나를 뛰어넘어 바로 뒤 칸에 착지)처럼 한 번 이동할 수 있습니다."},
+ locust:{n:"메뚜기떼",o:1,p:1,r:"EPIC",d:"아군 마이너 피스와 룩이 시작 위치에서 움직이지 않았다면 그래스호퍼처럼 한 번 이동할 수 있습니다."},
  iqp:{n:"IQP",o:1,p:1,r:"EPIC",d:"상대 e폰과 c폰을 제거합니다."},
  exped:{n:"친정",o:1,p:1,r:"EPIC",d:"아군 킹이 상대방 폰을 잡을 경우 한 번 더 움직일 수 있습니다."},
  corner:{n:"코너킥",p:1,r:"COMMON",d:"아군 나이트가 보드의 구석 2x2 자리에 위치할 경우 비숍처럼도 움직일 수 있습니다."},
@@ -2003,7 +2013,7 @@ const AUGS={
  dbl:{n:"더블 체크",p:1,r:"RARE",d:"서로 다른 내 기물 2개 이상이 동시에 상대 킹을 공격하면 즉시 승리해요."},
  palace:{n:"궁성",r:"RARE",d:"사용: 상대 킹 주변 3×3 칸에 궁성을 지어요. 상대 킹은 스스로 움직여 궁성을 나갈 수 없어요."}
 };
-AUGS.salvation={n:"구원",p:1,r:"LUNACY",d:"획득 시 아군 퀸이 천사로 바뀌어요. 천사는 퀸처럼 움직이고, 상대 기물을 3개 잡을 때마다 죽은 아군 기물 하나를 무작위로, 죽은 자리(막혀 있으면 가장 가까운 빈칸)에 부활시켜요."};
+AUGS.salvation={n:"구원",p:1,r:"LUNACY",d:"획득 시 아군 퀸이 천사로 바뀌어요."};
 Object.keys(AUGS).forEach(k=>{AUGS[k].r=AUGS[k].r||"COMMON"});
 const AUGW={"LUNACY":3.6,"RARE":.8,"EPIC":.4,"LEGEND":.63,"COMMON":1.18,"★☆":3,"★★":3,"★★☆":2,"★★★":1.5,"★★★☆":1};
 const AUGW0={...AUGW},AUG_OFF=new Set(); // 관리자 탭의 증강 밸런스 설정(config/augment)이 AUGW와 AUG_OFF(꺼 둔 증강)를 덮어써요
@@ -2282,12 +2292,12 @@ const AUGC={...STD,id:"augment",name:"✦ 증강 체스",
  },
  evalBonus:s=>{let w=0,b=0;s.b.forEach(p=>{if(p&&p.t==="K")p.c==="w"?w++:b++});return(w?0:-50000)+(b?0:50000)},
  // 얻은 증강 표시: 칩 색과 앞의 등급 글자로 등급을 바로 알 수 있게 (C·R·E·L·LU)
- info(s){const RA={COMMON:"C",RARE:"R",EPIC:"E",LEGEND:"L",LUNACY:"LU"},row=c=>s.aug[c].map(a=>{const d=AUGS[a.id],r=RA[d.r]?d.r:"COMMON";return`<span class="ag2 rk-${r}${a.used?" u":""}" title="${a.wb?"하얀 상자.":""}${d.n} [${r}] ${d.d}" onclick="showAug('${a.id}')"><i class="rkt">${RA[r]}</i>${d.p?"🔹":a.used?"▫️":"🔸"}${a.wb?"하얀 상자.":""}${d.n}</span>`}).join(" ")||"-";
+ info(s){const RA={COMMON:"C",RARE:"R",EPIC:"E",LEGEND:"L",LUNACY:"LU"},row=c=>s.aug[c].map(a=>{const d=AUGS[a.id],r=RA[d.r]?d.r:"COMMON";return`<span class="ag2 rk-${r}${a.used?" u":""}" data-aug="${a.id}" onclick="showAug('${a.id}')"><i class="rkt">${RA[r]}</i>${d.p?"🔹":a.used?"▫️":"🔸"}${a.wb?"하얀 상자.":""}${d.n}</span>`}).join(" ")||"-";
   let o=`백: ${row("w")}<br>흑: ${row("b")}<br><small>🔹PASSIVE 🔸사용 가능 ▫️사용함 · 이름을 누르면 설명이 나와요</small>`;
   // 증강 선택 기록: 그때 나온 증강 3개 중 고른 것은 굵게 (상대가 무엇을 받고 골랐는지 볼 수 있음)
   if((s.dlog||[]).length)o+=`<div class="dlg"><div class="lb">증강 선택 기록</div>${s.dlog.map(x=>`<div>${x.c==="w"?"백":"흑"} · ${x.o.map(id=>{const d=AUGS[id]||{n:id};return id===x.id?`<b onclick="showAug('${id}')">${d.n}</b>`:`<span onclick="showAug('${id}')">${d.n}</span>`}).join(" · ")}</div>`).join("")}</div>`;
   if(s.lastUse)o+=`<div class="adc" style="border-left:4px solid #8e44ad">✦ 최근 사용: <b>${s.lastUse}</b></div>`;
-  if(augSel&&AUGS[augSel])o+=`<div class="adc"><b>${AUGS[augSel].n}</b> <small class="aty">${AUGS[augSel].r}${AUGS[augSel].p?" · PASSIVE":" · ACTIVE"}${AUGS[augSel].o?" · OPENING":""}</small><br>${AUGS[augSel].d}</div>`;
+  if(augSel&&AUGS[augSel])o+=`<div class="adc"><b>${AUGS[augSel].n}</b> <small class="aty">${AUGS[augSel].r}${AUGS[augSel].p?" · PASSIVE":" · ACTIVE"}${AUGS[augSel].o?" · OPENING":""}</small><br><span data-aug="${augSel}">${augDesc(augSel)}</span></div>`;
   const ef=s.eff.map(e=>`${(AUGS[e.k]||{n:e.k}).n}(${e.c==="w"?"백":"흑"} ${e.left})`).concat(s.fz.filter(f=>f.until>s.n).length?["❄ 얼음 "+s.fz.filter(f=>f.until>s.n).length+"개"]:[]);
   if(ef.length)o+="<br><small>효과: "+ef.join(", ")+"</small>";
   if(!s.over&&!lockTurn()&&!(s.draft&&s.draft.length)){const act=s.aug[s.turn].filter(a=>!a.used&&!AUGS[a.id].p);
@@ -2355,6 +2365,47 @@ let luShown=null,annSeen=null,augSel=null;function showAnn(a){const id=AUGS[a.id
 let revSeen=null,revFx=null;const PNM={P:"폰",N:"나이트",B:"비숍",R:"룩",Q:"퀸",A:"천사"};
 // 부활 알림: 상태(S.rev)로 전달되어 두 사람 모두에게 똑같이 보임
 function showRevive(rv){revFx={sq:rv.to,until:Date.now()+2000};setTimeout(()=>{if(S)render()},2100)}
+// 증강 용어 설명: 설명에 이 낱말이 있으면 밑줄로 표시하고, 증강 카드에 마우스를 올리거나 꾹 누르면 따로 창에 풀이를 보여 줌
+// [보여 줄 이름, 찾을 낱말(정규식), 풀이, 그림(기물 종류, 없으면 빈칸)]
+const GLOSS=[
+ ["천사",/천사/,"퀸처럼 움직여요. 상대 기물을 3개 잡을 때마다 죽은 아군 기물 하나가 무작위로 살아나요. 죽었던 자리로 돌아오고, 그 칸이 막혀 있으면 가장 가까운 빈칸에 나와요.","A"],
+ ["아마존",/아마존/,"퀸과 나이트의 움직임을 모두 가진 기물처럼 움직여요.","Q"],
+ ["그래스호퍼",/그래스호퍼/,"가로·세로·대각선 같은 줄에 있는 기물 하나를 뛰어넘어, 그 바로 뒤 칸에 내려앉아요.",""],
+ ["예고장",/예고장/,"예고장(✉)을 받은 기물이 잡히면, 같은 편의 다른 기물 하나가 추가로 사라져요.",""],
+ ["가호",/가호/,"다음 공격 한 번을 막아 줘요(🛡). 막히면 공격한 쪽은 차례만 넘겨요.",""],
+ ["독",/독(?=[을이(·,)]|$)/,"독(☠)이 있는 기물을 잡은 기물은 2수 동안 움직일 수 없어요.",""],
+ ["빙결",/빙결|얼려|얼면/,"얼어붙은 기물(❄)은 움직이지도 잡히지도 않아요.",""],
+ ["기절",/기절/,"잠깐 동안 기물을 잡을 수 없어요.",""],
+ ["전향",/전향/,"상대 기물이 내 편 기물로 바뀌어요.",""],
+ ["희생",/희생/,"내 기물을 스스로 판에서 없애요.",""],
+ ["마이너 피스",/마이너 피스/,"나이트와 비숍이에요.","N"],
+ ["메이저 피스",/메이저 피스/,"퀸과 룩이에요.","R"],
+ ["원거리 기물",/원거리 기물/,"한 번에 여러 칸을 가는 기물(퀸·룩·비숍)이에요.","B"],
+ ["비폰 기물",/비폰/,"폰이 아닌 기물이에요.",""],
+ ["프로모션",/프로모션/,"폰이 끝 줄(프로모션 랭크)에 닿으면 다른 기물로 바뀌는 규칙이에요.","P"],
+ ["앙파상",/앙파상/,"상대 폰이 두 칸 전진해 내 폰 바로 옆에 서면, 그 폰이 지나간 칸으로 대각선 이동하며 잡는 규칙이에요.","P"],
+ ["캐슬링",/캐슬링/,"킹과 룩이 한 번에 자리를 바꾸는 규칙이에요.","K"]];
+const augTerms=id=>{const d=(AUGS[id]||{}).d||"";return GLOSS.filter(g=>g[1].test(d))};
+// 설명 글: 용어가 처음 나오는 곳에 점선 밑줄
+function augDesc(id){let d=esc((AUGS[id]||{}).d||"");augTerms(id).forEach(g=>{d=d.replace(new RegExp(g[1].source),m=>`<u class="gt">${m}</u>`)});return d}
+// 설명 창: 마우스는 올리는 동안, 손가락은 꾹(0.45초) 누르는 동안 보여 줌. 꾹 누른 뒤 손을 떼도 카드를 고르지 않음
+const agTip=(()=>{let el=null,tm=0,held=false;
+ const box=()=>el||(el=document.body.appendChild(Object.assign(document.createElement("div"),{id:"agp"})));
+ function show(t,id){const T=augTerms(id);if(!T.length)return;const e=box(),a=AUGS[id];
+  e.innerHTML=`<div class="agph">${esc(a.n)} · 용어 설명</div>`+T.map(g=>`<div class="agpr">${g[3]?`<span class="agpi">${pcSvg(g[3],"w")}</span>`:""}<div><b>${g[0]}</b><p>${g[2]}</p></div></div>`).join("");
+  e.classList.add("on");const r=t.getBoundingClientRect(),w=e.offsetWidth,h=e.offsetHeight,W=innerWidth,H=innerHeight;
+  let x=r.right+10,y=r.top;if(x+w>W-8)x=r.left-w-10;if(x<8){x=Math.max(8,Math.min(W-w-8,r.left+r.width/2-w/2));y=r.top-h-10;if(y<8)y=r.bottom+10}
+  e.style.left=x+"px";e.style.top=Math.max(8,Math.min(H-h-8,y))+"px"}
+ const hide=()=>{clearTimeout(tm);if(el)el.classList.remove("on")};
+ const at=e=>e.target.closest&&e.target.closest("[data-aug]");
+ document.addEventListener("pointerover",e=>{const t=at(e);if(t&&e.pointerType==="mouse")show(t,t.dataset.aug)});
+ document.addEventListener("pointerout",e=>{const t=at(e);if(t&&e.pointerType==="mouse"&&!t.contains(e.relatedTarget))hide()});
+ document.addEventListener("pointerdown",e=>{const t=at(e);held=false;if(!t||e.pointerType==="mouse")return;clearTimeout(tm);tm=setTimeout(()=>{held=true;show(t,t.dataset.aug)},450)});
+ ["pointerup","pointercancel"].forEach(k=>document.addEventListener(k,e=>{if(e.pointerType!=="mouse")hide()}));
+ document.addEventListener("click",e=>{if(held&&at(e)){e.stopPropagation();e.preventDefault();held=false}},true); // 꾹 누른 뒤에 오는 클릭은 막음
+ document.addEventListener("contextmenu",e=>{if(at(e))e.preventDefault()});
+ addEventListener("scroll",hide,true);
+ return{hide}})();
 function showAug(id){augSel=augSel===id?null:id;render()}
 let sM="standard",sO=1,sL="보통",sF=null; // sO: 0=한 기기 2인 1=AI 2=친구(온라인) 3=일반 매칭 4=랭크 매칭
 function applyTheme(id){const t=CONFIG.themes.find(x=>x.id===id),r=document.documentElement;
@@ -2499,7 +2550,7 @@ function render(){
   // 아이콘: OPENING=깃발, PASSIVE=방패, ACTIVE=번개
   const IC={o:'<path d="M7 3h2v18H7zM10 4h10l-3 4 3 4H10z"/>',p:'<path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/>',a:'<path d="M13 2L4 14h6l-1 8 9-12h-6z"/>'},RK={COMMON:1,RARE:1,EPIC:1,LEGEND:1,LUNACY:1};
   dq.opts.forEach((id,k)=>{const a=AUGS[id],r=RK[a.r]?a.r:"COMMON",ty=a.o?"o":a.p?"p":"a",b=document.createElement("button");b.className="dc rc-"+r;b.style.setProperty("--i",k);
-   b.innerHTML=`<span class="dcf"><span class="dci"><svg viewBox="0 0 24 24">${IC[ty]}</svg></span><b class="dcn">${a.n}</b><span class="dct">${r} · ${a.p?"PASSIVE":"ACTIVE"}${a.o?" · OPENING":""}</span><span class="dcd">${a.d}</span></span>`;if(!spec)b.onclick=()=>pickFx(b,id,r);else b.tabIndex=-1;if(r==="LEGEND")lgSkin(b,"L");if(r==="LUNACY"){luSkin(b);b.style.setProperty("--i",0)}else if(dq.opts.some(x=>AUGS[x].r==="LUNACY"))b.style.setProperty("--i",k?2:1);bx.appendChild(b)});const drShow=()=>{dm.classList.add("on");if(dq.opts.some(x=>AUGS[x].r==="LUNACY")&&luShown!==dq){luShown=dq;luReveal(bx)}else if(luShown===dq&&document.getElementById("lurv"))bx.classList.add("luwait")};if(drSeen!==dq){drSeen=dq;drReady=false;dm.classList.remove("on");clearTimeout(drT);drT=setTimeout(()=>{drReady=true;if(S.draft&&S.draft[0]===dq)render()},CONFIG_DRAFT_DELAY)}else if(drReady)drShow()}else{dm.classList.remove("on");clearTimeout(drT);drSeen=null}
+   b.innerHTML=`<span class="dcf"><span class="dci"><svg viewBox="0 0 24 24">${IC[ty]}</svg></span><b class="dcn">${a.n}</b><span class="dct">${r} · ${a.p?"PASSIVE":"ACTIVE"}${a.o?" · OPENING":""}</span><span class="dcd">${augDesc(id)}</span></span>`;b.dataset.aug=id;if(!spec)b.onclick=()=>{agTip.hide();pickFx(b,id,r)};else b.tabIndex=-1;if(r==="LEGEND")lgSkin(b,"L");if(r==="LUNACY"){luSkin(b);b.style.setProperty("--i",0)}else if(dq.opts.some(x=>AUGS[x].r==="LUNACY"))b.style.setProperty("--i",k?2:1);bx.appendChild(b)});const drShow=()=>{dm.classList.add("on");if(dq.opts.some(x=>AUGS[x].r==="LUNACY")&&luShown!==dq){luShown=dq;luReveal(bx)}else if(luShown===dq&&document.getElementById("lurv"))bx.classList.add("luwait")};if(drSeen!==dq){drSeen=dq;drReady=false;dm.classList.remove("on");clearTimeout(drT);drT=setTimeout(()=>{drReady=true;if(S.draft&&S.draft[0]===dq)render()},CONFIG_DRAFT_DELAY)}else if(drReady)drShow()}else{dm.classList.remove("on");clearTimeout(drT);drSeen=null}
  if(S.over&&!dismissed){if($("rso").classList.contains("on"))resultUI();else if(!rsT)rsT=setTimeout(()=>{rsT=0;if(S&&S.over&&!dismissed){resultUI();$("rso").classList.add("on")}},1800)}else{clearTimeout(rsT);rsT=0;$("rso").classList.remove("on")}
  renderBars();
 }
