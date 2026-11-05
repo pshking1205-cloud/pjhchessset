@@ -127,6 +127,7 @@ u.gt{text-decoration:underline dotted;text-underline-offset:3px;text-decoration-
 .adc{margin-top:8px;padding:8px 10px;border-radius:8px;background:var(--card2)}
 #inf button{margin:6px 4px 0 0;padding:6px 10px;font-size:12px}
 .toolbar{display:flex;flex-wrap:wrap;gap:8px}
+#bun,#bre{font-size:18px;line-height:1}.flx{display:inline-block;transform:scaleX(-1)} /* 앞으로 되돌리기: 되돌리기 화살표를 좌우로 뒤집음 */
 .toolbar button{margin:0;padding:10px 6px;font-size:13px;flex:1 1 28%}
 #top2{transform:rotate(180deg);background:var(--card);border-radius:10px;padding:10px 12px}
 #top2 button{margin:6px 4px 0 0}
@@ -185,7 +186,7 @@ u.gt{text-decoration:underline dotted;text-underline-offset:3px;text-decoration-
 .anbd span{width:88%;height:88%;display:grid;place-items:center}.anbd svg{width:100%;height:100%}
 .anbd .lm{box-shadow:inset 0 0 0 100px rgba(255,214,40,.38)}.anbd .bm{box-shadow:inset 0 0 0 3px #4aa3ff,inset 0 0 0 100px rgba(74,163,255,.25)}
 .anr{flex:1;min-width:240px;display:flex;flex-direction:column;gap:8px}
-.ann{font-size:15px;min-height:44px}.anb{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--c);color:#fff;margin-left:4px}.anw{color:var(--mut);font-size:13px}.anh{font-size:13px;color:var(--mut);margin-top:4px}.anh b{color:#4aa3ff}
+.ann{font-size:15px;min-height:44px}.anb{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--c);color:#fff;margin-left:4px}.anw{color:var(--mut);font-size:13px}.anh{font-size:13px;color:var(--mut);margin-top:4px}.anh b{color:#4aa3ff}.anh b.nx{color:var(--fg)}
 .anc{display:flex;align-items:center;gap:6px}.anc button{margin:0;padding:6px 10px}.anc span{flex:1;text-align:center;font-size:13px;color:var(--mut)}
 .anet{font-size:13px;color:var(--mut)}
 .anl{max-height:260px;overflow:auto;font-family:var(--f-mono);font-size:13px;background:var(--bg);border-radius:8px}
@@ -1392,7 +1393,7 @@ html[data-ag="crys"] #cv :is(.uab,.luua){display:none!important}
   <div class="panel" id="top"><div id="st"></div><div id="tmr" style="display:none"></div></div>
   <div class="toolbar">
    <button id="bdr">카드 뽑기</button><button class="g" id="ben">턴 종료</button>
-   <button class="g" id="bun">↩ 되돌리기</button><button class="g" id="bfl">⇅ 뒤집기</button>
+   <button class="g" id="bun" aria-label="되돌리기" title="되돌리기">↩</button><button class="g" id="bre" aria-label="앞으로 되돌리기" title="앞으로 되돌리기"><span class="flx">↩</span></button><button class="g" id="bfl">⇅ 뒤집기</button>
    <button class="g" id="bnw">새 게임</button><button class="g" id="brs">🏳 기권</button><button class="g" id="bana" style="display:none">게임 분석</button><button class="g" id="bmn">로비로</button>
   </div>
   <div class="panel"><div class="ph"><span>기보</span></div><div id="hs"></div></div>
@@ -2363,7 +2364,7 @@ const AI=(()=>{
 
 /* ============ 5) UI ============ */
 const $=i=>document.getElementById(i);
-let mode=STD,S=null,hist=[],sel=null,flip=false,ai=true,level="보통",theme="wood",aiT,seen=null,dismissed=false,ctm,soundOn=true,volume=20,checkPop=true;
+let mode=STD,S=null,hist=[],fut=[],sel=null,flip=false,ai=true,level="보통",theme="wood",aiT,seen=null,dismissed=false,ctm,soundOn=true,volume=20,checkPop=true;
 try{const sd0=localStorage.getItem("chessSound");if(sd0!=null)soundOn=sd0==="1";const v0=localStorage.getItem("chessVolume");if(v0!=null)volume=+v0;const c0=localStorage.getItem("chessCheckPop");if(c0!=null)checkPop=c0==="1"}catch(e){}
 // 온라인 대전에서 그 색을 둔 사람의 말 스킨 (스크립트가 다 읽히기 전에 불려도 안전하게)
 function pcNet(c){try{return net&&net.sk&&PCM[net.sk[c]]?net.sk[c]:null}catch(e){return null}}
@@ -2438,7 +2439,7 @@ const pname=n=>net?(net.names[n]||"?")+(n===net.seat?"(나)":""):n===1&&ai?"AI":
 const aiTurn=()=>ai&&S.seat[S.turn]===1;
 const actor=()=>S.draft&&S.draft.length?S.seat[S.draft[0].c]:S.seat[S.turn]; // 지금 조작할 좌석(증강 선택 중이면 고르는 쪽)
 const lockTurn=()=>aiTurn()||(!!net&&actor()!==net.seat);
-function newGame(){clearTimeout(aiT);clearInterval(spdT);spdT=null;Engine.setX(null);S=mode.setup();hist=[];sel=null;seen=null;dismissed=false;flip=false;gid=ai?"ai_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6):null;after()}
+function newGame(){clearTimeout(aiT);clearInterval(spdT);spdT=null;Engine.setX(null);S=mode.setup();hist=[];fut=[];sel=null;seen=null;dismissed=false;flip=false;gid=ai?"ai_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6):null;after()}
 let ckObj=null;
 function after(remote){
  if(S.draft&&S.draft.length&&ai&&S.seat[S.draft[0].c]===1){S=mode.pick(S,mode.aiPick(S));return after()}
@@ -2504,8 +2505,8 @@ function beep(cap){try{
  const og=actx.createGain();og.gain.value=.5*vs;og.gain.exponentialRampToValueAtTime(.0001,t+.07);
  o.connect(og);og.connect(actx.destination);o.start(t);o.stop(t+.07);
 }catch(e){}}
-function play(mv){const cap=!!(S.b[mv.to]||mv.ep||mv.epx!=null);if(mode.undo&&!net)hist.push(S);S=mode.applyMove(S,mv);sel=null;beep(cap);after()}
-function useAug(id){if(!S||S.over||lockTurn()||(S.draft&&S.draft.length))return;if(mode.undo&&!net)hist.push(S);S=mode.use(S,id);sel=null;after()}
+function play(mv){const cap=!!(S.b[mv.to]||mv.ep||mv.epx!=null);if(mode.undo&&!net){hist.push(S);fut=[]}S=mode.applyMove(S,mv);sel=null;beep(cap);after()}
+function useAug(id){if(!S||S.over||lockTurn()||(S.draft&&S.draft.length))return;if(mode.undo&&!net){hist.push(S);fut=[]}S=mode.use(S,id);sel=null;after()}
 /* --- 스톡피시 (Stockfish 10, asm.js): CDN 파일을 Web Worker로 띄워 UCI로 대화. 표준 체스 AI와 끝난 판 분석에 씀 --- */
 const SF=(()=>{const SRC="https://cdn.jsdelivr.net/npm/stockfish@10.0.2/src/stockfish.asm.js";let w=null,ready=null,q=Promise.resolve(),lis=null;
  function boot(){if(ready)return ready;ready=new Promise((ok,no)=>{try{w=new Worker(URL.createObjectURL(new Blob([`importScripts("${SRC}")`],{type:"text/javascript"})))}catch(e){return no(e)}
@@ -2551,12 +2552,15 @@ const evTxt=v=>Math.abs(v)>=9e3?`${v>0?"":"-"}M${Math.max(1,Math.round((1e4-Math
 function anDraw(){if(!an)return;const{st,ev,i}=an,s=st[i],N=st.length-1,v=ev[i];
  // 평가 막대 (백 기준. 판이 뒤집혀 있으면 막대도 뒤집음)
  $("anEv").style.height=(v==null?50:wpc(v))+"%";$("anE").classList.toggle("fl",an.flip);$("anEt").textContent="평가 "+(v==null?"…":evTxt(v));
- const lm=i>0?S.uci[i-1]:null,bm=i>0&&an.best[i-1]&&an.best[i-1]!==S.uci[i-1]&&["inacc","mist","blun"].includes(anCls(i-1))?an.best[i-1]:null, /* 방금 둔 수(노랑)와, 그 대신 둘 수 있었던 최선 수(파랑) */mk=x=>x?[sqIdx(x.slice(0,2)),sqIdx(x.slice(2,4))]:[];
+ const lm=i>0?S.uci[i-1]:null,bm=i>0&&an.best[i-1]&&an.best[i-1]!==S.uci[i-1]?an.best[i-1]:null, /* 방금 둔 수(노랑)와, 그 대신 둘 수 있었던 최선 수(파랑) */mk=x=>x?[sqIdx(x.slice(0,2)),sqIdx(x.slice(2,4))]:[];
  const L=mk(lm),B=mk(bm),ord=[...Array(64).keys()];if(an.flip)ord.reverse();
  $("anB").innerHTML=ord.map(k=>{const p=s.b[k],cl=((k>>3)+(k&7))%2?"d":"l";return`<div class="${cl}${L.includes(k)?" lm":""}${B.includes(k)?" bm":""}">${p?`<span class="${p.c==="w"?"pw":"pb"}">${pcSvg(p.an?"A":p.t,p.c)}</span>`:""}</div>`}).join("");
  // 지금 수에 대한 한 줄 평
- const c=i>0?anCls(i-1):null,pb=i>0&&an.best[i-1]&&an.best[i-1]!==S.uci[i-1]?(()=>{const m=uciMove(st[i-1],an.best[i-1],STD);return m?STD.applyMove(st[i-1],m).log.slice(-1)[0]:null})():null;
- $("anN").innerHTML=i===0?"시작 장면":`<b>${(i+1)>>1}${i%2?".":"..."} ${esc(st[i].log[i-1])}</b>`+(c?` <span class="anb" style="--c:${ANC[c][1]}">${ANC[c][2]} ${ANC[c][0]}</span>`:" <span class='anw'>분석 중…</span>")+(pb&&c&&c!=="best"&&c!=="good"?`<div class="anh">더 좋은 수: <b>${esc(pb)}</b></div>`:"");
+ const san=(k,u)=>{const m=u&&uciMove(st[k],u,STD);return m?STD.applyMove(st[k],m).log.slice(-1)[0]:null}; // 장면 k에서 UCI 수 u를 기보 표기로
+ const c=i>0?anCls(i-1):null,pb=i>0&&an.best[i-1]&&an.best[i-1]!==S.uci[i-1]?san(i-1,an.best[i-1]):null,nb=i<N&&an.best[i]?san(i,an.best[i]):null;
+ $("anN").innerHTML=(i===0?"시작 장면":`<b>${(i+1)>>1}${i%2?".":"..."} ${esc(st[i].log[i-1])}</b>`+(c?` <span class="anb" style="--c:${ANC[c][1]}">${ANC[c][2]} ${ANC[c][0]}</span>`:" <span class='anw'>분석 중…</span>")
+  +(c?`<div class="anh">${pb?`최선 수: <b>${esc(pb)}</b>`:"최선 수를 뒀어요"}</div>`:""))
+  +(nb?`<div class="anh">${i===0?"가장 좋은 첫 수":"다음 차례 최선 수"}: <b class="nx">${esc(nb)}</b></div>`:i===N?`<div class="anh">${esc(st[i].over?st[i].over.why:"")}</div>`:"");
  $("anS").textContent=an.done<st.length?`분석 중 ${an.done}/${st.length}`:`${i}/${N}`;
  // 정확도(백·흑): 수마다 승률 손해로 점수를 매겨 평균 (lichess 방식)
  const acc={w:[],b:[]},cnt={w:{inacc:0,mist:0,blun:0},b:{inacc:0,mist:0,blun:0}};
@@ -2612,11 +2616,11 @@ function render(){
  else{t+=mode.cards?(S.phase==="draw"?" · 카드를 뽑으세요":` · 남은 이동 ${S.left}회`):" · 차례";if(ck)t+=" · ⚠ 체크!"}
  $("st").textContent=t;$("st").insertAdjacentHTML("beforeend",`<div id="ms"></div>`);$("ms").textContent=S.msg;$("t2").textContent=t;$("m2").textContent=S.msg;$("top2").style.display=ai||net?"none":"";$("bdr2").style.display=$("ben2").style.display=mode.cards?"":"none";
  const hu=!S.over&&!lockTurn(),solo=ai||!!net;
- $("bdr").style.display=$("ben").style.display=mode.cards?"":"none";$("bun").style.display=mode.undo&&!net?"":"none";
+ $("bdr").style.display=$("ben").style.display=mode.cards?"":"none";$("bun").style.display=$("bre").style.display=mode.undo&&!net?"":"none";
  $("bnw").style.display=$("rn").style.display=net?"none":"";$("bana").style.display=S.over&&mode.id==="standard"&&S.uci&&S.uci.length?"":"none";$("brs").style.display=net&&!S.over?"":"none";
  document.title=(net&&hu?"● 내 차례 · ":"")+"체스 컬렉션";
  if(!mode.timeLimit){$("tmr").style.display=$("tmr2").style.display="none"}
- $("bdr").disabled=!(hu&&S.phase==="draw"&&(solo||sd===0));$("ben").disabled=!(hu&&S.phase==="move"&&(solo||sd===0));$("bdr2").disabled=!(hu&&S.phase==="draw"&&sd===1);$("ben2").disabled=!(hu&&S.phase==="move"&&sd===1);$("bun").disabled=!hist.length;
+ $("bdr").disabled=!(hu&&S.phase==="draw"&&(solo||sd===0));$("ben").disabled=!(hu&&S.phase==="move"&&(solo||sd===0));$("bdr2").disabled=!(hu&&S.phase==="draw"&&sd===1);$("ben2").disabled=!(hu&&S.phase==="move"&&sd===1);$("bun").disabled=!hist.length;$("bre").disabled=!fut.length;
  {const t=mode.info(S);$("inf").innerHTML=t;$("inf").style.display=t?"":"none"}
  const h=$("hs");
  // 기보: 백·흑 칸으로 나눠 보여 줌. 증강으로 한 사람이 연달아 두면 다음 줄로 넘기고 빈칸은 비워 둠
@@ -2646,7 +2650,10 @@ $("bdr").onclick=()=>{if(S.phase==="draw"&&!S.over&&!lockTurn()){S=mode.draw(S);
 $("ben").onclick=()=>{if(S.phase==="move"&&!S.over&&!lockTurn()){S=mode.pass(S);sel=null;after()}};
 $("brs").onclick=()=>Online.resign();
 $("bun").onclick=()=>{if(!mode.undo||!hist.length)return;clearTimeout(aiT);
- do{S=hist.pop()}while(ai&&hist.length&&S.seat[S.turn]===1);sel=null;dismissed=false;after()};
+ do{fut.push(S);S=hist.pop()}while(ai&&hist.length&&S.seat[S.turn]===1);sel=null;dismissed=false;after()};
+// 앞으로 되돌리기: AI 대결이면 AI가 둔 수까지 함께 다시 둠 (내 차례에서 멈춤)
+$("bre").onclick=()=>{if(!mode.undo||!fut.length)return;clearTimeout(aiT);
+ do{hist.push(S);S=fut.pop()}while(ai&&fut.length&&S.seat[S.turn]===1);sel=null;dismissed=false;after()};
 $("bfl").onclick=()=>{flip=!flip;render()};
 $("bdr2").onclick=()=>$("bdr").onclick();$("ben2").onclick=()=>$("ben").onclick();
 $("bnw").onclick=newGame;$("rn").onclick=newGame;
@@ -3094,7 +3101,7 @@ const Online=(()=>{
  function load1(g,first){
   const m0=MODES.find(m=>m.id===g.mode);if(!m0){leave();return toast("더 이상 제공하지 않는 모드의 대전이에요")}
   mode=m0;Engine.setX(mode.id==="augment"?augXM:null);
-  const n0=S&&S.log?S.log.length:0;S=JSON.parse(g.state);ai=false;hist=[];sel=null;gid=net.gid;
+  const n0=S&&S.log?S.log.length:0;S=JSON.parse(g.state);ai=false;hist=[];fut=[];sel=null;gid=net.gid;
   if(mode.timeLimit&&!S.over)S.deadline=Date.now()+mode.timeLimit*1000; // 기기마다 시계가 달라서 받은 시점부터 다시 셈
   if(!first&&S.log.length>n0)beep(false);
   if(first){flip=net.seat===1;dismissed=false;seen=S.shown&&S.shown.id;annSeen=S.ann&&S.ann.r;["mn","acc","rso"].forEach(i=>ov(i,false))}
