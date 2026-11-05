@@ -173,6 +173,25 @@ u.gt{text-decoration:underline dotted;text-underline-offset:3px;text-decoration-
 #rso .rh h2{margin:6px 0 2px;color:inherit;font-size:26px}
 #rw{color:inherit;opacity:.88;font-size:14px}
 /* 랭크 종료 창: 앰블럼(그림 바탕색 #2a2925와 같은 칸) · 등급 · 점수 · 게이지 */
+/* 게임 분석 창: 위에 정확도, 왼쪽 평가 막대+판, 오른쪽 한 줄 평·이동 버튼·수 목록 (좁은 화면은 위아래로) */
+#ana{z-index:45}#ana .anp{max-width:820px;width:100%;max-height:94vh;overflow:auto;text-align:left;position:relative}#ana h3{margin:0 0 10px}#ana .xb{position:absolute;top:10px;right:10px;border-radius:50%;width:34px;height:34px;padding:0}
+.ana{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}.ana>div{background:var(--card2);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:2px;font-size:13px}.ana small{color:var(--mut)}
+.anm{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.anwb{display:flex;gap:6px;flex:none}
+.anev{width:14px;border-radius:4px;background:#403d39;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
+.anev i{display:block;background:#f2f2f2;transition:height .4s;height:50%}.anev.fl{flex-direction:column-reverse}
+.anbd{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);width:min(420px,calc(100vw - 90px));aspect-ratio:1;border-radius:6px;overflow:hidden}
+.anbd>div{position:relative;display:grid;place-items:center}.anbd .l{background:var(--lt)}.anbd .d{background:var(--dk)}
+.anbd span{width:88%;height:88%;display:grid;place-items:center}.anbd svg{width:100%;height:100%}
+.anbd .lm{box-shadow:inset 0 0 0 100px rgba(255,214,40,.38)}.anbd .bm{box-shadow:inset 0 0 0 3px #4aa3ff,inset 0 0 0 100px rgba(74,163,255,.25)}
+.anr{flex:1;min-width:240px;display:flex;flex-direction:column;gap:8px}
+.ann{font-size:15px;min-height:44px}.anb{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--c);color:#fff;margin-left:4px}.anw{color:var(--mut);font-size:13px}.anh{font-size:13px;color:var(--mut);margin-top:4px}.anh b{color:#4aa3ff}
+.anc{display:flex;align-items:center;gap:6px}.anc button{margin:0;padding:6px 10px}.anc span{flex:1;text-align:center;font-size:13px;color:var(--mut)}
+.anet{font-size:13px;color:var(--mut)}
+.anl{max-height:260px;overflow:auto;font-family:var(--f-mono);font-size:13px;background:var(--bg);border-radius:8px}
+.anl span{cursor:pointer}.anl span i{font-style:normal;font-weight:800;margin-left:4px}.anl span.cur{background:var(--card2);font-weight:700}
+.anf{font-size:11px;color:var(--mut);margin-top:10px;text-align:right}
+@media(max-width:640px){.anbd{width:calc(100vw - 92px)}.anr{min-width:0;width:100%}}
 #rso .rvs{font-size:12px;opacity:.75;margin-top:4px}
 #rrk{background:#2a2925;color:#f0ede8;padding:14px 20px 18px;text-align:center;position:relative;overflow:hidden}
 #rrk .rkw{padding:40px 0;color:#a9a39a;font-size:14px}
@@ -1335,7 +1354,12 @@ html[data-ag="crys"] #cv :is(.uab,.luua){display:none!important}
  <div class="md" style="margin-top:4px">꺼도 체크된 킹은 빨갛게 표시되고, 킹이 잡히는 쪽으로는 움직일 수 없어요.</div>
  <button id="stgClose" class="g" style="margin-top:18px">닫기</button>
 </div></div>
-<div class="ov" id="rso"><div class="pop"><button class="g rx" id="rc" aria-label="닫고 보드 보기">✕</button><div class="rh"><h2 id="rt"></h2><div id="rw"></div></div><div class="rpl" id="rpl"></div><div class="rrk" id="rrk" style="display:none"></div><div class="rb"><button id="rn">새 게임</button><button id="rag">다시 찾기</button><button class="g" id="rm">로비로</button></div></div></div>
+<div class="ov" id="ana"><div class="pop anp" role="dialog" aria-label="게임 분석"><button class="g xb" id="anX" aria-label="닫기">✕</button><h3>게임 분석</h3>
+ <div class="ana" id="anA"></div>
+ <div class="anm"><div class="anwb"><div class="anev" id="anE"><i id="anEv"></i></div><div class="anbd" id="anB"></div></div>
+  <div class="anr"><div class="ann" id="anN"></div><div class="anc"><button class="g" id="anS0" aria-label="처음">⏮</button><button class="g" id="anP" aria-label="이전 수">◀</button><span id="anS"></span><button class="g" id="anF" aria-label="다음 수">▶</button><button class="g" id="anS9" aria-label="마지막">⏭</button></div><b class="anet" id="anEt"></b><div class="anl" id="anL"></div></div></div>
+ <div class="anf">분석: Stockfish 10</div></div></div>
+<div class="ov" id="rso"><div class="pop"><button class="g rx" id="rc" aria-label="닫고 보드 보기">✕</button><div class="rh"><h2 id="rt"></h2><div id="rw"></div></div><div class="rpl" id="rpl"></div><div class="rrk" id="rrk" style="display:none"></div><div class="rb"><button id="rn">새 게임</button><button id="rag">다시 찾기</button><button class="g" id="ran">게임 분석</button><button class="g" id="rm">로비로</button></div></div></div>
 <div class="ov" id="dro"><div class="pop"><div id="drt" style="font-weight:700;margin-bottom:6px"></div><div id="drb"></div></div></div>
 <div class="ov" id="lgo"><div class="pop wd" id="lgb"></div></div>
 <div class="ov" id="acc"><div class="pop wd"><button class="g xb" id="acx">✕</button><div class="tabs" id="act" style="margin-right:44px"></div><div id="acp" style="margin-top:12px"></div></div></div>
@@ -1369,7 +1393,7 @@ html[data-ag="crys"] #cv :is(.uab,.luua){display:none!important}
   <div class="toolbar">
    <button id="bdr">카드 뽑기</button><button class="g" id="ben">턴 종료</button>
    <button class="g" id="bun">↩ 되돌리기</button><button class="g" id="bfl">⇅ 뒤집기</button>
-   <button class="g" id="bnw">새 게임</button><button class="g" id="brs">🏳 기권</button><button class="g" id="bmn">로비로</button>
+   <button class="g" id="bnw">새 게임</button><button class="g" id="brs">🏳 기권</button><button class="g" id="bana" style="display:none">게임 분석</button><button class="g" id="bmn">로비로</button>
   </div>
   <div class="panel"><div class="ph"><span>기보</span></div><div id="hs"></div></div>
   <div class="panel" id="inf"></div>
@@ -1886,7 +1910,7 @@ const STD={id:"standard",name:"♔ 표준 체스",coords:true,undo:true,cards:fa
   const ls=Engine.all(n),ck=Engine.inCheck(n.b,you);
   let san=mv.castle?(mv.to>mv.from?"O-O":"O-O-O"):(p.t==="P"?(cap?FILE[mv.from&7]+"x":""):(p.t+(cap?"x":"")))+(mv.castle?"":sqName(mv.to))+(mv.promo?"="+mv.promo:"");
   san+=ck?(ls.length?"+":"#"):"";
-  n.log=[...s.log,san];n.lc=lcAdd(s,me);n.reps={...s.reps};const k=Engine.key(n);n.reps[k]=(n.reps[k]||0)+1;
+  n.log=[...s.log,san];n.lc=lcAdd(s,me);if(s.uci||!s.log.length)n.uci=[...(s.uci||[]),sqName(mv.from)+sqName(mv.to)+(mv.promo?mv.promo.toLowerCase():"")];n.reps={...s.reps};const k=Engine.key(n);n.reps[k]=(n.reps[k]||0)+1;
   n.msg=(you==="w"?"백":"흑")+" 차례"+(ck&&ls.length?" · 체크!":"");
   if(!ls.length)n.over=ck?{win:me,why:"체크메이트"}:{win:null,why:"스테일메이트"};
   else if(Engine.insufficient(n.b))n.over={win:null,why:"기물 부족"};
@@ -2482,10 +2506,74 @@ function beep(cap){try{
 }catch(e){}}
 function play(mv){const cap=!!(S.b[mv.to]||mv.ep||mv.epx!=null);if(mode.undo&&!net)hist.push(S);S=mode.applyMove(S,mv);sel=null;beep(cap);after()}
 function useAug(id){if(!S||S.over||lockTurn()||(S.draft&&S.draft.length))return;if(mode.undo&&!net)hist.push(S);S=mode.use(S,id);sel=null;after()}
+/* --- 스톡피시 (Stockfish 10, asm.js): CDN 파일을 Web Worker로 띄워 UCI로 대화. 표준 체스 AI와 끝난 판 분석에 씀 --- */
+const SF=(()=>{const SRC="https://cdn.jsdelivr.net/npm/stockfish@10.0.2/src/stockfish.asm.js";let w=null,ready=null,q=Promise.resolve(),lis=null;
+ function boot(){if(ready)return ready;ready=new Promise((ok,no)=>{try{w=new Worker(URL.createObjectURL(new Blob([`importScripts("${SRC}")`],{type:"text/javascript"})))}catch(e){return no(e)}
+  const t=setTimeout(()=>no(new Error("stockfish timeout")),20000);w.onmessage=e=>{const l=String(e.data);if(l==="uciok"){clearTimeout(t);ok()}if(lis)lis(l)};w.onerror=e=>{clearTimeout(t);no(e)};w.postMessage("uci")});
+  ready.catch(()=>{ready=null;try{w&&w.terminate()}catch(e){}w=null});return ready}
+ // 명령을 차례로 하나씩: go를 보내고 bestmove가 올 때까지 마지막 평가(cp 또는 mate, pv)를 모음. 평가는 둘 차례인 쪽 기준
+ function run(cmds){const job=q.then(()=>boot()).then(()=>new Promise(ok=>{let last={};lis=l=>{if(l.startsWith("info")&&l.includes(" score ")){const m=l.match(/score (cp|mate) (-?\d+)/),pv=l.match(/ pv (.+)$/);if(m)last={[m[1]]:+m[2],pv:pv?pv[1].split(" "):[]}}
+   if(l.startsWith("bestmove")){lis=null;ok({best:l.split(" ")[1],...last})}};cmds.forEach(c=>w.postMessage(c))}));q=job.catch(()=>{});return job}
+ return{boot,run,stop:()=>{if(w)w.postMessage("stop")}}})();
+// 지금 판을 FEN으로 (캐슬링 가능 여부는 킹·룩이 움직였는지로, 앙파상 칸은 S.ep로)
+function fenOf(s){let f="";for(let r=0;r<8;r++){let e=0;for(let c=0;c<8;c++){const p=s.b[r*8+c];if(!p){e++;continue}if(e){f+=e;e=0}const t=p.t==="A"?"Q":p.t;f+=p.c==="w"?t:t.toLowerCase()}if(e)f+=e;if(r<7)f+="/"}
+ const cr=(c,ki,ri)=>{const k=s.b[ki],R=s.b[ri];return!!(k&&k.t==="K"&&k.c===c&&!k.m&&R&&R.t==="R"&&R.c===c&&!R.m)};
+ const ca=(cr("w",60,63)?"K":"")+(cr("w",60,56)?"Q":"")+(cr("b",4,7)?"k":"")+(cr("b",4,0)?"q":"");
+ return`${f} ${s.turn} ${ca||"-"} ${s.ep&&s.ep.by!==s.turn?sqName(s.ep.sq):"-"} ${s.hm||0} ${(s.log.length>>1)+1}`}
+const sqIdx=n=>(8-(+n[1]))*8+FILE.indexOf(n[0]);
+// UCI 표기(e2e4, e7e8q)를 이 판의 합법 수로 바꿈 (없으면 null)
+function uciMove(s,u,md){if(!u||u.length<4)return null;const f=sqIdx(u.slice(0,2)),t=sqIdx(u.slice(2,4)),pr=u[4]?u[4].toUpperCase():null;
+ const L=(md||mode).allMoves(s).filter(m=>m.from===f&&m.to===t);return L.find(m=>(m.promo||null)===(pr||(m.promo?"Q":null)))||L[0]||null}
+// AI 난이도 → 스톡피시 실력(Skill Level 0~20)과 생각하는 양
+const SFL={"쉬움":{sk:0,go:"depth 1"},"보통":{sk:8,go:"depth 8"},"어려움":{sk:20,go:"movetime 1200"}};let sfOff=false; // 스톡피시를 못 불러오면 기존 AI로 둠
+function sfAi(){const s0=S,L=SFL[level]||SFL["보통"],fb=()=>{if(S===s0&&ai&&!S.over&&aiTurn()){const m=AI.choose(S,mode,CONFIG.aiDepth[level]);if(m)play(m)}};
+ SF.run([`setoption name Skill Level value ${L.sk}`,`position fen ${fenOf(S)}`,`go ${L.go}`]).then(r=>{if(S!==s0||!ai||S.over||!aiTurn())return;const m=uciMove(S,r.best);if(m)play(m);else fb()}).catch(()=>{sfOff=true;fb()})}
+
+/* --- 끝난 판 분석: 수마다 스톡피시로 평가해 최선·좋음·부정확·실수·블런더로 나누고, 평가 막대와 판을 보여 줌 --- */
+const ANC={best:["최선","#81b64c","★"],good:["좋음","#96bc4b","✓"],inacc:["부정확","#f0c15c","?!"],mist:["실수","#e6912c","?"],blun:["블런더","#d84a3a","??"]};
+// 이길 확률(%) — 평가 점수(센티폰)를 승률로 바꿔서 손해를 잼 (lichess 방식)
+const wpc=cp=>50+50*(2/(1+Math.exp(-.00368208*cp))-1);
+let anTok=0,an=null;
+function anOpen(){if(!S||!S.uci||!S.uci.length||mode.id!=="standard")return;$("rso").classList.remove("on");dismissed=true;const tok=++anTok;
+ // 처음부터 다시 둬 가며 각 장면(상태)을 만듦
+ const st=[STD.setup()];for(const u of S.uci){const m=uciMove(st[st.length-1],u,STD);if(!m)break;st.push(STD.applyMove(st[st.length-1],m))}
+ an={st,ev:Array(st.length).fill(null),best:Array(st.length).fill(null),i:st.length-1,flip,done:0};$("ana").classList.add("on");anDraw();
+ (async()=>{for(let i=0;i<st.length;i++){if(tok!==anTok)return;const s=st[i];
+   if(s.over){an.ev[i]=s.over.win?(s.over.win==="w"?1e4:-1e4):0}
+   else{try{const r=await SF.run(["setoption name Skill Level value 20",`position fen ${fenOf(s)}`,"go depth 12 movetime 700"]);if(tok!==anTok)return;
+     const v=r.mate!=null?(r.mate>0?1e4-r.mate*10:-1e4-r.mate*10):(r.cp||0);an.ev[i]=s.turn==="w"?v:-v;an.best[i]=r.best}
+    catch(e){if(tok===anTok){$("anS").textContent="스톡피시를 불러오지 못했어요";}return}}
+   an.done=i+1;anDraw()}})()}
+// 수 i(장면 i → i+1)의 등급
+function anCls(i){const a=an.ev[i],b=an.ev[i+1];if(a==null||b==null)return null;if(an.best[i]&&an.best[i]===S.uci[i])return"best";
+ const w=an.st[i].turn==="w",loss=Math.max(0,w?wpc(a)-wpc(b):wpc(-a)-wpc(-b));return loss>=30?"blun":loss>=20?"mist":loss>=10?"inacc":"good"}
+const evTxt=v=>Math.abs(v)>=9e3?`${v>0?"":"-"}M${Math.max(1,Math.round((1e4-Math.abs(v))/10))}`:`${v>0?"+":""}${(v/100).toFixed(1)}`;
+function anDraw(){if(!an)return;const{st,ev,i}=an,s=st[i],N=st.length-1,v=ev[i];
+ // 평가 막대 (백 기준. 판이 뒤집혀 있으면 막대도 뒤집음)
+ $("anEv").style.height=(v==null?50:wpc(v))+"%";$("anE").classList.toggle("fl",an.flip);$("anEt").textContent="평가 "+(v==null?"…":evTxt(v));
+ const lm=i>0?S.uci[i-1]:null,bm=i>0&&an.best[i-1]&&an.best[i-1]!==S.uci[i-1]&&["inacc","mist","blun"].includes(anCls(i-1))?an.best[i-1]:null, /* 방금 둔 수(노랑)와, 그 대신 둘 수 있었던 최선 수(파랑) */mk=x=>x?[sqIdx(x.slice(0,2)),sqIdx(x.slice(2,4))]:[];
+ const L=mk(lm),B=mk(bm),ord=[...Array(64).keys()];if(an.flip)ord.reverse();
+ $("anB").innerHTML=ord.map(k=>{const p=s.b[k],cl=((k>>3)+(k&7))%2?"d":"l";return`<div class="${cl}${L.includes(k)?" lm":""}${B.includes(k)?" bm":""}">${p?`<span class="${p.c==="w"?"pw":"pb"}">${pcSvg(p.an?"A":p.t,p.c)}</span>`:""}</div>`}).join("");
+ // 지금 수에 대한 한 줄 평
+ const c=i>0?anCls(i-1):null,pb=i>0&&an.best[i-1]&&an.best[i-1]!==S.uci[i-1]?(()=>{const m=uciMove(st[i-1],an.best[i-1],STD);return m?STD.applyMove(st[i-1],m).log.slice(-1)[0]:null})():null;
+ $("anN").innerHTML=i===0?"시작 장면":`<b>${(i+1)>>1}${i%2?".":"..."} ${esc(st[i].log[i-1])}</b>`+(c?` <span class="anb" style="--c:${ANC[c][1]}">${ANC[c][2]} ${ANC[c][0]}</span>`:" <span class='anw'>분석 중…</span>")+(pb&&c&&c!=="best"&&c!=="good"?`<div class="anh">더 좋은 수: <b>${esc(pb)}</b></div>`:"");
+ $("anS").textContent=an.done<st.length?`분석 중 ${an.done}/${st.length}`:`${i}/${N}`;
+ // 정확도(백·흑): 수마다 승률 손해로 점수를 매겨 평균 (lichess 방식)
+ const acc={w:[],b:[]},cnt={w:{inacc:0,mist:0,blun:0},b:{inacc:0,mist:0,blun:0}};
+ for(let j=0;j<N;j++){const k=anCls(j);if(!k)continue;const c2=st[j].turn,a=ev[j],b2=ev[j+1],w=c2==="w",loss=Math.max(0,w?wpc(a)-wpc(b2):wpc(-a)-wpc(-b2));
+  acc[c2].push(Math.max(0,Math.min(100,103.1668*Math.exp(-.04354*loss)-3.1669)));if(cnt[c2][k]!=null)cnt[c2][k]++}
+ const av=a=>a.length?Math.round(a.reduce((x,y)=>x+y,0)/a.length)+"%":"-";
+ $("anA").innerHTML=["w","b"].map(c2=>`<div><b>${c2==="w"?"백":"흑"} ${esc(pname(S.seat[c2]))}</b><span>정확도 <b>${av(acc[c2])}</b></span><small>부정확 ${cnt[c2].inacc} · 실수 ${cnt[c2].mist} · 블런더 ${cnt[c2].blun}</small></div>`).join("");
+ // 수 목록 (누르면 그 장면으로)
+ let o="";for(let j=0;j<N;j+=2){const cell=k=>{if(k>=N)return"<span></span>";const c3=anCls(k);return`<span class="${k===i-1?"cur":""}" data-k="${k+1}">${esc(st[k+1].log[k])}${c3&&c3!=="good"?`<i style="color:${ANC[c3][1]}">${ANC[c3][2]}</i>`:""}</span>`};o+=`<div class="mr"><i>${(j>>1)+1}.</i>${cell(j)}${cell(j+1)}</div>`}
+ const Lb=$("anL");Lb.innerHTML=o;Lb.querySelectorAll("[data-k]").forEach(e=>e.onclick=()=>{an.i=+e.dataset.k;anDraw()});const cur=Lb.querySelector(".cur");if(cur)cur.scrollIntoView({block:"nearest"})}
+function anGo(d){if(!an)return;an.i=Math.max(0,Math.min(an.st.length-1,an.i+d));anDraw()}
+function anClose(){anTok++;SF.stop();an=null;$("ana").classList.remove("on")}
 function aiStep(){
  if(!ai||S.over||!aiTurn())return;
  if(mode.cards&&S.phase==="draw"){S=mode.draw(S);return after()}
  if(mode.aiUse){const u=mode.aiUse(S);if(u){S=mode.use(S,u);return after()}}
+ if(mode.id==="standard"&&!sfOff)return sfAi();
  const m=AI.choose(S,mode,CONFIG.aiDepth[level]);if(!m)return;play(m);
 }
 function clickSq(i){
@@ -2525,7 +2613,7 @@ function render(){
  $("st").textContent=t;$("st").insertAdjacentHTML("beforeend",`<div id="ms"></div>`);$("ms").textContent=S.msg;$("t2").textContent=t;$("m2").textContent=S.msg;$("top2").style.display=ai||net?"none":"";$("bdr2").style.display=$("ben2").style.display=mode.cards?"":"none";
  const hu=!S.over&&!lockTurn(),solo=ai||!!net;
  $("bdr").style.display=$("ben").style.display=mode.cards?"":"none";$("bun").style.display=mode.undo&&!net?"":"none";
- $("bnw").style.display=$("rn").style.display=net?"none":"";$("brs").style.display=net&&!S.over?"":"none";
+ $("bnw").style.display=$("rn").style.display=net?"none":"";$("bana").style.display=S.over&&mode.id==="standard"&&S.uci&&S.uci.length?"":"none";$("brs").style.display=net&&!S.over?"":"none";
  document.title=(net&&hu?"● 내 차례 · ":"")+"체스 컬렉션";
  if(!mode.timeLimit){$("tmr").style.display=$("tmr2").style.display="none"}
  $("bdr").disabled=!(hu&&S.phase==="draw"&&(solo||sd===0));$("ben").disabled=!(hu&&S.phase==="move"&&(solo||sd===0));$("bdr2").disabled=!(hu&&S.phase==="draw"&&sd===1);$("ben2").disabled=!(hu&&S.phase==="move"&&sd===1);$("bun").disabled=!hist.length;
@@ -2572,8 +2660,11 @@ function resultUI(){const w=S.over.win,me=net?net.seat:ai?0:-1,res=!w?"draw":me<
  const card=c=>`<div class="pp ${!w?"":c===w?"win":"lose"}"><div class="rav">${pcSvg("K",c)}</div><b>${esc(pname(S.seat[c]))}</b><small>${c==="w"?"백":"흑"}</small></div>`;
  const L=me>=0&&S.seat.b===me?["b","w"]:["w","b"];$("rpl").innerHTML=card(L[0])+'<span class="vs">vs</span>'+card(L[1]);
  Online.rankEnd(); // 랭크 게임이면 두 선수 카드 대신 앰블럼·점수·게이지
+ $("ran").style.display=mode.id==="standard"&&S.uci&&S.uci.length?"":"none";
  const ag=net?Online.againLabel():null;$("rn").style.display=net?"none":"";$("rag").style.display=ag?"":"none";if(ag)$("rag").textContent=ag}
 $("rag").onclick=()=>{$("rso").classList.remove("on");Online.again()};
+$("ran").onclick=$("bana").onclick=anOpen;$("anX").onclick=anClose;$("anP").onclick=()=>anGo(-1);$("anF").onclick=()=>anGo(1);$("anS0").onclick=()=>anGo(-999);$("anS9").onclick=()=>anGo(999);
+addEventListener("keydown",e=>{if(!an)return;if(e.key==="ArrowLeft")anGo(-1);else if(e.key==="ArrowRight")anGo(1);else if(e.key==="Escape")anClose()});
 $("pmeB").onclick=()=>Online.profile();$("pfX").onclick=()=>$("pfo").classList.remove("on");
 // 로비 메뉴(#mn)가 열려 있는지에 따라 게임 화면 표시(ingame)를 켜고 끔
 new MutationObserver(()=>document.body.classList.toggle("ingame",!$("mn").classList.contains("on"))).observe($("mn"),{attributes:true,attributeFilter:["class"]});document.body.classList.toggle("ingame",!$("mn").classList.contains("on"));
