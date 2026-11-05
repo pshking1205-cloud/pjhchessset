@@ -2364,7 +2364,7 @@ const AI=(()=>{
 
 /* ============ 5) UI ============ */
 const $=i=>document.getElementById(i);
-let mode=STD,S=null,hist=[],fut=[],sel=null,flip=false,ai=true,level="보통",theme="wood",aiT,seen=null,dismissed=false,ctm,soundOn=true,volume=20,checkPop=true;
+let mode=STD,S=null,hist=[],fut=[],rkAi=null,sel=null,flip=false,ai=true,level="보통",theme="wood",aiT,seen=null,dismissed=false,ctm,soundOn=true,volume=20,checkPop=true;
 try{const sd0=localStorage.getItem("chessSound");if(sd0!=null)soundOn=sd0==="1";const v0=localStorage.getItem("chessVolume");if(v0!=null)volume=+v0;const c0=localStorage.getItem("chessCheckPop");if(c0!=null)checkPop=c0==="1"}catch(e){}
 // 온라인 대전에서 그 색을 둔 사람의 말 스킨 (스크립트가 다 읽히기 전에 불려도 안전하게)
 function pcNet(c){try{return net&&net.sk&&PCM[net.sk[c]]?net.sk[c]:null}catch(e){return null}}
@@ -2435,11 +2435,11 @@ function showAug(id){augSel=augSel===id?null:id;render()}
 let sM="standard",sO=1,sL="보통",sF=null; // sO: 0=한 기기 2인 1=AI 2=친구(온라인) 3=일반 매칭 4=랭크 매칭
 function applyTheme(id){const t=CONFIG.themes.find(x=>x.id===id),r=document.documentElement;
  ["bg","fg","card","bd","ac","lt","dk"].forEach(k=>r.style.setProperty("--"+k,t[k]));r.dataset.theme=t.dark?"dark":"light";r.style.colorScheme=t.dark?"dark":"light"}
-const pname=n=>net?(net.names[n]||"?")+(n===net.seat?"(나)":""):n===1&&ai?"AI":ai&&n===0?Online.myName():"플레이어"+(n+1);
+const pname=n=>net?(net.names[n]||"?")+(n===net.seat?"(나)":""):n===1&&ai?(rkAi?rkAi.name:"AI"):ai&&n===0?Online.myName():"플레이어"+(n+1);
 const aiTurn=()=>ai&&S.seat[S.turn]===1;
 const actor=()=>S.draft&&S.draft.length?S.seat[S.draft[0].c]:S.seat[S.turn]; // 지금 조작할 좌석(증강 선택 중이면 고르는 쪽)
 const lockTurn=()=>aiTurn()||(!!net&&actor()!==net.seat);
-function newGame(){clearTimeout(aiT);clearInterval(spdT);spdT=null;Engine.setX(null);S=mode.setup();hist=[];fut=[];sel=null;seen=null;dismissed=false;flip=false;gid=ai?"ai_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6):null;after()}
+function newGame(){rkAi=null;clearTimeout(aiT);clearInterval(spdT);spdT=null;Engine.setX(null);S=mode.setup();hist=[];fut=[];sel=null;seen=null;dismissed=false;flip=false;gid=ai?"ai_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6):null;after()}
 let ckObj=null;
 function after(remote){
  if(S.draft&&S.draft.length&&ai&&S.seat[S.draft[0].c]===1){S=mode.pick(S,mode.aiPick(S));return after()}
@@ -2450,7 +2450,7 @@ function after(remote){
  render();clearTimeout(aiT);
  if(net&&!remote)Online.push(S);
  if(S.over&&gid&&!recd.has(gid)){recd.add(gid);const w=S.over.win,my=net?net.seat:0;
-  Online.record(gid,{mode:mode.id,opp:net?net.names[1-net.seat]:"AI "+level,res:!w?"d":S.seat[w]===my?"w":"l",why:S.over.why,online:!!net,...(net&&net.kind?{kind:net.kind}:{}),...(net&&net.kind==="ranked"?{ranked:true,oppR:net.rt?net.rt[net.seat?"w":"b"]:1000}:{})},net?net.seat:null)}
+  Online.record(gid,{mode:mode.id,opp:net?net.names[1-net.seat]:rkAi?rkAi.name:"AI "+level,res:!w?"d":S.seat[w]===my?"w":"l",why:S.over.why,online:!!net||!!rkAi,...(net&&net.kind?{kind:net.kind}:rkAi?{kind:"ranked",ranked:true,oppR:rkAi.r,vsAi:true}:{}),...(net&&net.kind==="ranked"?{ranked:true,oppR:net.rt?net.rt[net.seat?"w":"b"]:1000}:{})},net?net.seat:null);if(rkAi&&gid===rkAi.gid)try{localStorage.removeItem("rkAiPend")}catch(e){}}
  if(ai&&!S.over&&aiTurn()&&!(S.draft&&S.draft.length))aiT=setTimeout(aiStep,CONFIG.aiDelay);
  clearInterval(spdT);spdT=null;
  if(mode.timeLimit&&!S.over&&!(S.draft&&S.draft.length)){spdTick();spdT=setInterval(spdTick,200)}
@@ -2527,7 +2527,7 @@ function uciMove(s,u,md){if(!u||u.length<4)return null;const f=sqIdx(u.slice(0,2
  const L=(md||mode).allMoves(s).filter(m=>m.from===f&&m.to===t);return L.find(m=>(m.promo||null)===(pr||(m.promo?"Q":null)))||L[0]||null}
 // AI 난이도 → 스톡피시 실력(Skill Level 0~20)과 생각하는 양
 const SFL={"쉬움":{sk:0,go:"depth 1"},"보통":{sk:8,go:"depth 8"},"어려움":{sk:20,go:"movetime 1200"}};let sfOff=false; // 스톡피시를 못 불러오면 기존 AI로 둠
-function sfAi(){const s0=S,L=SFL[level]||SFL["보통"],fb=()=>{if(S===s0&&ai&&!S.over&&aiTurn()){const m=AI.choose(S,mode,CONFIG.aiDepth[level]);if(m)play(m)}};
+function sfAi(){const s0=S,L=rkAi?rkAi.sf:SFL[level]||SFL["보통"],fb=()=>{if(S===s0&&ai&&!S.over&&aiTurn()){const m=AI.choose(S,mode,rkAi?rkAi.dep:CONFIG.aiDepth[level]);if(m)play(m)}};
  SF.run([`setoption name Skill Level value ${L.sk}`,`position fen ${fenOf(S)}`,`go ${L.go}`]).then(r=>{if(S!==s0||!ai||S.over||!aiTurn())return;const m=uciMove(S,r.best);if(m)play(m);else fb()}).catch(()=>{sfOff=true;fb()})}
 
 /* --- 끝난 판 분석: 수마다 스톡피시로 평가해 최선·좋음·부정확·실수·블런더로 나누고, 평가 막대와 판을 보여 줌 --- */
@@ -2573,12 +2573,28 @@ function anDraw(){if(!an)return;const{st,ev,i}=an,s=st[i],N=st.length-1,v=ev[i];
  const Lb=$("anL");Lb.innerHTML=o;Lb.querySelectorAll("[data-k]").forEach(e=>e.onclick=()=>{an.i=+e.dataset.k;anDraw()});const cur=Lb.querySelector(".cur");if(cur)cur.scrollIntoView({block:"nearest"})}
 function anGo(d){if(!an)return;an.i=Math.max(0,Math.min(an.st.length-1,an.i+d));anDraw()}
 function anClose(){anTok++;SF.stop();an=null;$("ana").classList.remove("on")}
+// 랭크 AI 대전: 매칭이 1분 넘게 안 잡히면 Online이 부름. 무르기 없음 · 나가면 패배 · 점수는 사람과 같은 방식(상대 점수 = AI 점수)
+// AI 실력(사람 레이팅 추정) = AI 점수 + 200. 낮으면 스톡피시를 얕게 + 가끔 아무 수, 높을수록 깊게 (증강 체스는 기존 AI의 깊이로)
+function rkAiCfg(r){const E=Math.max(400,r+200);let sf,dep,rnd=0;
+ if(E<1000){sf={sk:0,go:"depth 1"};rnd=(1000-E)/1000*.5;dep=1}
+ else if(E<1600){const t=(E-1000)/600;sf={sk:Math.round(t*8),go:`depth ${2+Math.round(t*6)}`};dep=E<1300?2:3}
+ else if(E<2400){const t=(E-1600)/800;sf={sk:8+Math.round(t*12),go:`depth ${8+Math.round(t*4)}`};dep=3}
+ else{sf={sk:20,go:"movetime 1000"};dep=3}
+ return{E,sf,dep,rnd}}
+function startRkAi(o){mode=MODES.find(m=>m.id===o.mid)||STD;ai=true;$("mn").classList.remove("on");["opo","rso"].forEach(i=>$(i).classList.remove("on"));newGame();
+ rkAi={...o,...rkAiCfg(o.r),gid};if(Math.random()<.5){S={...S,seat:{w:1,b:0}};flip=true} // 색은 무작위 (내가 흑이면 판을 뒤집음)
+ try{localStorage.setItem("rkAiPend",JSON.stringify({gid,mid:o.mid,r:o.r,name:o.name,uid:Online.uid()}))}catch(e){} // 창을 닫아도 다음 로그인 때 패배로 기록
+ toast("상대를 찾지 못해서 비슷한 실력의 AI와 대전해요");clearTimeout(aiT);after()}
+// 랭크 AI 대전 중에 나가기: 확인 후 패배로 기록
+async function rkAiQuit(){if(!(rkAi&&S&&!S.over&&gid===rkAi.gid))return true;if(!await ask("지금 나가면 패배로 처리돼요. 나갈까요?","나가기"))return false;
+ S={...S,over:{win:S.seat.w===0?"b":"w",why:"나가서 패배"},msg:"나감"};sel=null;dismissed=true;after();return true}
 function aiStep(){
  if(!ai||S.over||!aiTurn())return;
  if(mode.cards&&S.phase==="draw"){S=mode.draw(S);return after()}
  if(mode.aiUse){const u=mode.aiUse(S);if(u){S=mode.use(S,u);return after()}}
+ if(rkAi&&rkAi.rnd&&Math.random()<rkAi.rnd){const L=mode.allMoves(S);if(L.length)return play(L[Math.random()*L.length|0])} // 낮은 등급 AI는 가끔 아무 수나 둠
  if(mode.id==="standard"&&!sfOff)return sfAi();
- const m=AI.choose(S,mode,CONFIG.aiDepth[level]);if(!m)return;play(m);
+ const m=AI.choose(S,mode,rkAi?rkAi.dep:CONFIG.aiDepth[level]);if(!m)return;play(m);
 }
 function clickSq(i){
  if(!S||S.over||lockTurn()||$("pmo").classList.contains("on")||(S.draft&&S.draft.length))return;
@@ -2616,8 +2632,8 @@ function render(){
  else{t+=mode.cards?(S.phase==="draw"?" · 카드를 뽑으세요":` · 남은 이동 ${S.left}회`):" · 차례";if(ck)t+=" · ⚠ 체크!"}
  $("st").textContent=t;$("st").insertAdjacentHTML("beforeend",`<div id="ms"></div>`);$("ms").textContent=S.msg;$("t2").textContent=t;$("m2").textContent=S.msg;$("top2").style.display=ai||net?"none":"";$("bdr2").style.display=$("ben2").style.display=mode.cards?"":"none";
  const hu=!S.over&&!lockTurn(),solo=ai||!!net;
- $("bdr").style.display=$("ben").style.display=mode.cards?"":"none";$("bun").style.display=$("bre").style.display=mode.undo&&!net?"":"none";
- $("bnw").style.display=$("rn").style.display=net?"none":"";$("bana").style.display=S.over&&mode.id==="standard"&&S.uci&&S.uci.length?"":"none";$("brs").style.display=net&&!S.over?"":"none";
+ $("bdr").style.display=$("ben").style.display=mode.cards?"":"none";$("bun").style.display=$("bre").style.display=mode.undo&&!net&&!rkAi?"":"none";
+ $("bnw").style.display=$("rn").style.display=net||rkAi?"none":"";$("bana").style.display=S.over&&mode.id==="standard"&&S.uci&&S.uci.length?"":"none";$("brs").style.display=(net||rkAi)&&!S.over?"":"none";
  document.title=(net&&hu?"● 내 차례 · ":"")+"체스 컬렉션";
  if(!mode.timeLimit){$("tmr").style.display=$("tmr2").style.display="none"}
  $("bdr").disabled=!(hu&&S.phase==="draw"&&(solo||sd===0));$("ben").disabled=!(hu&&S.phase==="move"&&(solo||sd===0));$("bdr2").disabled=!(hu&&S.phase==="draw"&&sd===1);$("ben2").disabled=!(hu&&S.phase==="move"&&sd===1);$("bun").disabled=!hist.length;$("bre").disabled=!fut.length;
@@ -2648,27 +2664,27 @@ function render(){
 }
 $("bdr").onclick=()=>{if(S.phase==="draw"&&!S.over&&!lockTurn()){S=mode.draw(S);sel=null;after()}};
 $("ben").onclick=()=>{if(S.phase==="move"&&!S.over&&!lockTurn()){S=mode.pass(S);sel=null;after()}};
-$("brs").onclick=()=>Online.resign();
-$("bun").onclick=()=>{if(!mode.undo||!hist.length)return;clearTimeout(aiT);
+$("brs").onclick=async()=>{if(rkAi&&!net){if(S.over||!await ask("기권할까요? 패배로 기록돼요.","기권")||S.over)return;S={...S,over:{win:S.seat.w===0?"b":"w",why:"기권"},msg:"기권"};sel=null;return after()}Online.resign()};
+$("bun").onclick=()=>{if(!mode.undo||rkAi||!hist.length)return;clearTimeout(aiT);
  do{fut.push(S);S=hist.pop()}while(ai&&hist.length&&S.seat[S.turn]===1);sel=null;dismissed=false;after()};
 // 앞으로 되돌리기: AI 대결이면 AI가 둔 수까지 함께 다시 둠 (내 차례에서 멈춤)
-$("bre").onclick=()=>{if(!mode.undo||!fut.length)return;clearTimeout(aiT);
+$("bre").onclick=()=>{if(!mode.undo||rkAi||!fut.length)return;clearTimeout(aiT);
  do{hist.push(S);S=fut.pop()}while(ai&&fut.length&&S.seat[S.turn]===1);sel=null;dismissed=false;after()};
 $("bfl").onclick=()=>{flip=!flip;render()};
 $("bdr2").onclick=()=>$("bdr").onclick();$("ben2").onclick=()=>$("ben").onclick();
 $("bnw").onclick=newGame;$("rn").onclick=newGame;
-$("bmn").onclick=$("rm").onclick=async()=>{if(!await Online.quit())return;clearTimeout(aiT);clearInterval(spdT);spdT=null;$("rso").classList.remove("on");$("mn").classList.add("on");menu()};
+$("bmn").onclick=$("rm").onclick=async()=>{if(!await rkAiQuit()||!await Online.quit())return;clearTimeout(aiT);clearInterval(spdT);spdT=null;$("rso").classList.remove("on");$("mn").classList.add("on");menu()};
 // 게임 종료 창: 내 입장(AI·온라인)이면 승리/패배, 한 기기 2인이면 "백 승리". 두 선수 카드(이긴 쪽 왕관), 다시 하기 버튼
 let rsT=0;
 function resultUI(){const w=S.over.win,me=net?net.seat:ai?0:-1,res=!w?"draw":me<0||S.seat[w]===me?"win":"lose";
  $("rso").querySelector(".rh").className="rh"+(res==="lose"?" lose":res==="draw"?" draw":"");
  $("rt").textContent=res==="draw"?"무승부":me<0?`${w==="w"?"백":"흑"} 승리!`:res==="win"?"승리!":"패배";
- $("rw").textContent=S.over.why||"";if(net&&net.kind==="ranked")$("rw").insertAdjacentHTML("beforeend",`<div class="rvs">랭크 게임 · vs ${esc(net.names[1-net.seat]||"")}</div>`);
+ $("rw").textContent=S.over.why||"";{const vs=net&&net.kind==="ranked"?net.names[1-net.seat]:rkAi&&rkAi.gid===gid?rkAi.name:null;if(vs!=null)$("rw").insertAdjacentHTML("beforeend",`<div class="rvs">랭크 게임 · vs ${esc(vs||"")}</div>`)}
  const card=c=>`<div class="pp ${!w?"":c===w?"win":"lose"}"><div class="rav">${pcSvg("K",c)}</div><b>${esc(pname(S.seat[c]))}</b><small>${c==="w"?"백":"흑"}</small></div>`;
  const L=me>=0&&S.seat.b===me?["b","w"]:["w","b"];$("rpl").innerHTML=card(L[0])+'<span class="vs">vs</span>'+card(L[1]);
  Online.rankEnd(); // 랭크 게임이면 두 선수 카드 대신 앰블럼·점수·게이지
  $("ran").style.display=mode.id==="standard"&&S.uci&&S.uci.length?"":"none";
- const ag=net?Online.againLabel():null;$("rn").style.display=net?"none":"";$("rag").style.display=ag?"":"none";if(ag)$("rag").textContent=ag}
+ const ag=net||rkAi?Online.againLabel():null;$("rn").style.display=net||rkAi?"none":"";$("rag").style.display=ag?"":"none";if(ag)$("rag").textContent=ag}
 $("rag").onclick=()=>{$("rso").classList.remove("on");Online.again()};
 $("ran").onclick=$("bana").onclick=anOpen;$("anX").onclick=anClose;$("anP").onclick=()=>anGo(-1);$("anF").onclick=()=>anGo(1);$("anS0").onclick=()=>anGo(-999);$("anS9").onclick=()=>anGo(999);
 addEventListener("keydown",e=>{if(!an)return;if(e.key==="ArrowLeft")anGo(-1);else if(e.key==="ArrowRight")anGo(1);else if(e.key==="Escape")anClose()});
@@ -2726,7 +2742,7 @@ function renderBars(){if(!S)return;
   S.b.forEach(p=>{if(p&&p.t in N)(p.c===c?mine:th)[p.t]++});
   const oc=c==="w"?"b":"w",capt=["Q","R","B","N","P"].flatMap(t=>Array(Math.max(0,N[t]-th[t])).fill(t));
   const sc=x=>Object.keys(V).reduce((a,t)=>a+V[t]*x[t],0),adv=sc(mine)-sc(th);
-  const sub=(c==="w"?"백":"흑")+(ai&&!net&&seat===1?`<span class="lv">난이도 ${level}</span>`:"");
+  const sub=(c==="w"?"백":"흑")+(ai&&!net&&seat===1?`<span class="lv">${rkAi?rkAi.r+"점":"난이도 "+level}</span>`:"");
   el.innerHTML=`<div class="av ${c}">${pcSvg("K",c)}</div><div class="pn"><div class="nm">${esc(pname(seat))}<small>${sub}</small></div><div class="cap">${capt.map(t=>pcSvg(t,oc)).join("")}${adv>0?`<b>+${adv}</b>`:""}</div></div>${act?'<span class="turn">차례</span>':""}`;
   el.classList.toggle("act",act)})}
 // 로비 미리보기 보드
@@ -2735,7 +2751,7 @@ function drawPreview(){const pv=$("pv");if(!pv)return;const b=Engine.initial().b
 function ask(msg,yes){return new Promise(ok=>{$("askT").textContent=msg;$("askY").textContent=yes||"확인";const o=$("ask"),done=v=>{o.classList.remove("on");ok(v)};
  $("askY").onclick=()=>done(true);$("askN").onclick=()=>done(false);o.classList.add("on")})}
 // 나이트 로고: 상점·스킨·관리자·대국 어디서든 바로 메인(로비)으로. 진행 중인 온라인 대전만 나가기 확인을 거침
-$("home").onclick=async()=>{if(!$("mn").classList.contains("on")&&!await Online.quit())return;shopShow(false);["adm","skm","rso"].forEach(i=>$(i).classList.remove("on"));if(!$("mn").classList.contains("on"))$("bmn").onclick()};
+$("home").onclick=async()=>{if(!$("mn").classList.contains("on")&&(!await rkAiQuit()||!await Online.quit()))return;shopShow(false);["adm","skm","rso"].forEach(i=>$(i).classList.remove("on"));if(!$("mn").classList.contains("on"))$("bmn").onclick()};
 setInterval(()=>Online.dots(),15000); // 친구 접속 상태: 시간이 지나 오프라인이 된 친구 반영
 // 게임 시작 / 친구 대전 신청 (선택 창의 버튼)
 function startGame(){if(sO>=3){$("opo").classList.remove("on");return Online.match(sO===4?"ranked":"normal",sM)}
@@ -2805,7 +2821,7 @@ const Online=(()=>{
  function skinGuest(){const L=skinLocal();if(L&&L.by){skinFrom(null);try{localStorage.removeItem("chessSkin")}catch(e){}}}
  function skinLive(){if(prof.skinData&&!skinSame(prof.skinData)){skinFrom(prof.skinData);skinAuth()}}
  // 로그인 후 실시간 구독: 내 프로필 · 친구 · 친구 신청 · 대전 초대
- function start(){const u=me.uid,L=(q,f)=>subs.push(q.onSnapshot(f,e=>console.warn(e))),D=q=>q.docs.map(d=>({id:d.id,...d.data()}));
+ function start(){setTimeout(rkPend,2000);const u=me.uid,L=(q,f)=>subs.push(q.onSnapshot(f,e=>console.warn(e))),D=q=>q.docs.map(d=>({id:d.id,...d.data()}));
   skinLogin();
   L(db.doc("users/"+u),d=>{if(d.exists){prof=d.data();skinLive();giftSync();if(prof.banned){toast("이용이 정지된 계정이에요");return logout()}bar();if(tab==="stats"&&!view)refresh()}});
   loadLun();
@@ -3024,6 +3040,17 @@ const Online=(()=>{
  async function loadLun(){try{const nx={};for(const m of MODES){const q=await db.collection("users").orderBy(`rk.${m.id}`,"desc").limit(20).get();
    nx[m.id]=q.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>rkN(u,m.id)>=PLACE&&u.rk[m.id]>=1600).slice(0,5).map(u=>u.uid)}lun=nx;refresh()}catch(e){console.warn("lunacy",e)}}
  const rankRow=(d,uid)=>`<div class="li" style="flex-wrap:wrap;gap:4px 14px;border-bottom:0"><span style="flex:none">🏆 랭크 등급</span>${MODES.map(m=>`<span style="flex:none;font-size:12px">${esc(m.name)} ${rankOf(d,uid,m.id,true)}</span>`).join("")}</div>`;
+ // 랭크: 이 시간(초) 동안 사람을 못 찾으면 내 등급에 맞춘 AI와 대전. 내 대기표가 아직 기다리는 중일 때만 지우고 시작 (그 사이 누가 잡았으면 그 대전으로)
+ const RKAI_S=60;
+ async function aiFallback(Q){Q.busy=true;try{await db.runTransaction(async t=>{const a=await t.get(Q.ref);if(!a.exists||a.data().state!=="waiting")throw{code:"mine"};t.delete(Q.ref)})}catch(e){Q.busy=false;return}
+  if(mq!==Q)return;mqStop();startRkAi({mid:Q.mid,...rkAiFor(Q.r0,Q.mid)})}
+ // AI 점수 = 내 등급의 끝(다음 등급 시작 점수). 그랜드마스터·루나시는 내 점수 + 100 (최소 1700). 배치고사 중이면 지금 점수 기준
+ function rkAiFor(r,m){const i=RT.findIndex(x=>r>=x[0]),ar=i>0?RT[i-1][0]:Math.max(RT[0][0]+100,r+100),tn=rkN(prof,m)<PLACE?"배치고사":tierOf(r,me.uid,m)[0];return{r:ar,name:`AI · ${tn}`}}
+ // 랭크 AI 대전 중에 창을 닫았으면 다음 로그인 때 패배로 기록 (이미 끝나서 기록된 판이면 record가 알아서 건너뜀)
+ function rkPend(){let p=null;try{p=JSON.parse(localStorage.getItem("rkAiPend")||"null")}catch(e){}if(!p||!me||!prof||p.uid!==me.uid)return;if(rkAi&&rkAi.gid===p.gid&&S&&!S.over)return;
+  try{localStorage.removeItem("rkAiPend")}catch(e){}record(p.gid,{mode:p.mid,opp:p.name,res:"l",why:"나가서 패배",online:true,kind:"ranked",ranked:true,oppR:p.r,vsAi:true},null)}
+ // 지금 랭크 종료 창을 보여 줄 대전(사람 랭크 대전 또는 랭크 AI 대전)의 id
+ const rkGid=()=>net&&net.kind==="ranked"?net.gid:rkAi&&rkAi.gid===gid?rkAi.gid:null;
  function mqStop(){const Q=mq;if(!Q)return;mq=null;Q.done=true;clearInterval(Q.timer);if(Q.u1)Q.u1();if(Q.u2)Q.u2();ov("wto",false)}
  async function match(kind,mid){
    if(!db)return toast("온라인 서버에 연결되지 않았어요");if(mq)return;if(live())return toast("진행 중인 대전을 먼저 끝내 주세요");
@@ -3042,6 +3069,7 @@ const Online=(()=>{
    Q.cands.forEach(c=>{const h=ms(c.hb),s=Q.seen[c.uid];if(!s)Q.seen[c.uid]={hb:h,first:n,chg:n};else if(h!==s.hb){s.hb=h;s.chg=n}});scan(Q)},e=>{if(mq===Q){mqStop();ref.delete().catch(()=>{});toast(errMsg(e))}});
   Q.timer=setInterval(()=>{if(mq!==Q)return;const n=Date.now(),s=Math.floor((n-Q.t0)/1000);$("mqT").textContent=mqFmt(s);
    
+   if(Q.kind==="ranked"&&s>=RKAI_S&&!Q.busy&&!Q.done)return aiFallback(Q); // 1분 넘게 못 찾으면 AI와
    if(n-Q.hb>=10000){Q.hb=n;ref.update({hb:FV.serverTimestamp()}).catch(()=>{})}scan(Q)},1000);
  }
  // 상대 후보 고르기: 신호(hb)가 45초 넘게 안 바뀐 대기표는 나간 사람으로 봄 (서로 시계가 달라도 되게 내 시계로 "바뀐 시점"을 잼)
@@ -3070,8 +3098,8 @@ const Online=(()=>{
    Q.skip[c.uid]=Date.now()+(e&&e.code==="gone"?3000:8000);if(!e||e.code!=="gone")console.warn("match",e)}
   finally{Q.busy=false}}
  // 끝난 판에서 다시 하기: 일반 매칭이면 같은 모드로 다시 찾기, 친구 대전이면 재대결 신청
- function againLabel(){if(!net)return null;if(net.kind==="normal")return"다시 찾기";if(net.kind)return null;return friends.some(f=>f.uid===net.ou)?"재대결 신청":null}
- function again(){if(!net)return;const k=net.kind,ou=net.ou,m=mode.id;leave();if(k==="normal")return match(k,m);if(friends.some(f=>f.uid===ou))return invite(ou,m)}
+ function againLabel(){if(!net)return rkAi&&rkAi.gid===gid?"다시 찾기":null;if(net.kind==="normal")return"다시 찾기";if(net.kind)return null;return friends.some(f=>f.uid===net.ou)?"재대결 신청":null}
+ function again(){if(!net){if(rkAi){const m=rkAi.mid;rkAi=null;return match("ranked",m)}return}const k=net.kind,ou=net.ou,m=mode.id;leave();if(k==="normal")return match(k,m);if(friends.some(f=>f.uid===ou))return invite(ou,m)}
  function joinMatch(Q,gid){if(Q.done)return;const ref=Q.ref;mqStop();ref.delete().catch(()=>{});toast("상대를 찾았어요!");openGame(gid)}
  async function cancelMatch(){const Q=mq;if(!Q)return;
   try{const t=(await Q.ref.get()).data();if(t&&t.state==="matched"&&t.gid)return joinMatch(Q,t.gid)}catch(e){} // 취소를 누른 순간 이미 짝이 맞았으면 그 대전으로
@@ -3101,7 +3129,7 @@ const Online=(()=>{
  function load1(g,first){
   const m0=MODES.find(m=>m.id===g.mode);if(!m0){leave();return toast("더 이상 제공하지 않는 모드의 대전이에요")}
   mode=m0;Engine.setX(mode.id==="augment"?augXM:null);
-  const n0=S&&S.log?S.log.length:0;S=JSON.parse(g.state);ai=false;hist=[];fut=[];sel=null;gid=net.gid;
+  const n0=S&&S.log?S.log.length:0;S=JSON.parse(g.state);ai=false;rkAi=null;hist=[];fut=[];sel=null;gid=net.gid;
   if(mode.timeLimit&&!S.over)S.deadline=Date.now()+mode.timeLimit*1000; // 기기마다 시계가 달라서 받은 시점부터 다시 셈
   if(!first&&S.log.length>n0)beep(false);
   if(first){flip=net.seat===1;dismissed=false;seen=S.shown&&S.shown.id;annSeen=S.ann&&S.ann.r;["mn","acc","rso"].forEach(i=>ov(i,false))}
@@ -3136,12 +3164,12 @@ const Online=(()=>{
    if(g.ranked){const u=await t.get(uref),ud=u.data()||{},r0=(ud.rk||{})[g.mode],c0=rkN(ud,g.mode),a=typeof r0==="number"?r0:RK0,o=typeof g.oppR==="number"?g.oppR:RK0,s=g.res==="w"?1:g.res==="l"?0:.5,adj=Math.max(-60,Math.min(60,(o-a)/5)),nr=c0<PLACE?Math.max(0,Math.min(PMAX,Math.round(a+(s===1?200+adj:s===0?-40+adj/2:80+adj/2)))):Math.max(0,Math.round(a+32*(s-1/(1+Math.pow(10,Math.max(-400,Math.min(400,o-a))/400)))));
     up[`rk.${g.mode}`]=nr;up[`rkn.${g.mode}`]=c0+1;rec.rk=nr;rec.d=nr-a;if(c0<PLACE)rec.pl=c0+1;rr={a,nr,c0,m:g.mode}}
    t.set(gref,rec);t.update(uref,up)})
-   .then(()=>{if(g.ranked)rkKeep(id,rr,gref,g.mode);if(rr&&!(net&&net.gid===id)){const t0=tierOf(rr.a,me.uid,rr.m)[0],t1=tierOf(rr.nr,me.uid,rr.m)[0]; // 지금 보는 대전이면 종료 창에 나오므로 알림은 생략
+   .then(()=>{if(g.ranked)rkKeep(id,rr,gref,g.mode);if(rr&&rkGid()!==id){const t0=tierOf(rr.a,me.uid,rr.m)[0],t1=tierOf(rr.nr,me.uid,rr.m)[0]; // 지금 보는 대전이면 종료 창에 나오므로 알림은 생략
      toast(rr.c0<PLACE-1?`배치고사 ${rr.c0+1}/${PLACE} 완료`:rr.c0===PLACE-1?`배치고사 완료! 첫 등급은 ${t1} (${rr.nr})`:`랭크 점수 ${rr.a} → ${rr.nr} (${rr.nr>=rr.a?"+":""}${rr.nr-rr.a})${t0!==t1?` · ${t0} → ${t1} ${rr.nr>rr.a?"승급!":"강등"}`:""}`)}if(rr)loadLun();if(g.online&&seat!=null)return db.doc("games/"+id).update({[seat?"pendB":"pendW"]:false})}).catch(e=>console.warn("record",e))}
  // 랭크 종료 창: 대전(gid)별 점수 결과. 점수 계산이 끝나면 채우고, 그 대전의 종료 창이 열려 있으면 바로 그림
  const rkRes={};
  function rkKeep(id,rr,gref,m){
-  const fin=r=>{rkRes[id]=r;if(net&&net.gid===id&&$("rso").classList.contains("on"))rankEnd()};
+  const fin=r=>{rkRes[id]=r;if(rkGid()===id&&$("rso").classList.contains("on"))rankEnd()};
   const hist=r=>r.c0<PLACE?games(me.uid,12).then(q=>{const H=[];q.docs.forEach(d=>{const x=d.data();if(x.ranked&&x.mode===m&&x.pl)H[x.pl-1]=x.res});fin({...r,hist:H})}).catch(()=>fin(r)):fin(r);
   if(rr)return hist(rr);
   // 이미 기록된 판(새로고침 등): 저장된 기록에서 다시 만듦
@@ -3150,8 +3178,8 @@ const Online=(()=>{
  const EMN=["아이언","브론즈","실버","골드","플래티넘","다이아몬드","마스터","그랜드마스터","루나시"];
  // 점수 r의 등급: {min,n(이름),c(색),e(그림),nx(다음 등급 [시작 점수,이름])} — 그랜드마스터 상위 5명은 루나시
  function tierInfo(r,m){const[n,c]=tierOf(r,me.uid,m),i=RT.findIndex(x=>x[1]===n),t=i<0?[1600,n,c]:RT[i],nx=i>0?RT[i-1]:null;return{min:t[0],n,c,e:EMB[EMN.indexOf(n)],nx}}
- function rankEnd(){const el=$("rrk"),on=!!(net&&net.kind==="ranked"&&S&&S.over);el.style.display=on?"":"none";$("rpl").style.display=on?"none":"";if(!on)return;
-  const r=rkRes[net.gid],key=net.gid+(r?"+":"-");if(el.dataset.k===key)return;el.dataset.k=key;(el._t||[]).forEach(clearTimeout);el._t=[];
+ function rankEnd(){const el=$("rrk"),G=rkGid(),on=!!(G&&S&&S.over);el.style.display=on?"":"none";$("rpl").style.display=on?"none":"";if(!on)return;
+  const r=rkRes[G],key=G+(r?"+":"-");if(el.dataset.k===key)return;el.dataset.k=key;(el._t||[]).forEach(clearTimeout);el._t=[];
   if(!r){el.style.removeProperty("--tc");el.innerHTML='<div class="rkw">점수 계산 중…</div>';return}
   const T=(f,ms)=>el._t.push(setTimeout(f,ms)),m=r.m,d=r.nr-r.a,pl=r.c0<PLACE-1,done=r.c0===PLACE-1;
   if(pl){const n=r.c0+1,H=r.hist||[];el.style.removeProperty("--tc");
