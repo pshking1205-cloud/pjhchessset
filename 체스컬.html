@@ -265,6 +265,10 @@ u.gt{text-decoration:underline dotted;text-underline-offset:3px;text-decoration-
 .pme{display:flex;align-items:center;gap:10px;min-width:0}
 .pme .pmb{margin:0;padding:0;border:0;background:none;box-shadow:none;cursor:pointer;border-radius:8px;flex:none}
 .pme .pmb:hover .pav{filter:brightness(1.12)}.pme .pmb:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+/* 닉네임 옆 랭크: 앰블럼 + 등급 이름(등급 색) + 점수 */
+.pmr{display:flex;align-items:center;gap:5px;flex:none;font-size:13px;font-weight:700;white-space:nowrap}.pmr:empty{display:none}
+.pmr img{width:30px;height:29px;object-fit:contain;border-radius:6px}.pmr img.pl{opacity:.4;filter:grayscale(1)}
+.pmr small{font-size:12px;color:var(--mut);font-weight:600}
 .pme b{font-size:16px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pav{width:40px;height:40px;border-radius:8px;display:grid;place-items:center;background:var(--pg,#81b64c);flex:none;overflow:hidden}
 .pav svg{width:80%;height:80%}.pav.big{width:64px;height:64px;border-radius:12px}
@@ -1334,7 +1338,7 @@ html[data-ag="crys"] #cv :is(.uab,.luua){display:none!important}
  <div class="lobby">
   <section class="hero">
    <div id="ntc" class="ntc" style="display:none"></div>
-   <div class="pme" id="pme"><button class="pmb" id="pmeB" aria-label="내 프로필 보기·편집"></button><b id="pmeN"></b></div>
+   <div class="pme" id="pme"><button class="pmb" id="pmeB" aria-label="내 프로필 보기·편집"></button><b id="pmeN"></b><span class="pmr" id="pmeR"></span></div>
    <div id="pv" aria-hidden="true"></div>
   </section>
   <section class="play">
@@ -2694,7 +2698,7 @@ new MutationObserver(()=>document.body.classList.toggle("ingame",!$("mn").classL
 $("rc").onclick=()=>{dismissed=true;$("rso").classList.remove("on")};
 const MSUB={standard:"국제 규칙 그대로. 캐슬링·앙파상·승급·50수·3회 반복까지",augment:"시작할 때와 6수마다 증강 카드를 골라 규칙을 비틀어요"};
 function menu(){
- posGear();
+ posGear();Online.meDraw(); // 모드를 바꾸면 닉네임 옆 랭크도 그 모드로
  const box=$("mnb"),old=box.querySelector(".sl"),sc=old?old.scrollLeft:0;box.innerHTML="";
  const lab=t=>{const l=document.createElement("div");l.className="lb";l.textContent=t;box.appendChild(l)};
  const cards=(label,items,cur,fn)=>{lab(label);const w=document.createElement("div");w.className="opts";
@@ -2844,7 +2848,12 @@ const Online=(()=>{
  const avHtml=(s,big)=>{const a=avParse(s);return`<span class="pav${big?" big":""}" style="--pg:${PAVBG[a.g]}">${pcSvg(a.p,a.c,"classic")}</span>`};
  const guest=()=>{try{return JSON.parse(localStorage.getItem("chessMe")||"null")||{}}catch(e){return{}}};
  const myName=()=>me&&prof?prof.name:(guest().name||"게스트"),myAv=()=>me&&prof?(prof.av||""):(guest().av||"");
- function meDraw(){const b=$("pmeB");if(!b)return;b.innerHTML=avHtml(myAv());$("pmeN").textContent=myName()}
+ function meDraw(){const b=$("pmeB");if(!b)return;b.innerHTML=avHtml(myAv());$("pmeN").textContent=myName();
+  // 랭크: 로그인했을 때만. 로비에서 고른 모드(표준·증강)의 랭크
+  const R=$("pmeR"),m=sM||"standard",mm=MODES.find(x=>x.id===m);if(!R)return;if(!(me&&prof)){R.innerHTML="";return}
+  const n=rkN(prof,m),r=(prof.rk||{})[m];R.title=(mm?mm.name.replace(/^\S+\s/,""):"")+" 랭크";
+  R.innerHTML=!n&&typeof r!=="number"?'<small>랭크 기록 없음</small>':n<PLACE?`<img class="pl" src="${EMB[0]}" alt=""><span>배치고사</span><small>${n}/${PLACE}</small>`
+   :(t=>`<img src="${t.e}" alt="${t.n} 앰블럼"><span style="color:${t.c}">${t.n}</span><small>${r}</small>`)(tierInfo(r,m))}
  let pfEdit=false;
  function profile(){pfEdit=false;pfDraw();ov("pfo",true)}
  function pfDraw(){const B=$("pfB"),lg=!!(me&&prof);
@@ -3314,7 +3323,7 @@ const Online=(()=>{
  function ntcUI(B){B.innerHTML=`<div class="panel" style="padding:16px"><div class="lb" style="margin-top:0">로비 공지</div><textarea id="admN" maxlength="300" aria-label="로비 공지" placeholder="로비 맨 위에 보일 문구예요. 비우고 올리면 공지가 사라져요">${esc(ntcT)}</textarea><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button id="admNs">공지 올리기</button><button class="g" id="admNd">공지 내리기</button></div></div>`;
   const put=t=>!roOK()?0:db.doc("config/notice").set({text:t,by:me.uid,at:FV.serverTimestamp()}).then(()=>toast(t?"공지를 올렸어요":"공지를 내렸어요")).catch(e=>toast(errMsg(e)));
   $("admNs").onclick=()=>put($("admN").value.trim());$("admNd").onclick=()=>{$("admN").value="";put("")}}
- return{ready:()=>!!db,init,push,record,resign,leave,quit,dots,dot,invite,admOpen,admLoad,match,again,againLabel,rankEnd,profile,myName,rating:m=>rkOf(prof,m),rankText:m=>me&&prof?rankOf(prof,me.uid,m):"로그인하면 등급이 생겨요",uid:()=>me?me.uid:"",saveSkins,eq:()=>accEq,admin:()=>isAdmin(),owner:()=>isOwner(),me:()=>me&&prof?me:null,friends:()=>friends};
+ return{meDraw,ready:()=>!!db,init,push,record,resign,leave,quit,dots,dot,invite,admOpen,admLoad,match,again,againLabel,rankEnd,profile,myName,rating:m=>rkOf(prof,m),rankText:m=>me&&prof?rankOf(prof,me.uid,m):"로그인하면 등급이 생겨요",uid:()=>me?me.uid:"",saveSkins,eq:()=>accEq,admin:()=>isAdmin(),owner:()=>isOwner(),me:()=>me&&prof?me:null,friends:()=>friends};
 })();
 $("acx").onclick=()=>$("acc").classList.remove("on");
 
