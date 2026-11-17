@@ -2040,7 +2040,97 @@ const AUGS={
  invert:{n:"반전",r:"COMMON",d:"사용: 내 나이트/비숍 하나를 희생하면, 이번 차례 동안 내 룩과 비숍의 움직임이 서로 바뀌어요."},
  gale:{n:"강풍",r:"RARE",d:"사용: 3수 뒤, 주변 8칸에 다른 메이저 피스(퀸·룩)가 없는 모든 메이저 피스가 사라져요. (확인 필요: 3수 = 양쪽 합쳐 6플라이)"},
  dbl:{n:"더블 체크",p:1,r:"RARE",d:"서로 다른 내 기물 2개 이상이 동시에 상대 킹을 공격하면 즉시 승리해요."},
- palace:{n:"궁성",r:"RARE",d:"사용: 상대 킹 주변 3×3 칸에 궁성을 지어요. 상대 킹은 스스로 움직여 궁성을 나갈 수 없어요."}
+ palace:{n:"궁성",r:"RARE",d:"사용: 상대 킹 주변 3×3 칸에 궁성을 지어요. 상대 킹은 스스로 움직여 궁성을 나갈 수 없어요."},
+ squire:{n:"견습 기사단",o:1,p:1,r:"COMMON",d:"아군 b·g파일 폰이 종자가 되어 옆 칸의 적도 잡을 수 있어요."},
+ guardsman:{n:"근위병",o:1,p:1,r:"COMMON",d:"아군 킹 파일 폰이 근위병이 돼요. 가호가 사라지지 않고 계속 지켜줘요."},
+ knightmate:{n:"나이트메이트",o:1,p:1,r:"COMMON",d:"킹이 나이트 행마도 겸하고, 아군 나이트는 모두 만(킹처럼 한 칸, 캐슬링 불가)으로 바뀌어요."},
+ berolina:{n:"전환",o:1,p:1,r:"COMMON",d:"아군 폰이 모두 베롤리나 폰이 돼요. 대각선으로 전진하고 정면으로 잡아요."},
+ fanmass:{n:"집단 광기",o:1,p:1,r:"COMMON",d:"아군 폰이 모두 광신도가 돼요. 광신도를 잡으면 잡은 기물도 함께 사라져요."},
+ alfil:{n:"코끼리 탈출",o:1,p:1,r:"COMMON",d:"대각선으로 두 칸 뛰는(기물을 넘을 수 있는) 알필 두 마리가 생겨요."},
+ qknight:{n:"퀸의 기병대",o:1,p:1,r:"COMMON",d:"아군 퀸 파일 폰이 나이트로 바뀌어요."},
+ checkers:{n:"체커",o:1,p:1,r:"COMMON",d:"대각선으로만 한 칸 움직이고 잡는 체커 4개가 생겨요."},
+ thief:{n:"도적",o:1,p:1,r:"COMMON",d:"아군 퀸이 도적으로 바뀌어 잠복해요. 잠복이 풀린 채로 내 턴이 끝나면 사라져요. (확인 필요: 재잠복 조건 단순화)"},
+ wanted:{n:"수배",o:1,p:1,r:"COMMON",d:"무작위 상대 원거리 기물 하나가 잠복하며 수배돼요. 그 기물을 잡으면 한 번 더 움직일 수 있어요."},
+ fianchetto:{n:"피앙케토",o:1,p:1,r:"COMMON",d:"상대 폰은 아군 비숍이 있는 대각선 위 칸에 들어올 수 없어요. (확인 필요: 단순화)"},
+ grudge:{n:"원한",o:1,p:1,r:"RARE",d:"무작위 아군 비폰 기물 하나가 원한을 품어요. 잡히면 잡은 기물도 함께 사라져요."},
+ otherworld:{n:"이세계",o:1,p:1,r:"RARE",d:"무작위 아군 폰 하나가 사라지고, 14수 뒤 같은 자리(막혀 있으면 그 기물을 잡으며)에 마법사(퀸처럼 움직임)가 나타나요."},
+ herald:{n:"전령",o:1,p:1,r:"RARE",d:"룩 하나가 전령이 돼요. 전령이 처음 기물을 잡으면 그 기물의 행마를 배워요."},
+ qgambit:{n:"퀸즈 갬빗",o:1,p:1,r:"RARE",d:"퀸 파일 폰이 한 칸 전진하고, 퀸 파일 폰과 무작위 파일 폰이 가호를 얻어요."},
+ princess:{n:"프린세스",o:1,p:1,r:"RARE",d:"룩 하나가 프린세스(룩+나이트)로 바뀌어요."},
+ windmill:{n:"네덜란드",o:1,p:1,r:"EPIC",d:"아군 룩과 마이너 피스가 모두 풍차가 돼요(한 칸 어디로든도 움직일 수 있음). (확인 필요: 단순화)"},
+ horde:{n:"호드",o:1,p:1,r:"EPIC",d:"킹을 뺀 모든 아군 기물이 사라지고, 보드 하단이 폰으로 가득한 호드 진형으로 바뀌어요."},
+ bigbishop:{n:"BISHOP",o:1,p:1,r:"EPIC",d:"아군 비숍 하나가 조금 더 큰 비숍(비숍+한 칸 어디로든)이 돼요."},
+ bigrook:{n:"ROOK",o:1,p:1,r:"EPIC",d:"아군 룩 하나가 조금 더 큰 룩(룩+한 칸 어디로든)이 돼요."},
+ golem:{n:"메가체스트론",o:1,p:1,r:"LEGEND",d:"아군 폰이 모두 사라지고, 그 중 한 자리에 거신병(퀸+나이트 행마)이 나타나요."},
+ merchant:{n:"상인 조합",o:1,p:1,r:"LEGEND",d:"킹이 상인을 겸해 퀸처럼도 움직일 수 있어요(여전히 킹이에요). (확인 필요: 골드 매수 단순화)"},
+ pawnchain:{n:"폰 체인",o:1,p:1,r:"LEGEND",d:"획득 시 상대 폰이 모두 사슬로 묶여 서로 2칸 넘게 떨어질 수 없어요."},
+ longep:{n:"롱파상",p:1,r:"COMMON",d:"아군 폰이 거리와 상관없이, 상대가 방금 두 칸 전진한 폰을 앙파상 할 수 있어요. (확인 필요: 단순화)"},
+ stealth:{n:"잠복",r:"COMMON",d:"사용: 무작위 아군 기물 하나를 잠복시켜요. 잠복한 기물은 상대가 잡을 수 없고, 움직이면 풀려요."},
+ cleanup:{n:"클린업",r:"COMMON",d:"사용: 무작위 아군 기물 최대 3개를 보드에서 지워요."},
+ ruletix:{n:"규칙 티켓",r:"COMMON",d:"사용: 휴전·전원 가호·상대 동결 중 무작위 하나가 다음 내 턴부터 적용돼요. (확인 필요: 규칙 종류 단순화)"},
+ gun3:{n:"알레킨의 머신건",r:"COMMON",d:"사용: 서로 붙어 있는 아군 기물 3개가 있으면 모두 영구 가호를 얻어요. (확인 필요: 대형 조건 단순화)"},
+ quantum:{n:"양자 역학",r:"COMMON",d:"사용: 무작위 아군 기물 하나가 이번 턴에 기물을 잡지 못해요(중첩 이동). (확인 필요: 단순화)"},
+ conveyor:{n:"컨베이어",r:"COMMON",d:"사용: 무작위 파일에 컨베이어를 설치해요. 다음 턴부터, 그 파일의 기물이 상대 쪽으로 한 칸씩 밀려요."},
+ dodge:{n:"회피",r:"COMMON",d:"사용: 무작위 아군 기물 하나에 회피(가호)를 부여해요."},
+ convertrite:{n:"광신적 의식",r:"COMMON",d:"사용: 킹을 뺀 무작위 상대 기물 하나가 광신도로 변해요. 광신도를 잡으면 잡은 기물도 함께 사라져요."},
+ encourage:{n:"독려",p:1,r:"COMMON",d:"아군 킹 주변 8칸의 아군 기물이 계속 가호를 받아요."},
+ roller:{n:"롤러",r:"COMMON",d:"사용: 3수 동안, 아군 룩이 이동하면 그 방향으로 한 칸 더 미끄러져요."},
+ scarecrow:{n:"허수아비",r:"COMMON",d:"사용: 아군 기물 하나를 희생해 그 자리를 표시해요. 3수 뒤 그 자리에 허수아비(못 움직이지만 가호 있음)가 생겨요."},
+ descent:{n:"강림",r:"RARE",d:"사용: 아군 퀸 하나를 하늘로 올려요. 3수 뒤 무작위 빈 칸에 내려와요. (확인 필요: 착지 칸 무작위로 단순화)"},
+ roulette:{n:"랜덤룰렛",r:"RARE",d:"사용: 무작위 메이저 피스(퀸·룩) 하나가 완전히 무작위 기물로 바뀌어요."},
+ metal:{n:"메탈",r:"RARE",d:"사용: 무작위 아군 원거리 기물 하나가 금속화돼요(가호처럼 공격을 한 번 막아요)."},
+ counter:{n:"반격",r:"RARE",d:"사용: 무작위 아군 폰 하나가 반격을 얻어요. 잡히면 잡은 기물도 함께 사라져요."},
+ contract:{n:"봉건 계약",r:"RARE",d:"사용: 아군 폰과 비폰 기물 하나를 계약해요. 폰이 잡히면 계약된 기물이 공격한 기물을 없애요."},
+ rampart:{n:"봉쇄",r:"RARE",d:"사용: 아군 킹 주변 8칸의 빈칸에 3수 동안 엄폐물을 세워요. 엄폐물엔 기물이 들어갈 수 없어요."},
+ offset:{n:"상쇄",r:"RARE",d:"사용: 무작위 아군 기물 하나에 상쇄를 부여해요. 처음 공격받으면 공격한 기물과 함께 사라져요."},
+ schrodinger:{n:"슈뢰딩거의 폰",r:"RARE",d:"사용: 무작위 아군 폰 4개가 이번 턴에 기물을 잡지 못해요. (확인 필요: 중첩 효과 단순화)"},
+ bomber:{n:"자폭병",r:"RARE",d:"사용: 무작위 아군 폰 하나가 자폭병이 돼요. 잡히면 주변 3×3이 모두 폭발해요(아군도 사라져요)."},
+ infiltrate:{n:"잠입",p:1,r:"RARE",d:"아군 기물이 상대 홈 랭크에 들어갔을 때 주변에 적이 없으면 잠복해요."},
+ outpost:{n:"전초기지",r:"RARE",d:"사용: 상대 진영에 가장 가까운 아군 기물 하나가 가호를 얻어요. 다음에 움직이면 사라져요."},
+ assemble:{n:"조립",p:1,r:"RARE",d:"아군 룩이 상대 비숍을, 아군 비숍이 상대 룩을 잡으면 그 자리에서 퀸으로 바뀌어요."},
+ castlex:{n:"캐슬링",r:"RARE",d:"사용: 킹과 같은 줄·대각선의 아군 룩 하나와 위치를 바꿔요. (확인 필요: 단순화)"},
+ insight:{n:"통찰",r:"RARE",d:"사용: 상대의 좋은 효과를 지우고, 아군의 나쁜 효과를 지워요."},
+ trojan:{n:"트로이 목마",r:"RARE",d:"사용: 무작위 아군 나이트 하나를 몰래 지정해요. 잡히면 잡은 기물이 즉시 사라지고 시작 칸에 아군 폰이 생겨요."},
+ freemove:{n:"프리 무브",r:"RARE",d:"사용: 아군 기물 최대 3개가 즉시 한 칸씩 이동해요(기물은 못 잡아요). (확인 필요: 예약 없이 즉시 적용으로 단순화)"},
+ sacrif:{n:"희생",r:"RARE",d:"사용: 무작위 아군 기물 하나를 처형하고, 그보다 가치 낮은 아군 기물 하나가 3턴 동안 가호를 얻어요."},
+ mann:{n:"만",r:"EPIC",d:"사용: 무작위 아군 마이너 피스 하나가 만(킹처럼 한 칸, 캐슬링 불가)으로 바뀌어요."},
+ bind:{n:"봉인",r:"EPIC",d:"사용: 킹을 뺀 무작위 상대 기물 하나가 다음 2수 동안 움직일 수 없어요."},
+ weak:{n:"부상",p:1,r:"EPIC",d:"상대 나이트의 돌진 능력을 약화시켜요. (확인 필요: 대응되는 능력이 없어 현재는 효과 없음)"},
+ invis:{n:"은신",r:"EPIC",d:"사용: 무작위 아군 비숍 하나가 상대에게 보이지 않게 돼요. 움직이면 풀려요."},
+ chimera:{n:"키메라",r:"EPIC",d:"사용: 무작위 아군 메이저 피스 하나가 퀸+나이트로 바뀌어요."},
+ parry:{n:"패링",r:"EPIC",d:"사용: 무작위 아군 기물 하나가 패링을 얻어요. 다음 공격을 40% 확률로 반격해 공격한 기물을 없애요."},
+ ghost:{n:"고스트",p:1,r:"EPIC",d:"획득 시 아군 폰이 모두 고스트(잠복)가 돼요. 움직이면 드러나요. (확인 필요: 단순화)"},
+ mongolian:{n:"몽골리안 갬빗",p:1,r:"LEGEND",d:"획득 시 킹을 뺀 아군 기물이 모두 나이트로 바뀌어요."},
+ trolley:{n:"트롤리",r:"LEGEND",d:"사용: 무작위 상대 기물 두 묶음 중 가치가 낮은 쪽이 모두 사라져요. (확인 필요: 즉시 적용으로 단순화)"},
+ illusion:{n:"환각",r:"COMMON",d:"사용: 5수 동안 상대에게 아군 기물이 모두 퀸으로 보여요(실제 행마엔 영향 없어요)."},
+ squad:{n:"결사대",r:"COMMON",d:"사용: 무작위 파일의 아군 폰이 모두 광신도로 바뀌어요. 광신도를 잡으면 잡은 기물도 사라져요."},
+ summon:{n:"뒤틀린 소환",r:"COMMON",d:"사용: 아군 퀸 하나를 희생해요. 3수 뒤 그 자리와 무작위 빈 칸에 괴물(퀸+나이트)이 나타나요. (확인 필요: 단순화)"},
+ morph:{n:"변이",p:1,r:"COMMON",d:"아군 폰이 마지막 줄에 도달하면 괴물(퀸+나이트)로 승급할 수 있어요."},
+ bunker:{n:"엄폐물 설치",r:"COMMON",d:"사용: 무작위 빈 칸 주변에 3수 동안 엄폐물을 설치해요. 엄폐물엔 기물이 들어갈 수 없어요."},
+ vip:{n:"귀빈",r:"COMMON",d:"사용: 무작위 폰 하나를 지정해요. 3수 뒤 살아있으면 귀빈(가호 두른 퀸)으로 바뀌어요."},
+ lobster:{n:"랍스터",r:"COMMON",d:"사용: 무작위 빈 칸 하나를 지정해요. 한 수 뒤 그 자리에 랍스터(비숍처럼 움직임)가 나타나요. (확인 필요: 단순화)"},
+ redcard:{n:"레드카드",r:"COMMON",d:"사용: 가장 많이 잡은 비킹 기물(진영 무관)을 다음 증강 선택 때까지 보드에서 치워요."},
+ trial:{n:"마녀재판",r:"COMMON",d:"사용: 킹을 뺀 무작위 상대 기물 하나가 다음 2수 동안 기물을 잡을 수 없어요."},
+ spy:{n:"스파이",r:"COMMON",d:"사용: 무작위 상대 폰 최대 2개를 몰래 포섭해요. 그 폰들이 승급하면 아군 기물이 돼요."},
+ underprom:{n:"언더프로모션",p:1,r:"COMMON",d:"폰이 마이너 피스로 승급하면, 승급한 기물이 그 턴에 바로 한 번 더 움직여요."},
+ finalrank:{n:"최종병기",p:1,r:"COMMON",d:"아군 프로모션 랭크가 마지막 줄로 고정돼요. 퀸으로 승급하면 나이트 행마도 겸해요."},
+ resolve:{n:"결의",p:1,r:"RARE",d:"아군 폰이 상대에게 잡힌 뒤, 처음 움직이는(이동한 적 없는) 아군 폰은 턴을 소모하지 않고 한 번 더 움직여요."},
+ coronate:{n:"대관식",p:1,r:"RARE",d:"퀸으로 승급한 아군 기물은 가호를 얻어요."},
+ despe:{n:"데스페라도",r:"RARE",d:"사용: 무작위 아군 기물 하나가 두 번 움직여요. 이동이 끝나면 그 기물은 사라져요(상대 킹은 못 잡아요)."},
+ brutus:{n:"브루투스",p:1,r:"RARE",d:"획득 시 무작위 아군 룩 하나가 브루투스(룩+한 칸 어디로든)로 바뀌어요."},
+ possess:{n:"빙의",r:"RARE",d:"사용: 무작위 아군 폰 하나가 4수 동안 이미 사라진 무작위 아군 기물로 변해요. 시간이 지나면 다시 폰이 돼요."},
+ unicorn:{n:"유니콘",r:"RARE",d:"사용: 아군 룩 하나가 유니콘(비숍+나이트)으로 바뀌어요."},
+ regress:{n:"회귀",r:"RARE",d:"사용: 무작위 아군 비폰 기물 하나가 회귀를 얻어요. 다음에 움직이면 시작 위치로 돌아가요."},
+ replay:{n:"리플레이",r:"EPIC",d:"사용: 내 마지막 수를 즉시 취소해요."},
+ lastdash:{n:"마지막 질주",r:"EPIC",d:"사용: 무작위 아군 폰 하나가 이번 턴 최대 3칸 전진해요. 승급하지 못하면 그 폰은 사라져요."},
+ moving:{n:"무빙",p:1,r:"EPIC",d:"같은 아군 기물을 5번 연속 움직이면 그 기물이 가호를 얻어요."},
+ threeday:{n:"삼일천하",r:"EPIC",d:"사용: 무작위 아군 나이트 하나가 3턴 동안 아마존(퀸+나이트)이 돼요. 시간이 지나면 다시 나이트로 돌아가요."},
+ cub:{n:"아기곰",r:"EPIC",d:"사용: 아군 퀸 하나를 희생해 그 자리에 아기곰(한 칸 어디로든)이 나타나요. 7수 뒤 곰(퀸+나이트)으로 자라요."},
+ portal:{n:"포탈 건",r:"EPIC",d:"사용: 빈 칸 두 곳을 골라요. 그중 한 칸으로 들어오는 기물은 즉시 반대쪽 칸으로 나와요(한 번만 작동). (확인 필요: 단순화)"},
+ darkmagic:{n:"흑마법",r:"EPIC",d:"사용: 아군 킹 옆 빈 칸에 괴물(퀸+나이트) 하나가 나타나요."},
+ collapse:{n:"붕괴",r:"EPIC",d:"사용: 보드 양 끝 파일·랭크의 기물이 모두 사라져요. (확인 필요: 즉시 적용·프로모션 랭크 변경 생략으로 단순화)"},
+ clone:{n:"복제",p:1,r:"LEGEND",d:"상대가 패시브 증강을 얻을 때마다, 아군도 같은 패시브를 함께 얻어요."}
+
 };
 AUGS.salvation={n:"구원",p:1,r:"LUNACY",d:"획득 시 아군 퀸이 천사로 바뀌어요."};
 Object.keys(AUGS).forEach(k=>{AUGS[k].r=AUGS[k].r||"COMMON"});
@@ -2075,10 +2165,21 @@ function augXM(s,i,p,out,h){
  if(p.t==="R"&&EF("overtake"))for(const[a,d]of AD.slice(4)){let y=r+a,x=c+d,j=false;while(Engine.inb(y,x)){const q=b[y*8+x];if(!q){if(j)mk(y,x)}else if(q.c===me)j=true;else{if(j)mk(y,x);break}y+=a;x+=d}}
  if(p.t==="P"&&EF("brk")){const q=at(r+p.f,c);if(q&&q.c!==me)mk(r+p.f,c)}
  if(p.t==="P"&&EF("enpass"))[-1,1].forEach(dx=>{const q=at(r,c+dx);if(q&&q.c!==me&&at(r+p.f,c+dx)===null)out.push({from:i,to:(r+p.f)*8+c+dx,epx:r*8+c+dx})});
+ if(p.t==="P"&&A.includes("longep")&&s.ep&&s.ep.by!==me&&(s.ep.pawn>>3)===r)out.push({from:i,to:s.ep.sq,epx:s.ep.pawn});
  if(p.t==="P"&&A.includes("leap")&&at(r+p.f,c)&&at(r+2*p.f,c)===null)mk(r+2*p.f,c);
  if(p.t==="N"&&A.includes("mad"))KN.forEach(([a,d])=>{const q=at(r+a,c+d);if(q&&q.c===me&&q.t!=="K")mk(r+a,c+d)});
- if(p.t==="K"&&p.ka)for(const t of new Set(p.ka))out.push(...raw(t));
+ if(p.ka)for(const t of new Set(p.ka))out.push(...raw(t));
  if(p.t==="K"&&A.includes("killer"))out.push(...raw("R").filter(m=>b[m.to]&&b[m.to].t==="K"&&b[m.to].c!==me));
+ if(p.mann){out.length=0;AD.forEach(([a,d])=>{const q=at(r+a,c+d);if(q!==undefined&&(!q||q.c!==me))mk(r+a,c+d)})}
+ if(p.t==="P"&&p.brl){out.length=out.length;const f=p.f,st0=p.m?1:2;
+  [-1,1].forEach(dx=>{if(at(r+f,c+dx)===null){mk(r+f,c+dx);if(!p.m&&at(r+2*f,c+2*dx)===null)mk(r+2*f,c+2*dx)}});
+  const fq=at(r+f,c);if(fq&&fq.c!==me)mk(r+f,c)}
+ if(p.t==="P"&&p.sq)[-1,1].forEach(dx=>{const q=at(r,c+dx);if(q&&q.c!==me)mk(r,c+dx)});
+ if(p.t==="B"&&p.alf){out.length=0;[[2,2],[2,-2],[-2,2],[-2,-2]].forEach(([a,d])=>{const q=at(r+a,c+d);if(q!==undefined&&(!q||q.c!==me))mk(r+a,c+d)})}
+ if(p.t==="N"&&p.ckr){out.length=0;const fwd=me==="w"?-1:1;
+  [[fwd,1],[fwd,-1]].forEach(([a,d])=>{if(at(r+a,c+d)===null)mk(r+a,c+d)});
+  [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([a,d])=>{const mid=at(r+a,c+d),land=at(r+2*a,c+2*d);if(mid&&mid.c!==me&&land===null)out.push({from:i,to:(r+2*a)*8+(c+2*d),ckj:(r+a)*8+(c+d)})})}
+ if(p.big)AD.forEach(([a,d])=>{const q=at(r+a,c+d);if(q!==undefined&&(!q||q.c!==me))mk(r+a,c+d)});
  if(p.pw)out.push(...raw("P"));
  if(p.pawnish)out.push(...raw("P"));
  if(s.prom===i)out.push(...raw("Q"));
@@ -2096,6 +2197,7 @@ function augXM(s,i,p,out,h){
  if((p.t==="N"||p.t==="B"||p.t==="R")&&!p.m&&A.includes("locust"))for(const[a,d]of AD){let y=r+a,x=c+d;while(Engine.inb(y,x)&&!b[y*8+x]){y+=a;x+=d}
   if(Engine.inb(y,x)&&Engine.inb(y+a,x+d)){const q=b[(y+a)*8+x+d];if(!q||q.c!==me)mk(y+a,x+d)}}
  if(p.t==="P"&&A.includes("dash")&&!p.m&&at(r+p.f,c)===null&&at(r+2*p.f,c)===null&&at(r+3*p.f,c)===null)mk(r+3*p.f,c);
+ if(p.t==="P"&&p.dash3&&at(r+p.f,c)===null&&at(r+2*p.f,c)===null&&at(r+3*p.f,c)===null)out.push({from:i,to:(r+3*p.f)*8+c,dash3m:true});
  if(p.t==="P"&&A.includes("vanguard")){const adv=q=>q.f<0?7-(q.h>>3):0,rows=[];b.forEach((q,j)=>{if(q&&q.t==="P"&&q.c===me)rows.push([j>>3,j])});
   const mx=me==="w"?Math.min(...rows.map(x=>x[0])):Math.max(...rows.map(x=>x[0])),top=rows.filter(x=>x[0]===mx);
   if(top.length===1&&top[0][1]===i)[-1,1].forEach(dx=>{if(at(r+p.f,c+dx)===null)mk(r+p.f,c+dx)})}
@@ -2107,19 +2209,26 @@ function augXM(s,i,p,out,h){
   o=o.flatMap(m=>(!m.promo&&(m.to>>3)===er)?(hs?["B","N"]:["Q","R","B","N"]).map(t=>({...m,promo:t})):[m])}
  if(p.ia&&ranged)o=o.filter(m=>m.sw||m.warp||ch(m.to,i)>1);
  if(p.cu>s.n&&ranged)o=o.filter(m=>ch(m.to,i)<=1);
- if(p.da>s.n||(s.noCap||[]).includes(i))o=o.filter(m=>!b[m.to]&&!m.ep&&m.epx==null);
+ if(p.da>s.n||p.qt||(s.noCap||[]).includes(i))o=o.filter(m=>!b[m.to]&&!m.ep&&m.epx==null);
+ if(p.exz&&s.n<p.exz)return[]; // 레드카드로 추방된 기물: 기한까지 이동 불가
+ if(p.desp)o=o.filter(m=>!(b[m.to]&&b[m.to].t==="K")); // 데스페라도: 상대 킹은 못 잡음
  if(s.eff.some(e=>e.k==="truce"))o=o.filter(m=>!b[m.to]&&!m.ep&&m.epx==null);
  if(p.ch){const j=b.findIndex((q,k)=>q&&q.ch===p.ch&&k!==i);if(j>=0)o=o.filter(m=>ch(m.to,j)<=2)}
  ["w","b"].forEach(x=>{if(p.c===x)return;const ki=b.findIndex(q=>q&&q.t==="K"&&q.c===x),AX=s.aug[x];
   if(ki>=0&&(p.t==="Q"||p.t==="R")&&AX.some(a=>a.id==="majesty"))o=o.filter(m=>ch(m.to,ki)>1);
   if(AX.some(a=>a.id==="ironwall"))o=o.filter(m=>{const q=b[m.to];if(!q||q.t!=="R"||q.c!==x)return true;const half=x==="w"?(m.to>>3)>=4:(m.to>>3)<=3;return !(half&&(r===(m.to>>3)||c===(m.to&7)))});
   if(AX.some(a=>a.id==="sync")){const cl=new Set();b.forEach((q,j)=>{if(q&&q.c===x)cl.add(((j>>3)+(j&7))%2)});if(cl.size===1){const my=[...cl][0];o=o.filter(m=>((m.to>>3)+(m.to&7))%2===my)}}
-  if(p.t==="K"&&AX.some(a=>a.id==="overwhelm"))o=o.filter(m=>!(b[m.to]&&b[m.to].t==="Q"&&b[m.to].c===x))});
+  if(p.t==="K"&&AX.some(a=>a.id==="overwhelm"))o=o.filter(m=>!(b[m.to]&&b[m.to].t==="Q"&&b[m.to].c===x));
+  if(p.t==="P"&&AX.some(a=>a.id==="fianchetto")){const bs=b.map((q,j)=>q&&q.c===x&&q.t==="B"&&(j>>3)===(x==="w"?6:1)&&[1,6].includes(j&7)?j:-1).filter(j=>j>=0);
+   if(bs.length)o=o.filter(m=>!bs.some(sq=>((m.to>>3)-(m.to&7))===((sq>>3)-(sq&7))||((m.to>>3)+(m.to&7))===((sq>>3)+(sq&7))))}});
  if(E.includes("relo")){if(p.t==="K")return[];o=o.filter(m=>!b[m.to]&&!m.ep)}
  const pal=p.t==="K"&&(s.pal||[]).find(x=>x.c===me);
  if(pal)o=o.filter(m=>Math.max(Math.abs((m.to>>3)-(pal.sq>>3)),Math.abs((m.to&7)-(pal.sq&7)))<=1);
  const fzs=(s.fz||[]).filter(f=>f.until>s.n).map(f=>f.sq),kpc=(s.kp||[]).filter(k=>k.until>s.n).map(k=>k.c);
  o=o.filter(m=>{if(fzs.includes(m.to))return false;const q=b[m.to];return !(q&&q.t==="K"&&kpc.includes(q.c))});
+ o=o.filter(m=>{const q=b[m.to];return !(q&&q.hid&&q.c!==me&&!m.ep&&m.epx==null&&ch(i,m.to)>1)});
+ if(p.chlk){const j=b.findIndex((q,k)=>q&&q.chlk&&q.c===p.c&&k!==i);if(j>=0)o=o.filter(m=>ch(m.to,j)<=2)}
+ if((s.block||[]).some(x=>x.until>s.n))o=o.filter(m=>!s.block.some(x=>x.until>s.n&&x.sq===m.to));
  if(s.eff.some(e=>e.k==="taunt"&&e.c===me))o=o.filter(m=>me==="w"?(m.to>>3)<=r:(m.to>>3)>=r);
  if(s.eff.some(e=>e.k==="ice"&&e.c===me)&&(p.t==="R"||p.t==="B"||p.t==="Q")){
   const dist=m=>Math.max(Math.abs((m.to>>3)-r),Math.abs((m.to&7)-c)),dk=m=>Math.sign((m.to>>3)-r)+","+Math.sign((m.to&7)-c),mx={};
@@ -2136,7 +2245,35 @@ const OPEN={
  notice(n,c){const l=shuf(n.b.map((p,i)=>p&&p.c!==c&&p.t!=="P"&&p.t!=="K"?i:-1).filter(i=>i>=0));if(l.length){n.b=n.b.slice();n.b[l[0]]={...n.b[l[0]],nt:true}}},
  zonber(n,c){const l=shuf(n.b.map((p,i)=>p&&p.c===c&&p.t==="P"?i:-1).filter(i=>i>=0));if(l.length){n.b=n.b.slice();n.b[l[0]]={...n.b[l[0]],zb:28}}},
  iqp(n,c){const hs=c==="w"?[12,10]:[52,50];n.b=n.b.slice();hs.forEach(i=>{if(n.b[i]&&n.b[i].t==="P"&&n.b[i].c!==c)n.b[i]=null})},
- ban(n,c){n.bans=[...n.bans,{c:opp(c),left:8}]}
+ ban(n,c){n.bans=[...n.bans,{c:opp(c),left:8}]},
+ squire(n,c){const files=[1,6];n.b=n.b.map((p,i)=>p&&p.c===c&&p.t==="P"&&files.includes(i&7)?{...p,sq:true}:p)},
+ guardsman(n,c){n.b=n.b.map((p,i)=>p&&p.c===c&&p.t==="P"&&(i&7)===4?{...p,bl:true,gd:true}:p)},
+ knightmate(n,c){n.b=n.b.map(p=>{if(!p||p.c!==c)return p;if(p.t==="K")return{...p,ka:[...(p.ka||[]),"N"]};if(p.t==="N")return{...p,mann:true};return p})},
+ berolina(n,c){n.b=n.b.map(p=>p&&p.c===c&&p.t==="P"?{...p,brl:true}:p)},
+ fanmass(n,c){n.b=n.b.map(p=>p&&p.c===c&&p.t==="P"?{...p,fan:true}:p)},
+ alfil(n,c){const row=c==="w"?6:1,b=n.b.slice();[2,5].forEach(f=>{const i=row*8+f;if(!b[i])b[i]={t:"B",c,f:c==="w"?-1:1,m:true,h:i,alf:true}});n.b=b},
+ qknight(n,c){n.b=n.b.map((p,i)=>p&&p.c===c&&p.t==="P"&&(i&7)===3?{t:"N",c,f:p.f,m:true,h:p.h}:p)},
+ checkers(n,c){const row=c==="w"?5:2,b=n.b.slice();[1,3,4,6].forEach(f=>{const i=row*8+f;if(!b[i])b[i]={t:"N",c,f:c==="w"?-1:1,m:true,h:i,ckr:true}});n.b=b},
+ thief(n,c){n.b=n.b.map(p=>p&&p.c===c&&p.t==="Q"?{...p,hid:true,thf:true}:p)},
+ wanted(n,c){const l=shuf(n.b.map((p,i)=>p&&p.c!==c&&(p.t==="R"||p.t==="B"||p.t==="Q")?i:-1).filter(i=>i>=0));if(l.length){n.b=n.b.slice();n.b[l[0]]={...n.b[l[0]],hid:true,wtd:true}}},
+ grudge(n,c){const l=shuf(n.b.map((p,i)=>p&&p.c===c&&p.t!=="K"&&p.t!=="P"?i:-1).filter(i=>i>=0));if(l.length){n.b=n.b.slice();n.b[l[0]]={...n.b[l[0]],fan:true}}},
+ otherworld(n,c){const l=shuf(n.b.map((p,i)=>p&&p.c===c&&p.t==="P"?i:-1).filter(i=>i>=0));if(l.length){const sq=l[0];n.b=n.b.slice();n.b[sq]=null;n.sched=[...n.sched,{at:(n.n||0)+14,sq,data:{t:"Q",c,ka:["N"]}}]}},
+ herald(n,c){const l=n.b.map((p,i)=>p&&p.c===c&&p.t==="R"?i:-1).filter(i=>i>=0);if(l.length){const i=l[Math.random()*l.length|0];n.b=n.b.slice();n.b[i]={...n.b[i],her:true}}},
+ qgambit(n,c){const f=3,row=c==="w"?6:1,i=row*8+f,y=i+(c==="w"?-8:8),b=n.b.slice();if(b[i]&&!b[y]){b[y]={...b[i],m:true};b[i]=null}
+  n.b=b.map((p,j)=>p&&p.c===c&&p.t==="P"&&((j&7)===f)?{...p,bl:true}:p)},
+ princess(n,c){const l=n.b.map((p,i)=>p&&p.c===c&&p.t==="R"?i:-1).filter(i=>i>=0);if(l.length){const i=l[Math.random()*l.length|0];n.b=n.b.slice();n.b[i]={...n.b[i],ka:["N"]}}},
+ windmill(n,c){n.b=n.b.map(p=>p&&p.c===c&&(p.t==="R"||p.t==="N"||p.t==="B")?{...p,big:true}:p)},
+ horde(n,c){const b=n.b.slice();for(let i=0;i<64;i++){if(b[i]&&b[i].c===c&&b[i].t!=="K")b[i]=null}
+  const rows=c==="w"?[4,5,6]:[1,2,3];rows.forEach(rr=>{for(let f=0;f<8;f++){const i=rr*8+f;if(!b[i])b[i]={t:"P",c,f:c==="w"?-1:1,m:rr!==(c==="w"?6:1),h:i}}});n.b=b},
+ bigbishop(n,c){const l=n.b.map((p,i)=>p&&p.c===c&&p.t==="B"?i:-1).filter(i=>i>=0);if(l.length){n.b=n.b.slice();n.b[l[0]]={...n.b[l[0]],big:true}}},
+ bigrook(n,c){const l=n.b.map((p,i)=>p&&p.c===c&&p.t==="R"?i:-1).filter(i=>i>=0);if(l.length){n.b=n.b.slice();n.b[l[0]]={...n.b[l[0]],big:true}}},
+ golem(n,c){const b=n.b.slice();let spot=-1;for(let i=0;i<64;i++)if(b[i]&&b[i].c===c&&b[i].t==="P"){if(spot<0)spot=i;b[i]=null}
+  if(spot>=0)b[spot]={t:"Q",c,f:c==="w"?-1:1,m:true,h:spot,ka:["N"]};n.b=b},
+ merchant(n,c){n.b=n.b.map(p=>p&&p.c===c&&p.t==="K"?{...p,ka:[...(p.ka||[]),"Q"]}:p)},
+ pawnchain(n,c){n.b=n.b.map(p=>p&&p.c!==c&&p.t==="P"?{...p,chlk:true}:p)},
+ ghost(n,c){n.b=n.b.map(p=>p&&p.c===c&&p.t==="P"?{...p,hid:true}:p)},
+ mongolian(n,c){n.b=n.b.map(p=>p&&p.c===c&&p.t!=="K"?{t:"N",c,f:p.f,m:true,h:p.h}:p)}
+
 };
 // 기보의 각 수를 둔 색 (예전 판은 lc가 없어서 번갈아 둔 것으로 봄)
 const lcAdd=(s,c)=>[...(s.lc||s.log.map((_,i)=>i&1?"b":"w")),c];
@@ -2151,6 +2288,7 @@ const mkDraft=(s,c)=>{const own=s.aug[c].map(a=>a.id),pool=Object.keys(AUGS).fil
  return{c,opts}};
 const AUGC={...STD,id:"augment",name:"✦ 증강 체스",
  setup(){const s=Engine.initial();Engine.setX(augXM);s.aug={w:[],b:[]};s.eff=[];s.fz=[];s.st=[];s.kp=[];s.bans=[];s.chk={w:0,b:0};s.bq=[];s.pal=[];s.icbm=null;s.gale=null;s.only=null;s.pan=null;s.n=0;s.nd=12;s.reps={};
+  s.sched=[];s.block=[];s.conv=[];s.portal=null;s.rr={w:false,b:false};s.streak={w:{sq:-1,run:0},b:{sq:-1,run:0}};s.exZone=[];s.noCap=[]; // 새 증강(89종) 상태
   s.draft=[mkDraft(s,"w"),mkDraft(s,"b")];s.msg="게임 시작! 먼저 증강을 고르세요";return s},
  pick(s,id){const q=s.draft[0],n={...s,dlog:[...(s.dlog||[]),{c:q.c,o:q.opts,id}],aug:{...s.aug,[q.c]:[...s.aug[q.c],{id,used:false}]},draft:s.draft.slice(1)};
   if(OPEN[id])OPEN[id](n,q.c);
@@ -2225,19 +2363,81 @@ const AUGC={...STD,id:"augment",name:"✦ 증강 체스",
   else if(k==="ultimatum")n.ult={at:s.n+4,from:s.n};
   else if(k==="cancel"){const ki=idx(p=>p.c===you&&p.t==="K")[0];const kp=n.b[ki];if(!kp||!kp.ck)return{...s,msg:"상대가 캐슬링하지 않아서 사용할 수 없어요"};
    if(n.b[kp.h])return{...s,msg:"시작 칸이 비어 있지 않아 사용할 수 없어요"};n.b=n.b.slice();n.b[ki]=null;n.b[kp.h]={...kp,m:false,ck:false}}
+  else if(k==="stealth"){const l=shuf(idx(p=>p.c===me));if(!l.length)return{...s,msg:"대상이 없어요"};setP(l[0],{hid:true})}
+  else if(k==="cleanup"){const l=shuf(idx(p=>p.c===me&&p.t!=="K")).slice(0,3);if(!l.length)return{...s,msg:"대상이 없어요"};n.b=n.b.slice();l.forEach(i=>n.b[i]=null)}
+  else if(k==="ruletix"){const ch2=rnd(["truce","allbl","frz"]);n.sched=[...n.sched,{at:s.n+1,data:{t:"ruletix",c:me,ch:ch2}}]}
+  else if(k==="gun3"){const l=idx(p=>p.c===me);let hit=null;for(const i of l){let cnt=0;for(let a=-1;a<=1;a++)for(let d=-1;d<=1;d++){if(!a&&!d)continue;const y=(i>>3)+a,x=(i&7)+d;if(Engine.inb(y,x)&&n.b[y*8+x]&&n.b[y*8+x].c===me)cnt++}if(cnt>=2){hit=i;break}}
+   if(hit==null)return{...s,msg:"서로 붙어 있는 아군 기물 3개가 없어요"};n.b=n.b.slice();for(let a=-1;a<=1;a++)for(let d=-1;d<=1;d++){const y=(hit>>3)+a,x=(hit&7)+d;if(Engine.inb(y,x)&&n.b[y*8+x]&&n.b[y*8+x].c===me)n.b[y*8+x]={...n.b[y*8+x],bl:true,gd:true}}}
+  else if(k==="quantum"){const l=shuf(idx(p=>p.c===me));if(!l.length)return{...s,msg:"대상이 없어요"};setP(l[0],{qt:true})}
+  else if(k==="conveyor"){const files=[...Array(8).keys()].filter(f=>idx((p,i)=>p.c===me&&(i&7)===f).length||idx((p,i)=>p.c===you&&(i&7)===f).length);if(!files.length)return{...s,msg:"설치할 파일이 없어요"};const f=rnd(files);n.conv=[...n.conv,{file:f,dir:me==="w"?-8:8,at:s.n+2}]}
+  else if(k==="dodge"){const l=shuf(idx(p=>p.c===me&&!p.bl));if(!l.length)return{...s,msg:"대상이 없어요"};setP(l[0],{bl:true})}
+  else if(k==="convertrite"){const l=shuf(idx(p=>p.c===you&&p.t!=="K"&&!p.fan));if(!l.length)return{...s,msg:"대상이 없어요"};setP(l[0],{fan:true})}
+  else if(k==="roller")n.eff.push({k,c:me,left:3});
+  else if(k==="scarecrow"){const l=shuf(idx(p=>p.c===me&&p.t!=="K"));if(!l.length)return{...s,msg:"희생할 기물이 없어요"};const sq=l[0];n.b=n.b.slice();n.b[sq]=null;n.sched=[...n.sched,{at:s.n+3,sq,data:{t:"still",c:me}}]}
+  else if(k==="descent"){const l=shuf(idx(p=>p.c===me&&p.t==="Q"));if(!l.length)return{...s,msg:"퀸이 없어요"};const sq=l[0];n.b=n.b.slice();n.b[sq]=null;n.sched=[...n.sched,{at:s.n+3,sq:-1,data:{t:"Q",c:me,rand:true}}]}
+  else if(k==="roulette"){const l=shuf(idx(p=>p.t==="Q"||p.t==="R"));if(!l.length)return{...s,msg:"대상이 없어요"};const tt=rnd(["P","N","B","R","Q"]);setP(l[0],{t:tt,ka:null,big:null,mann:null})}
+  else if(k==="metal"){const l=shuf(idx(p=>p.c===me&&(p.t==="R"||p.t==="B"||p.t==="Q")&&!p.bl));if(!l.length)return{...s,msg:"대상이 없어요"};setP(l[0],{bl:true})}
+  else if(k==="counter"){const l=shuf(idx(p=>p.c===me&&p.t==="P"&&!p.fan));if(!l.length)return{...s,msg:"폰이 없어요"};setP(l[0],{fan:true})}
+  else if(k==="contract"){const pw=shuf(idx(p=>p.c===me&&p.t==="P"&&!p.ctL)),ot=shuf(idx(p=>p.c===me&&p.t!=="K"&&p.t!=="P"&&!p.ctL));if(!pw.length||!ot.length)return{...s,msg:"계약할 기물이 부족해요"};const cid=Math.random();setP(pw[0],{ctL:cid});setP(ot[0],{ctL:cid})}
+  else if(k==="rampart"){const ki=idx(p=>p.c===me&&p.t==="K")[0];n.block=[...n.block];for(let a=-1;a<=1;a++)for(let d=-1;d<=1;d++){if(!a&&!d)continue;const y=(ki>>3)+a,x=(ki&7)+d;if(Engine.inb(y,x)&&!n.b[y*8+x])n.block.push({sq:y*8+x,until:s.n+3})}}
+  else if(k==="offset"){const l=shuf(idx(p=>p.c===me&&!p.fan));if(!l.length)return{...s,msg:"대상이 없어요"};setP(l[0],{fan:true})}
+  else if(k==="schrodinger"){const l=shuf(idx(p=>p.c===me&&p.t==="P")).slice(0,4);if(!l.length)return{...s,msg:"폰이 없어요"};l.forEach(i=>setP(i,{qt:true}))}
+  else if(k==="bomber"){const l=shuf(idx(p=>p.c===me&&p.t==="P"&&!p.bmb));if(!l.length)return{...s,msg:"폰이 없어요"};setP(l[0],{bmb:true})}
+  else if(k==="outpost"){const ls=idx(p=>p.c===me&&p.t!=="K");if(!ls.length)return{...s,msg:"대상이 없어요"};const d=i=>me==="w"?(i>>3):7-(i>>3),best=Math.min(...ls.map(d)),cand=ls.filter(i=>d(i)===best);setP(rnd(cand),{bl:true,outp:true})}
+  else if(k==="castlex"){const ki=idx(p=>p.c===me&&p.t==="K")[0],kr=ki>>3,kc=ki&7,rs=idx(p=>p.c===me&&p.t==="R").filter(i=>{const r2=i>>3,c2=i&7;return r2===kr||c2===kc||Math.abs(r2-kr)===Math.abs(c2-kc)});
+   if(!rs.length)return{...s,msg:"일직선·대각선의 룩이 없어요"};const ri=rnd(rs);n.b=n.b.slice();const kp2=n.b[ki],rp=n.b[ri];n.b[ki]={...rp,m:true,h:ki};n.b[ri]={...kp2,m:true,h:ri}}
+  else if(k==="insight"){n.b=n.b.map(q=>{if(!q)return q;if(q.c===you&&(q.bl||q.gd||q.par||q.outp||q.lo))return{...q,bl:false,gd:false,par:false,outp:false,lo:false};if(q.c===me&&(q.da>s.n||q.cu>s.n))return{...q,da:0,cu:0};return q});
+   n.fz=n.fz.filter(f=>!(n.b[f.sq]&&n.b[f.sq].c===you));n.st=n.st.filter(f=>!(n.b[f.sq]&&n.b[f.sq].c===me));n.eff=n.eff.filter(e=>!((e.k==="ice"||e.k==="taunt"||e.k==="zug")&&e.c===me))}
+  else if(k==="trojan"){const l=shuf(idx(p=>p.c===me&&p.t==="N"&&!p.troj));if(!l.length)return{...s,msg:"나이트가 없어요"};setP(l[0],{troj:true})}
+  else if(k==="freemove"){const AD2=[[1,1],[1,-1],[-1,1],[-1,-1],[1,0],[-1,0],[0,1],[0,-1]];const l=shuf(idx(p=>p.c===me&&p.t!=="K")).slice(0,3);if(!l.length)return{...s,msg:"대상이 없어요"};n.b=n.b.slice();
+   l.forEach(i=>{const q=n.b[i];if(!q)return;const ms=AD2.map(([a,d])=>[(i>>3)+a,(i&7)+d]).filter(([y,x])=>Engine.inb(y,x)&&!n.b[y*8+x]);if(ms.length){const[y,x]=rnd(ms);n.b[y*8+x]={...q,m:true};n.b[i]=null}});n.eff.push({k:"nocapme",c:me,left:1})}
+  else if(k==="sacrif"){const V={P:1,N:3,B:3,R:5,Q:9};const l=shuf(idx(p=>p.c===me&&p.t!=="K"));if(!l.length)return{...s,msg:"대상이 없어요"};const vi=l[0],vv=V[n.b[vi].t]||0;
+   const cheap=shuf(idx(p=>p.c===me&&p.t!=="K"&&p!==n.b[vi]).filter(i=>i!==vi&&(V[n.b[i].t]||0)<vv));n.b=n.b.slice();n.b[vi]=null;if(cheap.length)n.b[cheap[0]]={...n.b[cheap[0]],bl:true}}
+  else if(k==="mann"){const l=shuf(idx(p=>(p.t==="N"||p.t==="B")&&!p.mann));if(!l.length)return{...s,msg:"대상이 없어요"};setP(l[0],{mann:true})}
+  else if(k==="bind"){const l=shuf(idx(p=>p.c===you&&p.t!=="K"));if(!l.length)return{...s,msg:"대상이 없어요"};n.st.push({sq:l[0],until:s.n+2})}
+  else if(k==="invis"){const l=shuf(idx(p=>p.c===me&&p.t==="B"&&!p.hid));if(!l.length)return{...s,msg:"비숍이 없어요"};setP(l[0],{hid:true})}
+  else if(k==="chimera"){const l=shuf(idx(p=>p.c===me&&(p.t==="Q"||p.t==="R")));if(!l.length)return{...s,msg:"메이저 피스가 없어요"};setP(l[0],{t:"Q",ka:["N"]})}
+  else if(k==="parry"){const l=shuf(idx(p=>p.c===me&&!p.par));if(!l.length)return{...s,msg:"대상이 없어요"};setP(l[0],{par:true})}
+  else if(k==="trolley"){const V={P:1,N:3,B:3,R:5,Q:9};const l=shuf(idx(p=>p.c===you&&p.t!=="K"));if(l.length<2)return{...s,msg:"대상이 부족해요"};const half=Math.ceil(l.length/2),g1=l.slice(0,half),g2=l.slice(half),
+   val=g=>g.reduce((a,i)=>a+(V[n.b[i].t]||0),0),dead=val(g1)<=val(g2)?g1:g2;n.b=n.b.slice();dead.forEach(i=>n.b[i]=null)}
+  else if(k==="illusion")n.eff.push({k,c:me,left:5});
+  else if(k==="squad"){const files=[...Array(8).keys()].filter(f=>idx((p,i)=>p.c===me&&p.t==="P"&&(i&7)===f).length);if(!files.length)return{...s,msg:"대상 폰이 없어요"};const f=rnd(files);n.b=n.b.map((p,i)=>p&&p.c===me&&p.t==="P"&&(i&7)===f?{...p,fan:true}:p)}
+  else if(k==="summon"){const l=shuf(idx(p=>p.c===me&&p.t==="Q"));if(!l.length)return{...s,msg:"퀸이 없어요"};const sq=l[0],em=shuf(n.b.map((q,i)=>!q&&i!==sq?i:-1).filter(i=>i>=0));
+   n.b=n.b.slice();n.b[sq]=null;n.sched=[...n.sched,{at:s.n+3,sq,data:{t:"Q",c:me,ka:["N"]}}];if(em.length)n.sched.push({at:s.n+3,sq:em[0],data:{t:"Q",c:me,ka:["N"]}})}
+  else if(k==="bunker"){const em=shuf(n.b.map((q,i)=>!q?i:-1).filter(i=>i>=0));if(!em.length)return{...s,msg:"빈 칸이 없어요"};const c0=em[0];n.block=[...n.block];for(let a=-1;a<=1;a++)for(let d=-1;d<=1;d++){const y=(c0>>3)+a,x=(c0&7)+d;if(Engine.inb(y,x)&&!n.b[y*8+x])n.block.push({sq:y*8+x,until:s.n+3})}}
+  else if(k==="vip"){const l=shuf(idx(p=>p.t==="P"));if(!l.length)return{...s,msg:"폰이 없어요"};const sq=l[0];n.sched=[...n.sched,{at:s.n+3,sq,data:{t:"Q",c:n.b[sq].c,bl:true,vip:true}}]}
+  else if(k==="lobster"){const em=shuf(n.b.map((q,i)=>!q?i:-1).filter(i=>i>=0));if(!em.length)return{...s,msg:"빈 칸이 없어요"};n.sched=[...n.sched,{at:s.n+1,sq:em[0],data:{t:"B",c:me}}]}
+  else if(k==="redcard"){const l=idx(p=>p.t!=="K");if(!l.length)return{...s,msg:"대상이 없어요"};let best=l[0];l.forEach(i=>{if((n.b[i].cc||0)>(n.b[best].cc||0))best=i});if(!(n.b[best].cc>0))return{...s,msg:"기물을 잡은 쪽이 없어요"};setP(best,{exz:n.nd||(s.n+12)})}
+  else if(k==="trial"){const l=shuf(idx(p=>p.c===you&&p.t!=="K"));if(!l.length)return{...s,msg:"대상이 없어요"};setP(l[0],{da:s.n+2})}
+  else if(k==="spy"){const l=shuf(idx(p=>p.c===you&&p.t==="P"&&!p.spyBy)).slice(0,2);if(!l.length)return{...s,msg:"폰이 없어요"};l.forEach(i=>setP(i,{spyBy:me}))}
+  else if(k==="despe"){const l=shuf(idx(p=>p.c===me&&p.t!=="K"));if(!l.length)return{...s,msg:"대상이 없어요"};setP(l[0],{desp:1});n.only=l[0]}
+  else if(k==="possess"){const l=shuf(idx(p=>p.c===me&&p.t==="P"&&!p.revAt)),g=(s.grave||{})[me]||[];if(!l.length||!g.length)return{...s,msg:"조건이 부족해요"};
+   const e=g[Math.random()*g.length|0],ty=e.t==="A"?"Q":e.t;setP(l[0],{t:ty,revAt:s.n+4,revT:"P",revKa:ty==="Q"&&e.t==="A"?["N"]:null,ka:ty==="Q"&&e.t==="A"?["N"]:null})}
+  else if(k==="unicorn"){const l=shuf(idx(p=>p.c===me&&p.t==="R"));if(!l.length)return{...s,msg:"룩이 없어요"};setP(l[0],{t:"B",ka:["N"]})}
+  else if(k==="regress"){const l=shuf(idx(p=>p.c===me&&p.t!=="K"&&p.t!=="P"&&!p.rgr));if(!l.length)return{...s,msg:"대상이 없어요"};setP(l[0],{rgr:true})}
+  else if(k==="replay"){if(!s.prev)return{...s,msg:"되돌릴 수가 없어요"};return{...s.prev,aug:{...s.prev.aug,[me]:s.prev.aug[me].map(x=>x.id===id?{...x,used:true}:x)},msg:"방금 수를 되돌렸어요",ann:null}}
+  else if(k==="lastdash"){const l=shuf(idx(p=>p.c===me&&p.t==="P"&&!p.dash3));if(!l.length)return{...s,msg:"폰이 없어요"};setP(l[0],{dash3:true})}
+  else if(k==="threeday"){const l=shuf(idx(p=>p.c===me&&p.t==="N"&&!p.revAt));if(!l.length)return{...s,msg:"나이트가 없어요"};setP(l[0],{t:"Q",ka:["N"],revAt:s.n+6,revT:"N",revKa:null})}
+  else if(k==="cub"){const l=shuf(idx(p=>p.c===me&&p.t==="Q"));if(!l.length)return{...s,msg:"퀸이 없어요"};setP(l[0],{t:"K2",big:true,upAt:s.n+7,upT:"Q",upKa:["N"]})}
+  else if(k==="portal"){const em=shuf(n.b.map((q,i)=>!q?i:-1).filter(i=>i>=0));if(em.length<2)return{...s,msg:"빈 칸이 부족해요"};n.portal={a:em[0],b:em[1],used:false}}
+  else if(k==="darkmagic"){const AD3=[[1,1],[1,-1],[-1,1],[-1,-1],[1,0],[-1,0],[0,1],[0,-1]];const ki=idx(p=>p.c===me&&p.t==="K")[0],em=AD3.map(([a,d])=>[(ki>>3)+a,(ki&7)+d]).filter(([y,x])=>Engine.inb(y,x)&&!n.b[y*8+x]);if(!em.length)return{...s,msg:"킹 옆에 빈 칸이 없어요"};const[y,x]=rnd(em);n.b=n.b.slice();n.b[y*8+x]={t:"Q",c:me,f:me==="w"?-1:1,m:true,h:y*8+x,ka:["N"]}}
+  else if(k==="collapse")n.sched=[...n.sched,{at:s.n+1,data:{t:"collapse",c:me}}];
   if(k==="zug"&&!Engine.all({...n,turn:you}).length)return{...s,msg:"상대 킹이 움직일 수 없어서 사용할 수 없어요"};
   if(!Engine.all(n).length)return{...s,msg:"지금 쓰면 움직일 수 없게 돼서 사용할 수 없어요"};
   n.ann={id,k,c:me,r:Math.random()};n.lastUse=`${me==="w"?"백":"흑"} 「${AUGS[id].n}」`+(k!==id?` → 「${AUGS[k].n}」`:"");
   n.msg=`${me==="w"?"백":"흑"} 「${AUGS[id].n}」`+(k!==id?` → 「${AUGS[k].n}」`:"")+" 사용!";return n},
  applyMove(s,mv){
   const me=s.turn,you=opp(me),p=s.b[mv.from],tgt=s.b[mv.to],A=s.aug[me].map(a=>a.id),A2=s.aug[you].map(a=>a.id),K=s.n;
-  let t,cap=null;const blocked=!!(tgt&&tgt.bl&&!mv.ep);
+  const chd=(a,b2)=>Math.max(Math.abs((a>>3)-(b2>>3)),Math.abs((a&7)-(b2&7)));
+  const encG=!!(tgt&&!mv.ep&&s.aug[tgt.c].some(a=>a.id==="encourage")&&(()=>{const ki=s.b.findIndex(x=>x&&x.t==="K"&&x.c===tgt.c);return ki>=0&&chd(ki,mv.to)<=1})());
+  let t,cap=null;const blocked=!!(tgt&&!mv.ep&&(tgt.bl||encG));
+  const prevSnap={...s,prev:null};
   if(mv.sw){const b=s.b.slice();b[mv.from]=tgt?{...tgt,m:true}:null;b[mv.to]={...p,m:true};t={...s,b,ep:null,last:[mv.from,mv.to],cap:null}}
   else if(mv.warp){const b=s.b.slice();b[mv.from]=null;b[mv.to]={...p,m:true};t={...s,b,ep:null,last:[mv.from,mv.to],cap:null}}
   else if(mv.epx!=null){const b=s.b.slice();cap=b[mv.epx];b[mv.epx]=null;b[mv.from]=null;b[mv.to]={...p,m:true};t={...s,b,cap,ep:null,hm:0,last:[mv.from,mv.to]}}
-  else if(blocked){const b=s.b.slice();b[mv.to]={...tgt,bl:false};t={...s,b,ep:null,last:[mv.from,mv.to],cap:null}}
+  else if(blocked){const b=s.b.slice();b[mv.to]={...tgt,bl:!!tgt.gd};t={...s,b,ep:null,last:[mv.from,mv.to],cap:null}}
   else{t=Engine.apply(s,mv);cap=t.cap}
-  const n={...t,n:K+1,eff:s.eff.map(e=>(e.c===me||e.c==="*")?{...e,left:e.left-1}:e).filter(e=>e.left>0),fz:s.fz.filter(f=>f.until>K+1),st:[...s.st.filter(f=>f.until>K+1)],kp:s.kp.filter(f=>f.until>K+1)};
+  const n={...t,n:K+1,prev:prevSnap,eff:s.eff.map(e=>(e.c===me||e.c==="*")?{...e,left:e.left-1}:e).filter(e=>e.left>0),fz:s.fz.filter(f=>f.until>K+1),st:[...s.st.filter(f=>f.until>K+1)],kp:s.kp.filter(f=>f.until>K+1)};
   if(!blocked){
    n.b=n.b.slice();let me2=n.b[mv.to];
    if(p.cm&&cap&&cap.t!=="K")me2={...me2,t:cap.t};
@@ -2251,10 +2451,56 @@ const AUGC={...STD,id:"augment",name:"✦ 증강 체스",
    if(cap&&cap.po)n.st.push({sq:mv.to,until:K+5});
    if(cap&&p.frz)extra2=true;
    if(cap&&A2.includes("guard"))n.kp.push({c:you,until:K+3});
+   if(mv.ckj!=null){n.b[mv.ckj]=null;cap=cap||s.b[mv.ckj]}
+   if(cap)me2={...n.b[mv.to],cc:(me2.cc||0)+1};
+   if(cap&&(cap.fan||cap.ctL!=null)){
+    if(cap.fan){me2=null}
+    if(cap.ctL!=null){const link=n.b.findIndex((q,j)=>q&&q.ctL===cap.ctL&&j!==mv.to);if(link>=0&&!(n.b[link]&&n.b[link].c===me))me2=null}
+   }
+   if(cap&&cap.par&&Math.random()<.4)me2=null;
+   if(cap&&cap.wtd)extra2=true;
+   if(cap&&cap.troj){me2=null;if(!n.b[cap.h])n.b[cap.h]={t:"P",c:cap.c,f:cap.c==="w"?-1:1,m:false,h:cap.h}}
+   n.b[mv.to]=me2;
+   if(mv.promo&&A.includes("finalrank")&&mv.promo==="Q")n.b[mv.to]={...n.b[mv.to],ka:["N"]};
+   if(mv.promo&&A.includes("coronate")&&mv.promo==="Q")n.b[mv.to]={...n.b[mv.to],bl:true};
+   if(mv.promo&&(mv.promo==="N"||mv.promo==="B")&&A.includes("underprom"))extra2=true;
+   if(mv.promo&&p.spyBy)n.b[mv.to]=n.b[mv.to]&&{...n.b[mv.to],c:p.spyBy,f:p.spyBy==="w"?-1:1,spyBy:null};
+   if(cap&&cap.bmb){const cx=mv.to&7,cy=mv.to>>3;for(let a=-1;a<=1;a++)for(let d=-1;d<=1;d++){const y=cy+a,x=cx+d;if(Engine.inb(y,x)&&n.b[y*8+x]&&n.b[y*8+x].t!=="K")n.b[y*8+x]=null}}
+   if(cap&&cap.t==="P"&&s.aug[cap.c].some(a=>a.id==="resolve")&&!s.rr[cap.c])n.rr={...n.rr,[cap.c]:true};
+   if(n.b[mv.to]&&n.b[mv.to].hid)n.b[mv.to]={...n.b[mv.to],hid:false};
+   if(n.b[mv.to]&&n.b[mv.to].qt)n.b[mv.to]={...n.b[mv.to],qt:false};
+   if(n.b[mv.to]&&n.b[mv.to].outp)n.b[mv.to]={...n.b[mv.to],bl:false,outp:false};
+   if(A.includes("infiltrate")&&n.b[mv.to]&&(mv.to>>3)===(me==="w"?0:7)){const y0=mv.to>>3,x0=mv.to&7;let near=false;for(let a=-1;a<=1;a++)for(let d=-1;d<=1;d++){if(!a&&!d)continue;const y=y0+a,x=x0+d;if(Engine.inb(y,x)&&n.b[y*8+x]&&n.b[y*8+x].c===you)near=true}if(!near)n.b[mv.to]={...n.b[mv.to],hid:true}}
+   if(s.rr[me]&&p.t==="P"&&!p.m){n.rr={...n.rr,[me]:false};extra2=true}
+   if(p.rgr&&n.b[mv.to]&&!n.b[p.h]&&p.h!==mv.to){n.b[p.h]={...n.b[mv.to],rgr:false,m:true};n.b[mv.to]=null}else if(n.b[mv.to]&&n.b[mv.to].rgr)n.b[mv.to]={...n.b[mv.to],rgr:false};
+   if(p.desp){if(p.desp===1){n.b[mv.to]&&(n.b[mv.to]={...n.b[mv.to],desp:2});n.only=mv.to;extra2=true}else{n.b[mv.to]=null;n.only=null}}
+   if(mv.dash3m&&n.b[mv.to]&&(mv.to>>3)!==(p.f<0?0:7))n.b[mv.to]=null;
+   if(n.portal&&!n.portal.used&&(mv.to===n.portal.a||mv.to===n.portal.b)&&n.b[mv.to]){const dest=mv.to===n.portal.a?n.portal.b:n.portal.a;if(!n.b[dest]){n.b[dest]={...n.b[mv.to],m:true};n.b[mv.to]=null;n.portal={...n.portal,used:true}}}
   }
   n.lc=lcAdd(s,me);n.log=[...s.log,(p.t==="P"?(cap?FILE[mv.from&7]+"x":""):p.t+(cap?"x":""))+(blocked?"⊘":"")+sqName(mv.to)+(mv.promo?"="+mv.promo:"")];
   if(cap&&cap.t==="K"){n.over={win:me,why:"킹 포획"};n.msg="킹 포획!";n.turn=you;return n}
   n.b=n.b.map(q=>q&&q.c===me&&q.zb?(q.zb>1?{...q,zb:q.zb-1}:{...q,zb:0,t:q.t==="P"?"Q":q.t}):q);
+  // 도적: 내 턴이 끝날 때 잠복이 풀려 있으면 체포(제거)
+  if(n.b.some(q=>q&&q.c===me&&q.thf&&!q.hid))n.b=n.b.map(q=>q&&q.c===me&&q.thf&&!q.hid?null:q);
+  // 회귀/삼일천하/아기곰/빙의: 예약된 시점이 되면 원래 형태로 되돌리거나 성장
+  n.b=n.b.map(q=>{if(q&&q.revAt&&n.n>=q.revAt)return{...q,t:q.revT,ka:q.revKa||null,revAt:null,revT:null,revKa:null};
+   if(q&&q.upAt&&n.n>=q.upAt)return{...q,t:q.upT,ka:q.upKa||null,upAt:null,upT:null,upKa:null,big:null};return q});
+  // 예약 소환(이세계·뒤틀린 소환·강림·전초기지류): s.sched 처리
+  if((n.sched||[]).length){n.b=n.b.slice();n.sched=n.sched.filter(e=>{if(n.n<e.at)return true;
+    if(e.data&&e.data.t==="ruletix"){const ch2=e.data.ch,c2=e.data.c,vs=opp(c2);
+     if(ch2==="truce")n.eff=[...n.eff,{k:"truce",c:"*",left:2}];else if(ch2==="frz"){const ki=n.b.findIndex(q=>q&&q.t==="K"&&q.c===vs);if(ki>=0)n.fz=[...n.fz,{sq:ki,until:n.n+2}]}
+     else n.b=n.b.map(q=>q&&q.c===c2?{...q,bl:true}:q);return false}
+    if(e.data&&e.data.t==="collapse"){for(let i=0;i<64;i++){const r2=i>>3,c2=i&7;if(r2===0||r2===7||c2===0||c2===7)n.b[i]=null}return false}
+    if(e.data&&e.data.t==="still"){if(e.sq!=null&&!n.b[e.sq])n.b[e.sq]={t:"N",c:e.data.c,f:e.data.c==="w"?-1:1,m:true,h:e.sq,bl:true,still:true};return false}
+    let sq=e.sq;if(e.data&&e.data.rand){const em=n.b.map((q,i)=>!q?i:-1).filter(i=>i>=0);sq=em.length?em[Math.random()*em.length|0]:-1}
+    if(sq==null||sq<0)return false;
+    if(!n.b[sq])n.b[sq]={t:e.data.t,c:e.data.c,f:e.data.c==="w"?-1:1,m:true,h:sq,ka:e.data.ka||null,bl:!!e.data.bl};
+    else if(e.data.t!=="still")n.b[sq]=null; // 막혀 있으면 그 기물을 잡으며 소환(단순화: 제거)
+    return false})}
+  // 컨베이어: 설치된 파일의 기물을 한 칸씩 밀어요(최대 3회)
+  if((n.conv||[]).length){n.b=n.b.slice();n.conv=n.conv.map(cv=>{if(n.n<cv.at)return cv;const col=cv.file,order=cv.dir>0?[...Array(8).keys()].reverse():[...Array(8).keys()];
+    order.forEach(r2=>{const from=r2*8+col,to=from+cv.dir;if(n.b[from]&&Engine.inb((to>>3),(to&7))&&!n.b[to]){n.b[to]={...n.b[from],m:true};n.b[from]=null}});
+    return{...cv,at:cv.at+2,n2:(cv.n2||0)+1}}).filter(cv=>(cv.n2||0)<3)}
   if((s.bans||[]).length){n.bans=s.bans.map(x=>x.c===me?{...x,left:x.left-1}:x).filter(x=>x.left>0);if(cap||Engine.inCheck(n.b,"w")||Engine.inCheck(n.b,"b"))n.bans=[]}
   n.chk={...s.chk};if(A.includes("penta")&&Engine.inCheck(n.b,you))n.chk[me]++;
   const win=(w,why)=>{n.over={win:w,why};n.msg=why;n.turn=you;return n},kk=c=>n.b.some(q=>q&&q.t==="K"&&q.c===c);
