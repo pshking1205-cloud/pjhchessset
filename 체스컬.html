@@ -127,6 +127,12 @@ u.gt{text-decoration:underline dotted;text-underline-offset:3px;text-decoration-
 .adc{margin-top:8px;padding:8px 10px;border-radius:8px;background:var(--card2)}
 #inf button{margin:6px 4px 0 0;padding:6px 10px;font-size:12px}
 .toolbar{display:flex;flex-wrap:wrap;gap:8px}
+/* 체스 시계 · 미리 두기 · 기보 보기 */
+.clk{font-family:var(--f-mono);font-weight:700;font-size:20px;padding:5px 10px;border-radius:8px;background:var(--card2);color:var(--mut);font-variant-numeric:tabular-nums;min-width:74px;text-align:center;flex:0 0 auto}
+.clk.on{background:var(--fg);color:var(--bg)}.clk.low{background:#c0392b;color:#fff}.clk.on.low{animation:ckpulse 1s infinite}
+.q.pre{background-image:linear-gradient(rgba(220,60,60,.55),rgba(220,60,60,.55))}.q.psel{box-shadow:inset 0 0 0 4px rgba(220,60,60,.9)}
+.rvb{display:flex;align-items:center;gap:8px;justify-content:center;font-size:13px;font-weight:700;color:var(--gold);padding:6px;border:1px dashed var(--gold);border-radius:8px;margin-top:2px}.rvb button{margin:0;padding:4px 10px;font-size:12px;box-shadow:none}
+#bd.rv{filter:saturate(.75)}
 #bun,#bre{font-size:18px;line-height:1}.flx{display:inline-block;transform:scaleX(-1)} /* 앞으로 되돌리기: 되돌리기 화살표를 좌우로 뒤집음 */
 .toolbar button{margin:0;padding:10px 6px;font-size:13px;flex:1 1 28%}
 #top2{transform:rotate(180deg);background:var(--card);border-radius:10px;padding:10px 12px}
@@ -1392,6 +1398,7 @@ html[data-ag="crys"] #cv :is(.uab,.luua){display:none!important}
   <div class="pbar" id="pbT"></div>
   <div id="bd"></div>
   <div class="pbar" id="pbB"></div>
+  <div class="rvb" id="rvb" style="display:none"></div>
  </section>
  <aside class="side">
   <div class="panel" id="top"><div id="st"></div><div id="tmr" style="display:none"></div></div>
@@ -1809,6 +1816,7 @@ function augMarks(p,i){if(!S||!S.aug)return{html:"",tip:""};const n=S.n||0,L=[];
  return{html:(L.length>3?L.slice(0,2).map(chip).join("")+`<i class="am more">+${L.length-2}</i>`:L.map(chip).join("")),tip:L.map(([k,v])=>AMK[k][0]+(v?` (${k==="zb"?v+"수 뒤 승진":"남은 "+v})`:"")).join(" · ")}}
 
 /* ============ 1) CONFIG ============ */
+const CONFIG_CLOCK_MS=10*60*1000; // 표준·증강 체스 한 사람당 제한 시간 (실제 체스처럼 10분, 차례일 때만 줄어듦)
 const CONFIG_DRAFT_DELAY=500; // 증강 차례가 된 뒤 선택 창이 뜨기까지 (ms)
 let drSeen=null,drReady=false,drT=0;
 const CONFIG={
@@ -1907,7 +1915,7 @@ const opp=Engine.opp;
 /* ============ 3) 모드별 규칙 (목록에 등록만 하면 메뉴에 표시) ============ */
 // 표준 체스: 국제 규칙. 체크/체크메이트/스테일메이트/캐슬링/앙파상/승급 선택/50수/3회 반복/기물 부족
 const STD={id:"standard",name:"♔ 표준 체스",coords:true,undo:true,cards:false,paired:true,
- setup(){const s=Engine.initial();s.reps={[Engine.key(s)]:1};s.msg="게임 시작! 백 차례";return s},
+ setup(){const s=Engine.initial();s.reps={[Engine.key(s)]:1};s.clk={w:CONFIG_CLOCK_MS,b:CONFIG_CLOCK_MS};s.msg="게임 시작! 백 차례";return s},
  moves:(s,i)=>Engine.legal(s,i,false),
  allMoves:s=>Engine.all(s,false),
  applyMove(s,mv){
@@ -2289,7 +2297,7 @@ const mkDraft=(s,c)=>{const own=s.aug[c].map(a=>a.id),pool=Object.keys(AUGS).fil
 const AUGC={...STD,id:"augment",name:"✦ 증강 체스",
  setup(){const s=Engine.initial();Engine.setX(augXM);s.aug={w:[],b:[]};s.eff=[];s.fz=[];s.st=[];s.kp=[];s.bans=[];s.chk={w:0,b:0};s.bq=[];s.pal=[];s.icbm=null;s.gale=null;s.only=null;s.pan=null;s.n=0;s.nd=12;s.reps={};
   s.sched=[];s.block=[];s.conv=[];s.portal=null;s.rr={w:false,b:false};s.streak={w:{sq:-1,run:0},b:{sq:-1,run:0}};s.exZone=[];s.noCap=[]; // 새 증강(89종) 상태
-  s.draft=[mkDraft(s,"w"),mkDraft(s,"b")];s.msg="게임 시작! 먼저 증강을 고르세요";return s},
+  s.draft=[mkDraft(s,"w"),mkDraft(s,"b")];s.clk={w:CONFIG_CLOCK_MS,b:CONFIG_CLOCK_MS};s.msg="게임 시작! 먼저 증강을 고르세요";return s},
  pick(s,id){const q=s.draft[0],n={...s,dlog:[...(s.dlog||[]),{c:q.c,o:q.opts,id}],aug:{...s.aug,[q.c]:[...s.aug[q.c],{id,used:false}]},draft:s.draft.slice(1)};
   if(OPEN[id])OPEN[id](n,q.c);
   // 획득 즉시 효과 (하얀 상자로 얻은 증강도 같은 효과를 받음)
@@ -2614,6 +2622,7 @@ const AI=(()=>{
 
 /* ============ 5) UI ============ */
 const $=i=>document.getElementById(i);
+let pre=null,preSel=null,rvH=[],rvI=null; // pre: 미리 둔 수 {from,to} · preSel: 미리 두기로 고른 칸 · rvH/rvI: 온라인·랭크 대전에서 지난 수 보기
 let mode=STD,S=null,hist=[],fut=[],rkAi=null,sel=null,flip=false,ai=true,level="보통",theme="wood",aiT,seen=null,dismissed=false,ctm,soundOn=true,volume=20,checkPop=true;
 try{const sd0=localStorage.getItem("chessSound");if(sd0!=null)soundOn=sd0==="1";const v0=localStorage.getItem("chessVolume");if(v0!=null)volume=+v0;const c0=localStorage.getItem("chessCheckPop");if(c0!=null)checkPop=c0==="1"}catch(e){}
 // 온라인 대전에서 그 색을 둔 사람의 말 스킨 (스크립트가 다 읽히기 전에 불려도 안전하게)
@@ -2689,10 +2698,12 @@ const pname=n=>net?(net.names[n]||"?")+(n===net.seat?"(나)":""):n===1&&ai?(rkAi
 const aiTurn=()=>ai&&S.seat[S.turn]===1;
 const actor=()=>S.draft&&S.draft.length?S.seat[S.draft[0].c]:S.seat[S.turn]; // 지금 조작할 좌석(증강 선택 중이면 고르는 쪽)
 const lockTurn=()=>aiTurn()||(!!net&&actor()!==net.seat);
-function newGame(){rkAi=null;clearTimeout(aiT);clearInterval(spdT);spdT=null;Engine.setX(null);S=mode.setup();hist=[];fut=[];sel=null;seen=null;dismissed=false;flip=false;gid=ai?"ai_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6):null;after()}
+function newGame(){rkAi=null;pre=preSel=null;rvH=[];rvI=null;clkPrev=null;clearTimeout(aiT);clearInterval(spdT);spdT=null;Engine.setX(null);S=mode.setup();hist=[];fut=[];sel=null;seen=null;dismissed=false;flip=false;gid=ai?"ai_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6):null;after()}
 let ckObj=null;
 function after(remote){
+ clkSync(remote);
  if(S.draft&&S.draft.length&&ai&&S.seat[S.draft[0].c]===1){S=mode.pick(S,mode.aiPick(S));return after()}
+ if(net||rkAi){const L=rvH[rvH.length-1];if(!L||L.log.length!==S.log.length||L.over!==S.over)rvH.push(S);else rvH[rvH.length-1]=S}
  if(S!==ckObj){ckObj=S;if(!S.over&&Engine.inCheck(S.b,S.turn)){const kidx=S.b.findIndex(p=>p&&p.t==="K"&&p.c===S.turn),n2=S.b.filter((p,i)=>p&&p.c!==S.turn&&Engine.pseudo({...S,only:null},i).some(m=>m.to===kidx)).length;showCheck(S.turn,n2)}}
  if(S.ann&&S.ann.r!==annSeen){annSeen=S.ann.r;showAnn(S.ann)}
  if(S.rev&&S.rev.r!==revSeen){revSeen=S.rev.r;showRevive(S.rev)}
@@ -2704,7 +2715,32 @@ function after(remote){
  if(ai&&!S.over&&aiTurn()&&!(S.draft&&S.draft.length))aiT=setTimeout(aiStep,CONFIG.aiDelay);
  clearInterval(spdT);spdT=null;
  if(mode.timeLimit&&!S.over&&!(S.draft&&S.draft.length)){spdTick();spdT=setInterval(spdTick,200)}
+ clkStart();
+ // 미리 둔 수: 내 차례가 되면 바로 둠 (그 사이 판이 바뀌어 둘 수 없으면 취소)
+ if(pre&&!S.over&&!lockTurn()&&!(S.draft&&S.draft.length)){const q=pre;pre=null;const ms=mode.moves(S,q.from).filter(m=>m.to===q.to);
+  if(ms.length){const m=ms.find(x=>x.promo==="Q")||ms[0];setTimeout(()=>{if(S&&!S.over&&!lockTurn())play(m)},80)}else{toast("미리 둔 수를 둘 수 없어서 취소했어요");render()}}
+ else if(S.over){pre=preSel=null}
 }
+/* ===== 체스 시계 (표준·증강, 오프라인·온라인 공통) =====
+ S.clk={w,b}: 각자 남은 시간(ms). 차례인 쪽 시간은 clkT0(이 기기에서 차례가 시작된 시각)부터 흘러감.
+ 수를 두면 둔 사람 기기가 쓴 시간을 빼서 새 상태에 적어 보냄. 받은 쪽은 받은 시점부터 다시 셈(기기마다 시계가 달라서).
+ 증강 고르는 동안은 멈춤. 되돌리기·앞으로는 그 시점의 시간으로 돌아감. */
+let clkT0=0,clkPrev=null,clkSkip=false,clkI=null;
+const clkPaused=s=>!s||!s.clk||s.over||!!(s.draft&&s.draft.length);
+function clkRaw(c){if(!S||!S.clk)return 0;let v=S.clk[c];if(!clkPaused(S)&&S.turn===c)v-=Date.now()-clkT0;return v}
+function clkSync(remote){if(!S)return;
+ if(S.clk&&clkPrev&&clkPrev!==S&&!clkSkip&&!remote&&clkPrev.clk&&!clkPaused(clkPrev)){const c=clkPrev.turn;S={...S,clk:{...S.clk,[c]:Math.max(0,clkPrev.clk[c]-(Date.now()-clkT0))}}}
+ if(clkPrev!==S||clkSkip||remote)clkT0=Date.now();clkSkip=false;clkPrev=S}
+const clkFmt=v=>{v=Math.max(0,v);if(v<20000)return`0:${String(Math.floor(v/1000)).padStart(2,"0")}.${Math.floor(v%1000/100)}`;const t=Math.ceil(v/1000);return`${Math.floor(t/60)}:${String(t%60).padStart(2,"0")}`};
+function clkPaint(){document.querySelectorAll(".clk").forEach(e=>{const c=e.dataset.c,v=clkRaw(c);e.textContent=clkFmt(v);e.classList.toggle("low",v<30000)})}
+function clkStart(){clearInterval(clkI);clkI=null;if(!S||!S.clk)return;clkPaint();if(!clkPaused(S))clkI=setInterval(clkTick,100)}
+function clkTick(){if(!S||clkPaused(S)){clearInterval(clkI);clkI=null;return clkPaint()}
+ const c=S.turn,v=clkRaw(c);clkPaint();
+ // 시간 초과: 혼자·AI면 바로, 온라인은 차례인 쪽이 처리하고 상대는 3초 더 기다렸다가(상대가 나갔을 때) 대신 처리
+ if(v<=0&&(!net||!lockTurn()||v<-3000)){clearInterval(clkI);clkI=null;const o=c==="w"?"b":"w";
+  // 상대에게 체크메이트할 기물이 없으면(킹만, 또는 킹+나이트/비숍 하나) 무승부 — 국제 규칙
+  const op=S.b.filter(p=>p&&p.c===o&&p.t!=="K"),draw=mode.id==="standard"&&(!op.length||(op.length===1&&"NB".includes(op[0].t)));
+  S={...S,clk:{...S.clk,[c]:0},over:{win:draw?null:o,why:draw?"시간 초과 · 기물 부족":"시간 초과"},msg:"시간 초과"};pre=preSel=null;sel=null;clkSkip=true;after()}}
 function spdTick(){
  if(!S||S.over||!mode.timeLimit)return clearInterval(spdT);
  const left=S.deadline-Date.now();
@@ -2856,8 +2892,16 @@ function aiStep(){
  if((mode.id==="standard"||mode.id==="augment")&&!sfOff)return sfAi(); // 증강 체스도 스톡피시(안 되는 판은 기존 AI)
  const m=AI.choose(S,mode,rkAi?rkAi.dep:CONFIG.aiDepth[level]);if(!m)return;play(m);
 }
+// 미리 두기: AI·온라인에서 상대 차례일 때 내 말 → 칸을 눌러 두면, 내 차례가 되자마자 둠 (빨간 칸 · 빈 곳이나 오른쪽 클릭으로 취소)
+const myColor=()=>net?(S.seat.w===net.seat?"w":"b"):ai?(S.seat.w===0?"w":"b"):null;
 function clickSq(i){
- if(!S||S.over||lockTurn()||$("pmo").classList.contains("on")||(S.draft&&S.draft.length))return;
+ if(rvI!=null){rvI=null;return render()} // 지난 수 보던 중이면 지금 판으로 돌아옴
+ if(!S||S.over||$("pmo").classList.contains("on"))return;
+ if(lockTurn()&&(ai||net)&&myColor()){const mc=myColor(),p=S.b[i];
+  if(preSel!=null&&preSel!==i&&!(p&&p.c===mc)){pre={from:preSel,to:i};preSel=null;return render()}
+  if(p&&p.c===mc&&preSel!==i){preSel=i;pre=null;return render()}
+  pre=preSel=null;return render()}
+ if(lockTurn()||(S.draft&&S.draft.length))return;
  const ms=sel&&sel.ms.filter(m=>m.to===i);
  if(ms&&ms.length){if(ms.length>1&&ms[0].promo){askPromo(ms);return}return play(ms[0])}
  const p=S.b[i];sel=(p&&p.c===S.turn)?{i,ms:mode.moves(S,i)}:null;render();
@@ -2869,20 +2913,22 @@ function posGear(){}
 window.addEventListener("resize",posGear);window.addEventListener("scroll",posGear,true);
 function render(){
  posGear();setTimeout(()=>{try{crPieceFx()}catch(e){}},0);
- const el=$("bd");el.innerHTML="";const ck=!S.over&&Engine.inCheck(S.b,S.turn);
- const kidx=ck?S.b.findIndex(p=>p&&p.t==="K"&&p.c===S.turn):-1;
- const atk=kidx<0?[]:S.b.map((p,i)=>p&&p.c!==S.turn&&Engine.pseudo({...S,only:null},i).some(m=>m.to===kidx)?i:-1).filter(i=>i>=0);
+ const el=$("bd");el.innerHTML="";const V=rvI!=null&&rvH[rvI]?rvH[rvI]:S; // V: 보드에 그릴 상태 (지난 수 보기 중이면 그때 판)
+ const ck=!V.over&&Engine.inCheck(V.b,V.turn);
+ const kidx=ck?V.b.findIndex(p=>p&&p.t==="K"&&p.c===V.turn):-1;
+ const atk=kidx<0?[]:V.b.map((p,i)=>p&&p.c!==V.turn&&Engine.pseudo({...V,only:null},i).some(m=>m.to===kidx)?i:-1).filter(i=>i>=0);
  for(let k=0;k<64;k++){
-  const i=flip?63-k:k,r=i>>3,c=i&7,p=S.b[i],d=document.createElement("div");
+  const i=flip?63-k:k,r=i>>3,c=i&7,p=V.b[i],d=document.createElement("div");
   d.className="q "+((r+c)%2?"d":"l");
-  if(S.last&&S.last.includes(i))d.classList.add("lm");
+  if(V.last&&V.last.includes(i))d.classList.add("lm");
+  if(V===S&&pre&&(pre.from===i||pre.to===i))d.classList.add("pre");if(V===S&&preSel===i)d.classList.add("psel");
   if(sel&&sel.i===i)d.classList.add("s");
   const mv=sel&&sel.ms.find(m=>m.to===i);if(mv){d.classList.add("m2");if(p||mv.ep)d.classList.add("x")}
-  if(p){if(ck&&p.t==="K"&&p.c===S.turn)d.classList.add("ck");
-  if(S.over&&p.t==="K"){const wn=S.over.win,e=document.createElement("i");e.className="kres "+(!wn?"d":p.c===wn?"w":"l");e.textContent=!wn?"½":p.c===wn?"♛":"✕";d.appendChild(e)}
+  if(p){if(ck&&p.t==="K"&&p.c===V.turn)d.classList.add("ck");
+  if(V.over&&p.t==="K"){const wn=V.over.win,e=document.createElement("i");e.className="kres "+(!wn?"d":p.c===wn?"w":"l");e.textContent=!wn?"½":p.c===wn?"♛":"✕";d.appendChild(e)}
   if(atk.includes(i))d.classList.add("atk");
    const sp=document.createElement("span");sp.className=(p.c==="w"?"pw":"pb")+(!ai&&!net&&S.seat[p.c]===1?" o2":"");sp.innerHTML=pcSvg(p.an?"A":p.t,p.c);if(p.an)sp.classList.add("ang");if(revFx&&revFx.sq===i&&revFx.until>Date.now()){d.classList.add("rvq");d.insertAdjacentHTML("beforeend",'<i class="halo bk"></i><i class="halo fr"></i>')};d.appendChild(sp);const mk=augMarks(p,i);if(mk.html){const e=document.createElement("span");e.className="amk"+(!ai&&!net&&S.seat[p.c]===1?" rot":"");e.innerHTML=mk.html;d.appendChild(e);d.title=mk.tip}}
-  if(S.fz&&S.fz.some(f=>f.sq===i&&f.until>S.n))d.classList.add("fzn");
+  if(V.fz&&V.fz.some(f=>f.sq===i&&f.until>V.n))d.classList.add("fzn");
   if(mode.coords){if(k>>3===7){const e=document.createElement("i");e.className="co cf";e.textContent=FILE[c];d.appendChild(e)}
    if(!(k&7)){const e=document.createElement("i");e.className="co cr";e.textContent=8-r;d.appendChild(e)}}
   d.onclick=()=>clickSq(i);el.appendChild(d);
@@ -2892,11 +2938,12 @@ function render(){
  else{t+=mode.cards?(S.phase==="draw"?" · 카드를 뽑으세요":` · 남은 이동 ${S.left}회`):" · 차례";if(ck)t+=" · ⚠ 체크!"}
  $("st").textContent=t;$("st").insertAdjacentHTML("beforeend",`<div id="ms"></div>`);$("ms").textContent=S.msg;$("t2").textContent=t;$("m2").textContent=S.msg;$("top2").style.display=ai||net?"none":"";$("bdr2").style.display=$("ben2").style.display=mode.cards?"":"none";
  const hu=!S.over&&!lockTurn(),solo=ai||!!net;
- $("bdr").style.display=$("ben").style.display=mode.cards?"":"none";$("bun").style.display=$("bre").style.display=mode.undo&&!net&&!rkAi?"":"none";
+ $("bdr").style.display=$("ben").style.display=mode.cards?"":"none";$("bun").style.display=$("bre").style.display=mode.undo||net||rkAi?"":"none";
  $("bnw").style.display=$("rn").style.display=net||rkAi?"none":"";$("bana").style.display=S.over&&mode.id==="standard"&&S.uci&&S.uci.length?"":"none";$("brs").style.display=(net||rkAi)&&!S.over?"":"none";
  document.title=(net&&hu?"● 내 차례 · ":"")+"체스 컬렉션";
  if(!mode.timeLimit){$("tmr").style.display=$("tmr2").style.display="none"}
- $("bdr").disabled=!(hu&&S.phase==="draw"&&(solo||sd===0));$("ben").disabled=!(hu&&S.phase==="move"&&(solo||sd===0));$("bdr2").disabled=!(hu&&S.phase==="draw"&&sd===1);$("ben2").disabled=!(hu&&S.phase==="move"&&sd===1);$("bun").disabled=!hist.length;$("bre").disabled=!fut.length;
+ $("bdr").disabled=!(hu&&S.phase==="draw"&&(solo||sd===0));$("ben").disabled=!(hu&&S.phase==="move"&&(solo||sd===0));$("bdr2").disabled=!(hu&&S.phase==="draw"&&sd===1);$("ben2").disabled=!(hu&&S.phase==="move"&&sd===1);if(net||rkAi){$("bun").disabled=rvH.length<2||rvI===0;$("bre").disabled=rvI==null;$("bun").title="이전 수 보기";$("bre").title="다음 수 보기"}else{$("bun").disabled=!hist.length;$("bre").disabled=!fut.length;$("bun").title="되돌리기";$("bre").title="앞으로 되돌리기"}
+ {const rb=$("rvb"),on=rvI!=null&&!!rvH[rvI];rb.style.display=on?"":"none";$("bd").classList.toggle("rv",on);if(on){rb.innerHTML=`📜 지난 수 보는 중 · ${rvI}/${rvH.length-1}수 <button class="g" id="rvL">지금 판으로</button>`;$("rvL").onclick=()=>{rvI=null;render()}}}
  {const t=mode.info(S);$("inf").innerHTML=t;$("inf").style.display=t?"":"none"}
  const h=$("hs");
  // 기보: 백·흑 칸으로 나눠 보여 줌. 증강으로 한 사람이 연달아 두면 다음 줄로 넘기고 빈칸은 비워 둠
@@ -2925,12 +2972,15 @@ function render(){
 $("bdr").onclick=()=>{if(S.phase==="draw"&&!S.over&&!lockTurn()){S=mode.draw(S);sel=null;after()}};
 $("ben").onclick=()=>{if(S.phase==="move"&&!S.over&&!lockTurn()){S=mode.pass(S);sel=null;after()}};
 $("brs").onclick=async()=>{if(rkAi&&!net){if(S.over||!await ask("기권할까요? 패배로 기록돼요.","기권")||S.over)return;S={...S,over:{win:S.seat.w===0?"b":"w",why:"기권"},msg:"기권"};sel=null;return after()}Online.resign()};
-$("bun").onclick=()=>{if(!mode.undo||rkAi||!hist.length)return;clearTimeout(aiT);
+// 온라인·랭크 대전: 판은 그대로 두고 지난 수만 보여 줌 (뒤로/앞으로)
+function rvGo(d){if(!rvH.length)return;let i=rvI==null?rvH.length-1:rvI;i=Math.max(0,Math.min(rvH.length-1,i+d));rvI=i>=rvH.length-1?null:i;sel=preSel=null;render()}
+$("bun").onclick=()=>{if(net||rkAi)return rvGo(-1);if(!mode.undo||!hist.length)return;clearTimeout(aiT);clkSkip=true;
  do{fut.push(S);S=hist.pop()}while(ai&&hist.length&&S.seat[S.turn]===1);sel=null;dismissed=false;after()};
 // 앞으로 되돌리기: AI 대결이면 AI가 둔 수까지 함께 다시 둠 (내 차례에서 멈춤)
-$("bre").onclick=()=>{if(!mode.undo||rkAi||!fut.length)return;clearTimeout(aiT);
+$("bre").onclick=()=>{if(net||rkAi)return rvGo(1);if(!mode.undo||!fut.length)return;clearTimeout(aiT);clkSkip=true;
  do{hist.push(S);S=fut.pop()}while(ai&&fut.length&&S.seat[S.turn]===1);sel=null;dismissed=false;after()};
 $("bfl").onclick=()=>{flip=!flip;render()};
+$("bd").addEventListener("contextmenu",e=>{if(pre||preSel!=null){e.preventDefault();pre=preSel=null;render()}});
 $("bdr2").onclick=()=>$("bdr").onclick();$("ben2").onclick=()=>$("ben").onclick();
 $("bnw").onclick=newGame;$("rn").onclick=newGame;
 $("bmn").onclick=$("rm").onclick=async()=>{if(!await rkAiQuit()||!await Online.quit())return;clearTimeout(aiT);clearInterval(spdT);spdT=null;$("rso").classList.remove("on");$("mn").classList.add("on");menu()};
@@ -3003,7 +3053,7 @@ function renderBars(){if(!S)return;
   const oc=c==="w"?"b":"w",capt=["Q","R","B","N","P"].flatMap(t=>Array(Math.max(0,N[t]-th[t])).fill(t));
   const sc=x=>Object.keys(V).reduce((a,t)=>a+V[t]*x[t],0),adv=sc(mine)-sc(th);
   const sub=(c==="w"?"백":"흑")+(ai&&!net&&seat===1?`<span class="lv">${rkAi?rkAi.r+"점":"난이도 "+level}</span>`:"");
-  el.innerHTML=`<div class="av ${c}">${pcSvg("K",c)}</div><div class="pn"><div class="nm">${esc(pname(seat))}<small>${sub}</small></div><div class="cap">${capt.map(t=>pcSvg(t,oc)).join("")}${adv>0?`<b>+${adv}</b>`:""}</div></div>${act?'<span class="turn">차례</span>':""}`;
+  el.innerHTML=`<div class="av ${c}">${pcSvg("K",c)}</div><div class="pn"><div class="nm">${esc(pname(seat))}<small>${sub}</small></div><div class="cap">${capt.map(t=>pcSvg(t,oc)).join("")}${adv>0?`<b>+${adv}</b>`:""}</div></div>${S.clk?`<span class="clk${act&&!clkPaused(S)?" on":""}" data-c="${c}">${clkFmt(clkRaw(c))}</span>`:act?'<span class="turn">차례</span>':""}`;
   el.classList.toggle("act",act)})}
 // 로비 미리보기 보드
 function drawPreview(){const pv=$("pv");if(!pv)return;const b=Engine.initial().b;pv.innerHTML=b.map((p,i)=>`<div class="${((i>>3)+(i&7))%2?"d":"l"}">${p?`<span class="${p.c==="w"?"pw":"pb"}">${pcSvg(p.t,p.c)}</span>`:""}</div>`).join("")}
@@ -3397,7 +3447,7 @@ const Online=(()=>{
   const n0=S&&S.log?S.log.length:0;S=JSON.parse(g.state);ai=false;rkAi=null;hist=[];fut=[];sel=null;gid=net.gid;
   if(mode.timeLimit&&!S.over)S.deadline=Date.now()+mode.timeLimit*1000; // 기기마다 시계가 달라서 받은 시점부터 다시 셈
   if(!first&&S.log.length>n0)beep(false);
-  if(first){flip=net.seat===1;dismissed=false;seen=S.shown&&S.shown.id;annSeen=S.ann&&S.ann.r;["mn","acc","rso"].forEach(i=>ov(i,false))}
+  if(first){flip=net.seat===1;dismissed=false;rvH=[];rvI=null;pre=preSel=null;seen=S.shown&&S.shown.id;annSeen=S.ann&&S.ann.r;["mn","acc","rso"].forEach(i=>ov(i,false))}
   after(true);
  }
  function push(s){const my=net,ref=db.doc("games/"+my.gid),r=my.rev;my.rev=r+1;
